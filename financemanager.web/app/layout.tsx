@@ -4,6 +4,7 @@ import '@mantine/charts/styles.css'
 import { ColorSchemeScript, MantineProvider, createTheme, mantineHtmlProps } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
 import ClientLayout from '../components/ClientLayout'
+import Providers from './providers'
 
 //override the background colour for mantine dark mode
 const theme = createTheme({
@@ -35,12 +36,14 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body>
-        <MantineProvider defaultColorScheme="auto" theme={theme}>
-          <Notifications />
-          <ClientLayout>
-            {children}
-          </ClientLayout>
-        </MantineProvider>
+        <Providers>
+          <MantineProvider defaultColorScheme="auto" theme={theme}>
+            <Notifications />
+            <ClientLayout>
+              {children}
+            </ClientLayout>
+          </MantineProvider>
+        </Providers>
       </body>
     </html>
   )

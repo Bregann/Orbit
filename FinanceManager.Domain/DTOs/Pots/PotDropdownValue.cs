@@ -1,0 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FinanceManager.Domain.DTOs.Shared
+{
+    public class PotDropdownValue
+    {
+        public required string PotName { get; set; }
+        public required int PotId { get; set; }
+    }
+}

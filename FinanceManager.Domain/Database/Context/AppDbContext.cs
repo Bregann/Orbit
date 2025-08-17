@@ -10,8 +10,11 @@ namespace FinanceManager.Domain.Database.Context
         public DbSet<UserRefreshToken> UserRefreshTokens { get; set; } = null!;
 
         public DbSet<Transactions> Transactions { get; set; }
-        public DbSet<SpendingPot> Pots { get; set; }
+        public DbSet<SpendingPot> SpendingPots { get; set; }
+        public DbSet<SavingsPot> SavingsPots { get; set; }
         public DbSet<AutomaticTransaction> AutomaticTransactions { get; set; }
         public DbSet<HistoricMonthlyData> HistoricData { get; set; }
+        public DbSet<HistoricPotData> HistoricPotData { get; set; }
+
     }
 }

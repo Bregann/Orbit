@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
+using FinanceManager.Domain.Interfaces.Api;
+using FinanceManager.Domain.Data.Services;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("/app/Logs/log.log", retainedFileCountLimit: 7, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 Log.Information("Logger Setup");
@@ -33,6 +35,13 @@ builder.Services.AddScoped<IBankApiHelper, BankApiHelper>();
 
 // Add in the auth
 builder.Services.AddAuthorization();
+
+// add in controller data services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITransactionsService, TransactionsService>();
+builder.Services.AddScoped<IStatsService, StatsService>();
+builder.Services.AddScoped<IPotsService, PotsService>();
+
 //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //    .AddJwtBearer(options =>
 //    {

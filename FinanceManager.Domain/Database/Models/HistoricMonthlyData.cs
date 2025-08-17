@@ -10,7 +10,7 @@ namespace FinanceManager.Domain.Database.Models
         public int Id { get; set; }
 
         [Required]
-        public required DateTime Date { get; set; }
+        public required DateTime DateAdded { get; set; }
 
         [Required]
         public required decimal MonthlyIncome { get; set; }

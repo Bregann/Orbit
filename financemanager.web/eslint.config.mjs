@@ -33,6 +33,8 @@ const eslintConfig = [
         named: 'never',
         asyncArrow: 'always'
       }],
+      'space-before-blocks': ['error', 'always'], // ⬅ Space before curly braces
+      'keyword-spacing': ['error', { before: true, after: true }], // ⬅ Space after if/else/for
       'eol-last': ['error', 'always'],
       'no-multi-spaces': ['error'],
       'key-spacing': ['error', {

@@ -1,5 +1,7 @@
 'use client'
 
+import { PotDropdownValue } from '@/interfaces/api/pots/PotDropdownValue'
+import { TransactionsTable } from '@/interfaces/api/transactions/TransactionsTableRow'
 import {
   Table,
   Select,
@@ -13,48 +15,13 @@ import {
   IconPhotoX
 } from '@tabler/icons-react'
 
-export interface TransactionData {
-  id: string
-  merchantName: string
-  iconUrl: string
-  transactionAmount: string
-  transactionDate: string
-  potId?: string
-}
-
-export interface PotOption {
-  value: string
-  label: string
-}
-
 interface TransactionsTableProps {
-  transactions: TransactionData[]
-  potOptions: PotOption[]
-  onPotChange?: (transactionId: string, potId: string) => void
-  onDeleteTransaction?: (transactionId: string) => void
-  showActions?: boolean
+  transactions: TransactionsTable[]
+  potOptions: PotDropdownValue[]
+  onPotChange: (transactionId: string, potId: string | null) => void
 }
 
-export default function TransactionsTable({
-  transactions,
-  potOptions,
-  onPotChange,
-  onDeleteTransaction,
-  showActions = true
-}: TransactionsTableProps) {
-
-  const handlePotChange = (transactionId: string, potId: string | null) => {
-    if (potId && onPotChange) {
-      onPotChange(transactionId, potId)
-    }
-  }
-
-  const handleDeleteClick = (transactionId: string) => {
-    if (onDeleteTransaction) {
-      onDeleteTransaction(transactionId)
-    }
-  }
-
+export default function TransactionsTableComponent(props: TransactionsTableProps) {
   return (
     <Paper withBorder radius="md" p="md" shadow="sm">
       <Table striped highlightOnHover>
@@ -65,14 +32,14 @@ export default function TransactionsTable({
             <Table.Th>Amount</Table.Th>
             <Table.Th>Date</Table.Th>
             <Table.Th>Pot Type</Table.Th>
-            {showActions && <Table.Th>Actions</Table.Th>}
+            <Table.Th>Actions</Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {transactions.map((transaction) => (
+          {props.transactions.map((transaction) => (
             <Table.Tr key={transaction.id}>
               <Table.Td>
-                {transaction.iconUrl ? (
+                {transaction.iconUrl !== '' ?
                   <Image
                     src={transaction.iconUrl}
                     alt="Merchant icon"
@@ -80,9 +47,9 @@ export default function TransactionsTable({
                     height={32}
                     radius="sm"
                   />
-                ) : (
+                  :
                   <IconPhotoX size={32} color="gray" />
-                )}
+                }
               </Table.Td>
               <Table.Td>
                 <Text fw={500}>{transaction.merchantName}</Text>
@@ -91,30 +58,31 @@ export default function TransactionsTable({
                 <Text fw={500}>{transaction.transactionAmount}</Text>
               </Table.Td>
               <Table.Td>
-                <Text c="dimmed">{transaction.transactionDate}</Text>
+                <Text c="dimmed">{new Date(transaction.transactionDate).toLocaleDateString().concat(' ', new Date(transaction.transactionDate).toLocaleTimeString())}</Text>
               </Table.Td>
               <Table.Td>
                 <Select
                   placeholder="Pick pot"
-                  data={potOptions}
-                  defaultValue={transaction.potId}
+                  data={props.potOptions.map(option => ({
+                    value: option.potId.toString(),
+                    label: option.potName
+                  }))}
+                  defaultValue={transaction.potId?.toString() ?? null}
                   comboboxProps={{
                     transitionProps: { transition: 'pop', duration: 200 }
                   }}
-                  onChange={(value) => handlePotChange(transaction.id, value)}
+                  onChange={(value) => props.onPotChange(transaction.id, value)}
                 />
               </Table.Td>
-              {showActions && (
-                <Table.Td>
-                  <ActionIcon
-                    variant="light"
-                    color="red"
-                    onClick={() => handleDeleteClick(transaction.id)}
-                  >
-                    <IconTrash size={16} />
-                  </ActionIcon>
-                </Table.Td>
-              )}
+              <Table.Td>
+                <ActionIcon
+                  variant="light"
+                  color="red"
+                  onClick={() => props.onPotChange(transaction.id, null)}
+                >
+                  <IconTrash size={16} />
+                </ActionIcon>
+              </Table.Td>
             </Table.Tr>
           ))}
         </Table.Tbody>
