@@ -81,11 +81,11 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Check if user is authenticated for protected routes
-  // if (!isPublicRoute && !accessToken && !refreshToken) {
-  //   // User is not authenticated and trying to access a protected route
-  //   return NextResponse.redirect(new URL('/login', request.url))
-  // }
+  //Check if user is authenticated for protected routes
+  if (!isPublicRoute && !accessToken && !refreshToken) {
+    // User is not authenticated and trying to access a protected route
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
 
   return NextResponse.next()
 }

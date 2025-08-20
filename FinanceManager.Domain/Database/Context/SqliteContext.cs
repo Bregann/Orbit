@@ -2,8 +2,7 @@
 
 namespace FinanceManager.Domain.Database.Context
 {
-    public class SqliteContext : AppDbContext
+    public class SqliteContext(DbContextOptions<SqliteContext> options) : AppDbContext(options)
     {
-        public SqliteContext(DbContextOptions<SqliteContext> options) : base(options) { }
     }
 }

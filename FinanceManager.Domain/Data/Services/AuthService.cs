@@ -1,8 +1,8 @@
-﻿using FinanceManager.Domain.DTOs.Auth.Requests;
+﻿using FinanceManager.Domain.Database.Context;
+using FinanceManager.Domain.Database.Models;
+using FinanceManager.Domain.DTOs.Auth.Requests;
 using FinanceManager.Domain.DTOs.Auth.Responses;
 using FinanceManager.Domain.Interfaces.Api;
-using FinanceManager.Domain.Database.Context;
-using FinanceManager.Domain.Database.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -47,19 +47,19 @@ namespace FinanceManager.Domain.Data.Services
 
         public async Task<LoginUserResponse> LoginUser(LoginUserRequest request)
         {
-            Log.Information($"Logging in user {request.Username}");
+            Log.Information($"Logging in user {request.Email}");
 
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username.ToLower().Trim());
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email.ToLower().Trim());
 
             if (user == null)
             {
-                Log.Information($"User not found {request.Username}");
+                Log.Information($"User not found {request.Email}");
                 throw new KeyNotFoundException("User not found");
             }
 
             if (_passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
             {
-                Log.Information($"Invalid password for user {request.Username}");
+                Log.Information($"Invalid password for user {request.Email}");
                 throw new UnauthorizedAccessException("Invalid password");
             }
 
@@ -68,7 +68,7 @@ namespace FinanceManager.Domain.Data.Services
 
             await SaveRefreshToken(refreshToken, user.Id);
 
-            Log.Information($"User logged in {request.Username}");
+            Log.Information($"User logged in {request.Email}");
 
             return new LoginUserResponse
             {

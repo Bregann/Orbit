@@ -11,7 +11,6 @@ interface FetchResponse<T> {
   data?: T
   status: number
   ok: boolean
-  raw: Response
 }
 
 interface RequestOptions {
@@ -76,7 +75,6 @@ async function doRequest<T>(
             data: undefined,
             status: res.status,
             ok: false,
-            raw: res,
           }
         }
       }
@@ -93,7 +91,6 @@ async function doRequest<T>(
         data,
         status: res.status,
         ok: res.ok,
-        raw: res,
       }
     } catch (error) {
       console.error(`Error in doRequest (attempt ${attempt + 1}):`, error)
@@ -103,7 +100,6 @@ async function doRequest<T>(
           data: undefined,
           status: 500,
           ok: false,
-          raw: new Response(null, { status: 500 }),
         }
       }
     }
@@ -113,7 +109,6 @@ async function doRequest<T>(
     data: undefined,
     status: 500,
     ok: false,
-    raw: new Response(null, { status: 500 }),
   }
 }
 

@@ -1,6 +1,6 @@
-﻿using FinanceManager.Domain.Enums;
+﻿using FinanceManager.Domain.Database.Context;
+using FinanceManager.Domain.Enums;
 using FinanceManager.Domain.Interfaces.Helpers;
-using FinanceManager.Domain.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

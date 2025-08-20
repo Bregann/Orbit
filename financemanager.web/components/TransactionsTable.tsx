@@ -1,7 +1,9 @@
 'use client'
 
+import { doPatch } from '@/helpers/apiClient'
+import notificationHelper from '@/helpers/notificationHelper'
 import { PotDropdownValue } from '@/interfaces/api/pots/PotDropdownValue'
-import { TransactionsTable } from '@/interfaces/api/transactions/TransactionsTableRow'
+import { TransactionsTableRow } from '@/interfaces/api/transactions/TransactionsTableRow'
 import {
   Table,
   Select,
@@ -12,16 +14,35 @@ import {
 } from '@mantine/core'
 import {
   IconTrash,
-  IconPhotoX
+  IconPhotoX,
+  IconCheck,
+  IconX
 } from '@tabler/icons-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface TransactionsTableProps {
-  transactions: TransactionsTable[]
+  transactions: TransactionsTableRow[]
   potOptions: PotDropdownValue[]
-  onPotChange: (transactionId: string, potId: string | null) => void
 }
 
 export default function TransactionsTableComponent(props: TransactionsTableProps) {
+  const queryClient = useQueryClient()
+
+  const updateTransactionMutation = useMutation({
+    mutationFn: async (data: { transactionId: string, potId: number | null }) => {
+      await doPatch('/api/Transactions/UpdateTransaction', { body: { transactionId: data.transactionId, potId: data.potId } })
+    },
+    onSuccess: () =>{
+      queryClient.invalidateQueries({ queryKey: ['unprocessedTransactions'] })
+      queryClient.invalidateQueries({ queryKey: ['homepage-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['thisMonthTransactions'] })
+      notificationHelper.showSuccessNotification('Success', 'Transaction updated successfully', 3000, <IconCheck />)
+    },
+    onError: () =>{
+      notificationHelper.showErrorNotification('Error', 'Failed to update transaction', 3000, <IconX />)
+    }
+  })
+
   return (
     <Paper withBorder radius="md" p="md" shadow="sm">
       <Table striped highlightOnHover>
@@ -71,14 +92,14 @@ export default function TransactionsTableComponent(props: TransactionsTableProps
                   comboboxProps={{
                     transitionProps: { transition: 'pop', duration: 200 }
                   }}
-                  onChange={(value) => props.onPotChange(transaction.id, value)}
+                  onChange={async (value) => { await updateTransactionMutation.mutateAsync({ transactionId: transaction.id, potId: value !== null ? Number(value) : null }) }}
                 />
               </Table.Td>
               <Table.Td>
                 <ActionIcon
                   variant="light"
                   color="red"
-                  onClick={() => props.onPotChange(transaction.id, null)}
+                  onClick={async () => { await updateTransactionMutation.mutateAsync({ transactionId: transaction.id, potId: null }) }}
                 >
                   <IconTrash size={16} />
                 </ActionIcon>

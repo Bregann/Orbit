@@ -1,6 +1,6 @@
-﻿using FinanceManager.Domain.Interfaces.Helpers;
-using FinanceManager.Domain.Database.Context;
+﻿using FinanceManager.Domain.Database.Context;
 using FinanceManager.Domain.Database.Models;
+using FinanceManager.Domain.Interfaces.Helpers;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 

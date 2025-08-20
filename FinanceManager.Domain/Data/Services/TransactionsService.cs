@@ -4,11 +4,6 @@ using FinanceManager.Domain.DTOs.Transactions.Requests;
 using FinanceManager.Domain.DTOs.Transactions.Responses;
 using FinanceManager.Domain.Interfaces.Api;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FinanceManager.Domain.Data.Services
 {
@@ -32,6 +27,23 @@ namespace FinanceManager.Domain.Data.Services
                     throw new KeyNotFoundException($"Spending pot with ID {request.PotId.Value} not found.");
                 }
 
+                // check if the transaction already had a pot assigned as we need to update the pot amounts
+                if (transaction.PotId.HasValue)
+                {
+                    var oldPot = await context.SpendingPots.FindAsync(transaction.PotId.Value);
+
+                    if (oldPot != null)
+                    {
+                        // Update the old pot amounts
+                        oldPot.PotAmountLeft += transaction.TransactionAmount;
+                        oldPot.PotAmountSpent -= transaction.TransactionAmount;
+                    }
+                }
+
+                // Update the new pot amounts
+                pot.PotAmountLeft -= transaction.TransactionAmount;
+                pot.PotAmountSpent += transaction.TransactionAmount;
+
                 transaction.PotId = request.PotId.Value;
             }
             else
@@ -54,11 +66,47 @@ namespace FinanceManager.Domain.Data.Services
                         Id = t.Id,
                         MerchantName = t.MerchantName,
                         IconUrl = t.ImgUrl ?? "",
-                        TransactionAmount = t.TransactionAmount,
+                        TransactionAmount = $"£{(t.TransactionAmount / 100.0):0.00}",
                         TransactionDate = t.TransactionDate,
                         PotId = t.PotId
                     })
                     .ToArrayAsync()
+            };
+        }
+
+        public async Task<GetTransactionsForCurrentMonthDto> GetTransactionsForMonth()
+        {
+            // get the current month
+            var startDate = context.HistoricData.OrderByDescending(h => h.DateAdded)
+                .Select(h => h.DateAdded)
+                .FirstOrDefault();
+
+            if (startDate == default)
+            {
+                return new GetTransactionsForCurrentMonthDto
+                {
+                    Transactions = []
+                };
+            }
+
+            // get all the transactions since the startDate
+            var transactions = await context.Transactions
+                .Where(t => t.TransactionDate >= startDate && t.TransactionDate < DateTime.Now)
+                .OrderByDescending(t => t.TransactionDate)
+                .Select(t => new TransactionsTableRow
+                {
+                    Id = t.Id,
+                    MerchantName = t.MerchantName,
+                    IconUrl = t.ImgUrl ?? "",
+                    TransactionAmount = $"£{(t.TransactionAmount / 100.0):0.00}",
+                    TransactionDate = t.TransactionDate,
+                    PotId = t.PotId
+                })
+                .ToArrayAsync();
+
+            return new GetTransactionsForCurrentMonthDto
+            {
+                Transactions = transactions
             };
         }
     }

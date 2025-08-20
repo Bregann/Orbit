@@ -44,7 +44,17 @@ const eslintConfig = [
       }],
       semi: ['error', 'never'],
       quotes: ['error', 'single', { avoidEscape: true }],
-      indent: ['error', 2, { SwitchCase: 1 }]
+      indent: ['error', 2, { SwitchCase: 1 }],
+      'block-spacing': ['error', 'always'],
+      '@typescript-eslint/strict-boolean-expressions': ['error', {
+        allowString: false,
+        allowNumber: false,
+        allowNullableObject: false,
+        allowNullableBoolean: false,
+        allowNullableString: false,
+        allowNullableNumber: false,
+        allowAny: false,
+      }]
     }
   }
 ]

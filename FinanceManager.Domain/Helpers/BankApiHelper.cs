@@ -1,5 +1,4 @@
-﻿using FinanceManager.Domain.Database.Models;
-using FinanceManager.Domain.DTOs.Banking;
+﻿using FinanceManager.Domain.DTOs.Banking;
 using FinanceManager.Domain.Enums;
 using FinanceManager.Domain.Interfaces.Helpers;
 using Newtonsoft.Json;
@@ -97,7 +96,6 @@ namespace FinanceManager.Domain.Helpers
                 secret_id = secretId,
                 secret_key = secretKey
             });
-
 
             var response = await client.ExecuteAsync(request);
 

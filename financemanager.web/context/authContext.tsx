@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (email: string, password: string) => {
     const res = await doPost('/api/auth/LoginUser', { body: { email, password } })
     if (res.status === 200) {
+      console.log('Login successful')
       router.replace('/')
       setUser({ email })
       return true

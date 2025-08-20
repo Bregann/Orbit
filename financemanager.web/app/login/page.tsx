@@ -29,7 +29,7 @@ export default function LoginPage() {
     setLoading(true)
     const res = await auth.login(email, password)
 
-    if(!res){
+    if (!res) {
       setLoading(false)
       notificationHelper.showErrorNotification('Login failed', 'Please check your email and password.', 3000, <IconExclamationCircle size={16} />)
       return

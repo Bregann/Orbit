@@ -1,19 +1,18 @@
+using FinanceManager.Core;
+using FinanceManager.Domain.Data.Services;
+using FinanceManager.Domain.Database.Context;
 using FinanceManager.Domain.Enums;
 using FinanceManager.Domain.Helpers;
+using FinanceManager.Domain.Interfaces.Api;
 using FinanceManager.Domain.Interfaces.Helpers;
-using FinanceManager.Domain.Database.Context;
 using Hangfire;
-using Hangfire.Dashboard;
 using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.MemoryStorage;
-using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
-using FinanceManager.Domain.Interfaces.Api;
-using FinanceManager.Domain.Data.Services;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("/app/Logs/log.log", retainedFileCountLimit: 7, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 Log.Information("Logger Setup");
@@ -42,20 +41,20 @@ builder.Services.AddScoped<ITransactionsService, TransactionsService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<IPotsService, PotsService>();
 
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = true,
-//            ValidateAudience = true,
-//            ValidateLifetime = true,
-//            ValidateIssuerSigningKey = true,
-//            ValidIssuer = Environment.GetEnvironmentVariable("JwtValidIssuer"),
-//            ValidAudience = Environment.GetEnvironmentVariable("JwtValidAudience"),
-//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JwtKey")!))
-//        };
-//    });
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = Environment.GetEnvironmentVariable("JwtValidIssuer"),
+            ValidAudience = Environment.GetEnvironmentVariable("JwtValidAudience"),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JwtKey")!))
+        };
+    });
 
 builder.Services.AddCors(options =>
 {
@@ -67,11 +66,11 @@ builder.Services.AddCors(options =>
     });
 });
 
-
 #if DEBUG
 builder.Services.AddDbContext<SqliteContext>(options =>
     options.UseLazyLoadingProxies()
            .UseSqlite($"Data Source={Directory.GetCurrentDirectory()}/application.db"));
+
 builder.Services.AddScoped<AppDbContext>(provider => provider.GetService<SqliteContext>());
 
 GlobalConfiguration.Configuration.UseMemoryStorage();
@@ -82,7 +81,6 @@ builder.Services.AddHangfire(configuration => configuration
         .UseRecommendedSerializerSettings()
         .UseMemoryStorage()
         );
-
 
 #else
 builder.Services.AddDbContext<PostgresqlContext>(options =>
@@ -116,11 +114,10 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetService<AppDbContext>()!;
     var settingsHelper = scope.ServiceProvider.GetRequiredService<IEnvironmentalSettingHelper>();
 
-    if (dbContext.Database.GetPendingMigrations().Any())
-    {
-        await dbContext.Database.MigrateAsync();
-        await DatabaseSeedHelper.SeedDatabase(dbContext, settingsHelper, scope.ServiceProvider);
-    }
+    dbContext.Database.EnsureDeleted();
+    dbContext.Database.EnsureCreated();
+
+    await DatabaseSeedHelper.SeedDatabase(dbContext, settingsHelper, scope.ServiceProvider);
 }
 #endif
 
@@ -132,6 +129,8 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+
+app.UseApiAuthorizationMiddleware();
 
 app.UseAuthentication();
 app.UseAuthorization();

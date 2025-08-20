@@ -1,6 +1,6 @@
 ﻿﻿Add migrations with:
-Add-Migration <name> -Context SqliteContext -o Data/Database/Migrations/Sqlite
-Add-Migration <name> -Context PostgresqlContext -o Data/Database/Migrations/Postgresql
+Add-Migration <name> -Context SqliteContext -o Database/Migrations/Sqlite
+Add-Migration <name> -Context PostgresqlContext -o Database/Migrations/Postgresql
 
 Update database with:
 Update-Database -Context SqliteContext

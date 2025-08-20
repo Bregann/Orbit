@@ -3,8 +3,9 @@ import '@mantine/notifications/styles.css'
 import '@mantine/charts/styles.css'
 import { ColorSchemeScript, MantineProvider, createTheme, mantineHtmlProps } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
-import ClientLayout from '../components/ClientLayout'
 import Providers from './providers'
+import { AuthProvider } from '@/context/authContext'
+import ClientLayout from '@/components/navigation/ClientLayout'
 
 //override the background colour for mantine dark mode
 const theme = createTheme({
@@ -37,12 +38,14 @@ export default function RootLayout({
       </head>
       <body>
         <Providers>
-          <MantineProvider defaultColorScheme="auto" theme={theme}>
-            <Notifications />
-            <ClientLayout>
-              {children}
-            </ClientLayout>
-          </MantineProvider>
+          <AuthProvider>
+            <MantineProvider defaultColorScheme="auto" theme={theme}>
+              <Notifications />
+              <ClientLayout>
+                {children}
+              </ClientLayout>
+            </MantineProvider>
+          </AuthProvider>
         </Providers>
       </body>
     </html>

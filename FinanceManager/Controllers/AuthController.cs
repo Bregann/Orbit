@@ -1,7 +1,6 @@
 ﻿using FinanceManager.Domain.DTOs.Auth.Requests;
 using FinanceManager.Domain.DTOs.Auth.Responses;
 using FinanceManager.Domain.Interfaces.Api;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using System.Data;
@@ -38,8 +37,25 @@ namespace FinanceManager.Core.Controllers
         {
             try
             {
-                var response = await authService.LoginUser(request);
-                return Ok(response);
+                var loginData = await authService.LoginUser(request);
+
+                Response.Cookies.Append("accessToken", loginData.AccessToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTimeOffset.UtcNow.AddHours(1)
+                });
+
+                Response.Cookies.Append("refreshToken", loginData.RefreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTimeOffset.UtcNow.AddDays(30)
+                });
+
+                return Ok();
             }
             catch (KeyNotFoundException ex)
             {
@@ -59,22 +75,34 @@ namespace FinanceManager.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<LoginUserResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
+        public async Task<IActionResult> RefreshToken()
         {
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                Response.Cookies.Delete("accessToken");
+                Response.Cookies.Delete("refreshToken");
+                return Unauthorized("No refresh token provided");
+            }
+
             try
             {
-                var response = await authService.RefreshToken(request.RefreshToken);
-                return Ok(response);
+                var newAccessToken = await authService.RefreshToken(refreshToken);
+                Response.Cookies.Append("accessToken", newAccessToken.AccessToken, new CookieOptions
+                {
+                    HttpOnly = false,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTimeOffset.UtcNow.AddHours(1)
+                });
+                return Ok();
             }
-            catch (KeyNotFoundException ex)
+            catch (Exception ex) when (ex is UnauthorizedAccessException || ex is KeyNotFoundException)
             {
-                Log.Warning(ex, "Error attempting to refresh token");
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "Unknown error attempting to refresh token");
-                return BadRequest();
+                Response.Cookies.Delete("accessToken");
+                Response.Cookies.Delete("refreshToken");
+                return Unauthorized(ex.Message);
             }
         }
     }

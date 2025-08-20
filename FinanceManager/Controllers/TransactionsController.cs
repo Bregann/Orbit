@@ -11,7 +11,7 @@ namespace FinanceManager.Core.Controllers
     [Authorize]
     public class TransactionsController(ITransactionsService transactionsService) : ControllerBase
     {
-        [HttpPost]
+        [HttpPatch]
         public async Task<IActionResult> UpdateTransaction([FromBody] UpdateTransactionRequest request)
         {
             try
@@ -29,6 +29,12 @@ namespace FinanceManager.Core.Controllers
         public async Task<GetUnprocessedTransactionsDto> GetUnprocessedTransactions()
         {
             return await transactionsService.GetUnprocessedTransactions();
+        }
+
+        [HttpGet]
+        public async Task<GetTransactionsForCurrentMonthDto> GetTransactionsForMonth()
+        {
+            return await transactionsService.GetTransactionsForMonth();
         }
     }
 }
