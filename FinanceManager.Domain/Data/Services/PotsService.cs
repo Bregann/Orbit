@@ -74,9 +74,9 @@ namespace FinanceManager.Domain.Data.Services
                     }))
                 .ToArrayAsync();
 
-            return new GetManagePotDataDto 
-            { 
-                Pots = pots 
+            return new GetManagePotDataDto
+            {
+                Pots = pots
             };
         }
 
