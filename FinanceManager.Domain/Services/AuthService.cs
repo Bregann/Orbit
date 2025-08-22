@@ -13,7 +13,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace FinanceManager.Domain.Data.Services
+namespace FinanceManager.Domain.Services
 {
     public class AuthService(AppDbContext context) : IAuthService
     {

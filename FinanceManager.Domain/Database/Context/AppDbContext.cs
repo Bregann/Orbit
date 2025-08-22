@@ -14,7 +14,7 @@ namespace FinanceManager.Domain.Database.Context
         public DbSet<SavingsPot> SavingsPots { get; set; }
         public DbSet<AutomaticTransaction> AutomaticTransactions { get; set; }
         public DbSet<HistoricMonthlyData> HistoricData { get; set; }
-        public DbSet<HistoricPotData> HistoricPotData { get; set; }
-
+        public DbSet<HistoricSpendingPotData> HistoricSpendingPotData { get; set; }
+        public DbSet<HistoricSavingsPotData> HistoricSavingsPotData { get; set; }
     }
 }

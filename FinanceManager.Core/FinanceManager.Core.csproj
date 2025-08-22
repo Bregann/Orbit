@@ -44,8 +44,4 @@
     <EditorConfigFiles Remove="C:\Users\BenRegan_dwgmpmp\Downloads\FinanceManager-Rewrite\FinanceManager-Rewrite\FinanceManager\.editorconfig" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="C:\Users\BenRegan_dwgmpmp\Downloads\FinanceManager-Rewrite\FinanceManager-Rewrite\FinanceManager\.editorconfig" />
-  </ItemGroup>
-
 </Project>

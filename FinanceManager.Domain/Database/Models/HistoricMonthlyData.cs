@@ -22,6 +22,9 @@ namespace FinanceManager.Domain.Database.Models
         public required decimal AmountSpent { get; set; }
 
         [DeleteBehavior(DeleteBehavior.Cascade)]
-        public virtual ICollection<HistoricPotData> HistoricPotData { get; set; } = null!;
+        public virtual ICollection<HistoricSpendingPotData> HistoricPotData { get; set; } = null!;
+
+        [DeleteBehavior(DeleteBehavior.Cascade)]
+        public virtual ICollection<HistoricSavingsPotData> HistoricSavingsPotData { get; set; } = null!;
     }
 }

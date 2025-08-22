@@ -53,7 +53,6 @@ namespace FinanceManager.Domain.Helpers
                 new SpendingPot
                 {
                     PotName = "General",
-                    PotAmount = 1000,
                     AmountToAdd = 200,
                     PotAmountLeft = 100,
                     PotAmountSpent = 900
@@ -61,7 +60,6 @@ namespace FinanceManager.Domain.Helpers
                 new SpendingPot
                 {
                     PotName = "Holiday",
-                    PotAmount = 5000,
                     AmountToAdd = 500,
                     PotAmountLeft = 1000,
                     PotAmountSpent = 4000
@@ -69,7 +67,6 @@ namespace FinanceManager.Domain.Helpers
                 new SpendingPot
                 {
                     PotName = "Emergency",
-                    PotAmount = 2000,
                     AmountToAdd = 300,
                     PotAmountLeft = 500,
                     PotAmountSpent = 1500

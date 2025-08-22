@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FinanceManager.Domain.Database.Models
 {
-    public class HistoricPotData
+    public class HistoricSpendingPotData
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }

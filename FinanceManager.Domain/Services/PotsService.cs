@@ -1,12 +1,13 @@
 ﻿using FinanceManager.Domain.Database.Context;
 using FinanceManager.Domain.Database.Models;
+using FinanceManager.Domain.DTOs.Month.Request;
 using FinanceManager.Domain.DTOs.Pots.Request;
 using FinanceManager.Domain.DTOs.Pots.Responses;
 using FinanceManager.Domain.DTOs.Shared;
 using FinanceManager.Domain.Interfaces.Api;
 using Microsoft.EntityFrameworkCore;
 
-namespace FinanceManager.Domain.Data.Services
+namespace FinanceManager.Domain.Services
 {
     public class PotsService(AppDbContext context) : IPotsService
     {
@@ -31,9 +32,9 @@ namespace FinanceManager.Domain.Data.Services
                 {
                     PotId = p.Id,
                     PotName = p.PotName,
-                    AmountAllocated = $"£{p.AmountToAdd / 100.0:0.00}",
-                    AmountLeft = $"£{p.PotAmountLeft / 100.0:0.00}",
-                    AmountSpent = $"£{p.PotAmountSpent / 100.0:0.00}"
+                    AmountAllocated = $"£{p.AmountToAdd / 100m:0.00}",
+                    AmountLeft = $"£{p.PotAmountLeft / 100m:0.00}",
+                    AmountSpent = $"£{p.PotAmountSpent / 100m:0.00}"
                 })
                 .ToArrayAsync();
 
@@ -42,8 +43,8 @@ namespace FinanceManager.Domain.Data.Services
                 {
                     PotId = p.Id,
                     PotName = p.PotName,
-                    AmountSaved = $"£{p.PotAmount / 100.0:0.00}",
-                    AmountAddedThisMonth = $"£{p.AmountToAdd / 100.0:0.00}"
+                    AmountSaved = $"£{p.PotAmount / 100m:0.00}",
+                    AmountAddedThisMonth = $"£{p.AmountToAdd / 100m:0.00}"
                 })
                 .ToArrayAsync();
 
@@ -61,7 +62,7 @@ namespace FinanceManager.Domain.Data.Services
                 {
                     PotId = p.Id,
                     PotName = p.PotName,
-                    AmountToAdd = p.AmountToAdd / 100,
+                    AmountToAdd = p.AmountToAdd / 100m,
                     IsSavingsPot = false
                 })
                 .Union(context.SavingsPots
@@ -69,7 +70,7 @@ namespace FinanceManager.Domain.Data.Services
                     {
                         PotId = p.Id,
                         PotName = p.PotName,
-                        AmountToAdd = p.AmountToAdd / 100,
+                        AmountToAdd = p.AmountToAdd / 100m,
                         IsSavingsPot = true
                     }))
                 .ToArrayAsync();
@@ -77,6 +78,34 @@ namespace FinanceManager.Domain.Data.Services
             return new GetManagePotDataDto
             {
                 Pots = pots
+            };
+        }
+
+        public async Task<GetAddMonthPotDataDto> GetAddMonthPotData()
+        {
+            var spendingPots = await context.SpendingPots
+                .Select(p => new AddMonthSpendingPot
+                {
+                    PotId = p.Id,
+                    PotName = p.PotName,
+                    AmountToAdd = p.AmountToAdd / 100m,
+                    RolloverAmount = $"£{p.PotAmountLeft / 100.0:0.00}"
+                })
+                .ToArrayAsync();
+
+            var savingsPots = await context.SavingsPots
+                .Select(p => new AddMonthSavingsPot
+                {
+                    PotId = p.Id,
+                    PotName = p.PotName,
+                    AmountToAdd = p.AmountToAdd / 100m
+                })
+                .ToArrayAsync();
+
+            return new GetAddMonthPotDataDto
+            {
+                SpendingPots = spendingPots,
+                SavingsPots = savingsPots
             };
         }
 
@@ -119,7 +148,6 @@ namespace FinanceManager.Domain.Data.Services
                     AmountToAdd = (long)(request.AmountToAdd * 100),
                     PotAmountLeft = 0,
                     PotAmountSpent = 0,
-                    PotAmount = 0
                 };
 
                 await context.SpendingPots.AddAsync(pot);

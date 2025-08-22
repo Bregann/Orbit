@@ -5,7 +5,7 @@ using FinanceManager.Domain.DTOs.Transactions.Responses;
 using FinanceManager.Domain.Interfaces.Api;
 using Microsoft.EntityFrameworkCore;
 
-namespace FinanceManager.Domain.Data.Services
+namespace FinanceManager.Domain.Services
 {
     public class TransactionsService(AppDbContext context) : ITransactionsService
     {
@@ -66,7 +66,7 @@ namespace FinanceManager.Domain.Data.Services
                         Id = t.Id,
                         MerchantName = t.MerchantName,
                         IconUrl = t.ImgUrl ?? "",
-                        TransactionAmount = $"£{(t.TransactionAmount / 100.0):0.00}",
+                        TransactionAmount = $"£{t.TransactionAmount / 100.0:0.00}",
                         TransactionDate = t.TransactionDate,
                         PotId = t.PotId
                     })
@@ -98,7 +98,7 @@ namespace FinanceManager.Domain.Data.Services
                     Id = t.Id,
                     MerchantName = t.MerchantName,
                     IconUrl = t.ImgUrl ?? "",
-                    TransactionAmount = $"£{(t.TransactionAmount / 100.0):0.00}",
+                    TransactionAmount = $"£{t.TransactionAmount / 100.0:0.00}",
                     TransactionDate = t.TransactionDate,
                     PotId = t.PotId
                 })
@@ -108,6 +108,56 @@ namespace FinanceManager.Domain.Data.Services
             {
                 Transactions = transactions
             };
+        }
+
+        public async Task<GetAutomaticTransactionsDto> GetAutomaticTransactions()
+        {
+            return new GetAutomaticTransactionsDto
+            {
+                AutomaticTransactions = await context.AutomaticTransactions
+                    .Select(at => new AutomaticTransaction
+                    {
+                        Id = at.Id,
+                        MerchantName = at.MerchantName,
+                        PotId = at.PotId
+                    })
+                    .ToArrayAsync()
+            };
+        }
+
+        public async Task<int> AddAutomaticTransaction(AddAutomaticTransactionRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.MerchantName) || request.PotId <= 0)
+            {
+                throw new ArgumentException("Invalid merchant name or pot ID.");
+            }
+
+            var pot = await context.SpendingPots.FindAsync(request.PotId);
+
+            if (pot == null)
+            {
+                throw new KeyNotFoundException($"Spending pot with ID {request.PotId} not found.");
+            }
+
+            // check if an automatic transaction with the same merchant name already exists
+            var existing = await context.AutomaticTransactions
+                .AnyAsync(at => at.MerchantName.ToLower() == request.MerchantName.ToLower());
+
+            if (existing)
+            {
+                throw new InvalidOperationException($"An automatic transaction for merchant '{request.MerchantName}' already exists.");
+            }
+
+            var automaticTransaction = new Database.Models.AutomaticTransaction
+            {
+                MerchantName = request.MerchantName,
+                PotId = request.PotId
+            };
+
+            context.AutomaticTransactions.Add(automaticTransaction);
+            await context.SaveChangesAsync();
+
+            return automaticTransaction.Id;
         }
     }
 }

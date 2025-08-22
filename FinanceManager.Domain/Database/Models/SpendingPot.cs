@@ -13,9 +13,6 @@ namespace FinanceManager.Domain.Database.Models
         public required string PotName { get; set; }
 
         [Required]
-        public required long PotAmount { get; set; }
-
-        [Required]
         public required long AmountToAdd { get; set; }
 
         [Required]
@@ -25,6 +22,6 @@ namespace FinanceManager.Domain.Database.Models
         public required long PotAmountLeft { get; set; }
 
         [DeleteBehavior(DeleteBehavior.Cascade)]
-        public virtual ICollection<HistoricPotData> HistoricPotData { get; set; } = null!;
+        public virtual ICollection<HistoricSpendingPotData> HistoricPotData { get; set; } = null!;
     }
 }

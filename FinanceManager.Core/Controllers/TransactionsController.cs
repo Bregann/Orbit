@@ -36,5 +36,33 @@ namespace FinanceManager.Core.Controllers
         {
             return await transactionsService.GetTransactionsForMonth();
         }
+
+        [HttpGet]
+        public async Task<GetAutomaticTransactionsDto> GetAutomaticTransactions()
+        {
+            return await transactionsService.GetAutomaticTransactions();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddAutomaticTransaction([FromBody] AddAutomaticTransactionRequest request)
+        {
+            try
+            {
+                var newId = await transactionsService.AddAutomaticTransaction(request);
+                return Ok(newId);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

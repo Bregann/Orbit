@@ -3,7 +3,7 @@ using FinanceManager.Domain.DTOs.Stats.Responses;
 using FinanceManager.Domain.Interfaces.Api;
 using Microsoft.EntityFrameworkCore;
 
-namespace FinanceManager.Domain.Data.Services
+namespace FinanceManager.Domain.Services
 {
     public class StatsService(AppDbContext context) : IStatsService
     {
@@ -35,11 +35,11 @@ namespace FinanceManager.Domain.Data.Services
 
             return new GetHomepageStatsDto
             {
-                MoneyIn = $"£{(latestMonth.MonthlyIncome / 100m):0.00}",
-                MoneySpent = $"£{(moneySpent / 100m):0.00}",
-                MoneyLeft = $"£{((latestMonth.MonthlyIncome - moneySpent) / 100m):0.00}",
-                TotalInSavings = $"£{((await context.SavingsPots.SumAsync(s => s.PotAmount)) / 100m):0.00}",
-                TotalInSpendingPots = $"£{((await context.SpendingPots.SumAsync(s => s.PotAmountLeft)) / 100m):0.00}"
+                MoneyIn = $"£{latestMonth.MonthlyIncome / 100m:0.00}",
+                MoneySpent = $"£{moneySpent / 100m:0.00}",
+                MoneyLeft = $"£{(latestMonth.MonthlyIncome - moneySpent) / 100m:0.00}",
+                TotalInSavings = $"£{await context.SavingsPots.SumAsync(s => s.PotAmount) / 100m:0.00}",
+                TotalInSpendingPots = $"£{await context.SpendingPots.SumAsync(s => s.PotAmountLeft) / 100m:0.00}"
             };
         }
     }

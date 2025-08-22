@@ -1,4 +1,4 @@
-﻿namespace FinanceManager.Domain.Data.Services
+﻿namespace FinanceManager.Domain.Services
 {
     internal class ExampleService
     {

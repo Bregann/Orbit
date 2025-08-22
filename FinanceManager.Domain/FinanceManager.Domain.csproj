@@ -39,8 +39,4 @@
     <EditorConfigFiles Remove="C:\Users\BenRegan_dwgmpmp\Downloads\FinanceManager-Rewrite\FinanceManager-Rewrite\FinanceManager.Domain\.editorconfig" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="C:\Users\BenRegan_dwgmpmp\Downloads\FinanceManager-Rewrite\FinanceManager-Rewrite\FinanceManager.Domain\.editorconfig" />
-  </ItemGroup>
-
 </Project>

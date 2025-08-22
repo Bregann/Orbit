@@ -15,7 +15,7 @@ import {
 import { useState } from 'react'
 import TransactionsTable from '../../components/TransactionsTable'
 import { GetSpendingPotDropdownOptionsDto } from '@/interfaces/api/pots/GetSpendingPotDropdownOptionsDto'
-import { doGet } from '@/helpers/apiClient'
+import { doQueryGet } from '@/helpers/apiClient'
 import { useQuery } from '@tanstack/react-query'
 import { GetTransactionsForCurrentMonthDto } from '@/interfaces/api/transactions/GetTransactionsForCurrentMonthDto'
 import { GetAllPotDataDto, SavingsPotData } from '@/interfaces/api/pots/GetAllPotDataDto'
@@ -25,17 +25,17 @@ import { SavingsPotCard } from '../cards/SavingsPotCard'
 export default function ThisMonthComponent() {
   const { data: potOptions, isLoading: isLoadingPotOptions } = useQuery({
     queryKey: ['getSpendingPotDropdownOptions'],
-    queryFn: () => doGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions')
+    queryFn: async () => await doQueryGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions')
   })
 
   const { data: allPotData, isLoading: isLoadingAllPotData } = useQuery({
     queryKey: ['potBreakdownData'],
-    queryFn: () => doGet<GetAllPotDataDto>('/api/pots/GetAllPotData')
+    queryFn: async () => await doQueryGet<GetAllPotDataDto>('/api/pots/GetAllPotData')
   })
 
   const { data: thisMonthTransactionsData, isLoading: isLoadingThisMonthTransactionsData } = useQuery({
     queryKey: ['thisMonthTransactions'],
-    queryFn: () => doGet<GetTransactionsForCurrentMonthDto>('/api/transactions/GetTransactionsForMonth')
+    queryFn: async () => await doQueryGet<GetTransactionsForCurrentMonthDto>('/api/transactions/GetTransactionsForMonth')
   })
 
   const [openEditSavingsModal, setOpenEditSavingsModal] = useState(false)
@@ -60,7 +60,7 @@ export default function ThisMonthComponent() {
     return <div>Loading...</div>
   }
 
-  if (potOptions?.data === undefined || allPotData?.data === undefined || thisMonthTransactionsData?.data === undefined) {
+  if (potOptions === undefined || allPotData === undefined || thisMonthTransactionsData === undefined) {
     return <div>Error loading data</div>
   }
 
@@ -76,8 +76,8 @@ export default function ThisMonthComponent() {
         Monthly Budget Breakdown
       </Title>
       <Grid gutter="md" mb="xl">
-        {allPotData.data.spendingPots.map((pot) => (
-          <Grid.Col span={{ base: 12, sm: 6, md: allPotData.data !== undefined && allPotData.data.spendingPots.length > 3 ? 3 : 4 }} key={pot.potId}>
+        {allPotData.spendingPots.map((pot) => (
+          <Grid.Col span={{ base: 12, sm: 6, md: allPotData.spendingPots.length > 3 ? 3 : 4 }} key={pot.potId}>
             <SpendingPotCard data={pot} />
           </Grid.Col>
         ))}
@@ -88,8 +88,8 @@ export default function ThisMonthComponent() {
         Savings Breakdown
       </Title>
       <Grid gutter="lg" justify="center" mb="xl">
-        {allPotData.data.savingsPots.map((pot) => (
-          <Grid.Col span={{ base: 12, sm: 6, md: allPotData.data !== undefined && allPotData.data.savingsPots.length > 3 ? 3 : 4 }} key={pot.potId}>
+        {allPotData.savingsPots.map((pot) => (
+          <Grid.Col span={{ base: 12, sm: 6, md: allPotData.savingsPots.length > 3 ? 3 : 4 }} key={pot.potId}>
             <SavingsPotCard data={pot} />
           </Grid.Col>
         ))}
@@ -100,8 +100,8 @@ export default function ThisMonthComponent() {
         Transactions This Month
       </Title>
       <TransactionsTable
-        transactions={thisMonthTransactionsData.data.transactions}
-        potOptions={potOptions.data.potOptions}
+        transactions={thisMonthTransactionsData.transactions}
+        potOptions={potOptions.potOptions}
       />
 
       {/* Savings Tracking Over Time */}

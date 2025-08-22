@@ -1,5 +1,5 @@
 import HomeComponent from '@/components/pages/HomeComponent'
-import { doGet } from '@/helpers/apiClient'
+import { doQueryGet } from '@/helpers/apiClient'
 import { GetSpendingPotDropdownOptionsDto } from '@/interfaces/api/pots/GetSpendingPotDropdownOptionsDto'
 import { GetHomepageStatsDto } from '@/interfaces/api/stats/GetHomepageStatsDto'
 import { GetUnprocessedTransactionsDto } from '@/interfaces/api/transactions/GetUnprocessedTransactionsDto'
@@ -8,7 +8,6 @@ import { cookies } from 'next/headers'
 
 export default async function Home() {
   const queryClient = new QueryClient()
-
   const cookieStore = await cookies()
 
   if (cookieStore.has('accessToken')) {
@@ -19,17 +18,17 @@ export default async function Home() {
 
     await queryClient.prefetchQuery({
       queryKey: ['homepage-stats'],
-      queryFn: () => doGet<GetHomepageStatsDto>('/api/stats/GetHomepageStats', { cookieHeader }),
+      queryFn: async () => await doQueryGet<GetHomepageStatsDto>('/api/stats/GetHomepageStats', { cookieHeader }),
     })
 
-    await queryClient.fetchQuery({
+    await queryClient.prefetchQuery({
       queryKey: ['unprocessedTransactions'],
-      queryFn: () => doGet<GetUnprocessedTransactionsDto>('/api/transactions/GetUnprocessedTransactions', { cookieHeader }),
+      queryFn: async () => await doQueryGet<GetUnprocessedTransactionsDto>('/api/transactions/GetUnprocessedTransactions', { cookieHeader }),
     })
 
-    await queryClient.fetchQuery({
+    await queryClient.prefetchQuery({
       queryKey: ['getSpendingPotDropdownOptions'],
-      queryFn: () => doGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions', { cookieHeader }),
+      queryFn: async () => await doQueryGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions', { cookieHeader }),
     })
 
     return (
