@@ -1,10 +1,10 @@
-using FinanceManager.Core;
-using FinanceManager.Domain.Data.Services;
 using FinanceManager.Domain.Database.Context;
 using FinanceManager.Domain.Enums;
 using FinanceManager.Domain.Helpers;
+using FinanceManager.Domain.Interfaces;
 using FinanceManager.Domain.Interfaces.Api;
 using FinanceManager.Domain.Interfaces.Helpers;
+using FinanceManager.Domain.Services;
 using Hangfire;
 using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.MemoryStorage;
@@ -41,6 +41,7 @@ builder.Services.AddScoped<ITransactionsService, TransactionsService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<IPotsService, PotsService>();
 builder.Services.AddScoped<IMonthService, MonthService>();
+builder.Services.AddScoped<IBankService, BankService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -130,8 +131,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-
-app.UseApiAuthorizationMiddleware();
 
 app.UseAuthentication();
 app.UseAuthorization();
