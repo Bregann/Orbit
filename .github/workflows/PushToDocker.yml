@@ -1,0 +1,25 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-publish:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Build C# Docker image
+        run: docker build -f FinanceManager.Core/Dockerfile -t 192.168.1.100:5000/financemanagerapi:latest .
+
+      - name: Push Docker image
+        run: docker push 192.168.1.100:5000/financemanagerapi:latest
+        
+      - name: Build Next.js Docker image
+        run: docker build -f financemanager.web/Dockerfile -t 192.168.1.100:5000/financemanager:latest ./financemanager.web
+
+      - name: Push Docker image
+        run: docker push 192.168.1.100:5000/financemanager:latest

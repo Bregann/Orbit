@@ -46,19 +46,36 @@ namespace FinanceManager.Domain.Services
                 await context.SaveChangesAsync();
                 Log.Information($"[Monzo Transactions Job] Added transaction {transaction.Id} - {transaction.Merchant?.Name ?? "Unknown"} - £{positiveTransactionAmount / 100.0:0.00}");
             }
-
-            await UpdateAutomaticTransactions();
         }
 
         public async Task GetOpenBankingTransactionsAndAddToDatabase()
         {
             var accessToken = await bankApiHelper.GetGoCardlessBankingDataAccessToken();
+
+            if (accessToken == null)
+            {
+                Log.Error("[Open Banking Transactions Job] No access token found for GoCardless");
+                return;
+            }
+
             var openBankingTransactions = await bankApiHelper.GetGoCardlessBankingDataTransactions(accessToken, environmentalSettingHelper.GetEnviromentalSettingValue(Enums.EnvironmentalSettingEnum.MainBankAccountId));
 
             if (openBankingTransactions == null || openBankingTransactions.Transactions.Booked.Length == 0)
             {
                 Log.Information("[Open Banking Transactions Job] No new transactions found");
                 return;
+            }
+
+            // grab the credit card transactions too and add to the list
+            var creditCardTransactions = await bankApiHelper.GetGoCardlessBankingDataTransactions(accessToken, environmentalSettingHelper.GetEnviromentalSettingValue(Enums.EnvironmentalSettingEnum.CreditCardAccountId));
+
+            if (creditCardTransactions == null || creditCardTransactions.Transactions.Booked.Length == 0)
+            {
+                Log.Information("[Open Banking Transactions Job] No new credit card transactions found");
+            }
+            else if (creditCardTransactions != null)
+            {
+                openBankingTransactions.Transactions.Booked = openBankingTransactions.Transactions.Booked.Concat(creditCardTransactions.Transactions.Booked).ToArray();
             }
 
             foreach (var transaction in openBankingTransactions.Transactions.Booked)
@@ -88,11 +105,9 @@ namespace FinanceManager.Domain.Services
                 await context.SaveChangesAsync();
                 Log.Information($"[Open Banking Transactions Job] Added transaction {transaction.TransactionId} - {transaction.RemittanceInformationUnstructured ?? "Unknown"} - £{positiveTransactionAmount / 100.0:0.00}");
             }
-
-            await UpdateAutomaticTransactions();
         }
 
-        private async Task UpdateAutomaticTransactions()
+        public async Task UpdateAutomaticTransactions()
         {
             // get all unproecessed transactions
             var unprocessedTransactions = await context.Transactions
@@ -103,7 +118,7 @@ namespace FinanceManager.Domain.Services
 
             foreach (var transaction in unprocessedTransactions)
             {
-                if(automaticTransactions.Any(a => transaction.MerchantName.ToLower().Contains(a.MerchantName.ToLower())))
+                if (automaticTransactions.Any(a => transaction.MerchantName.ToLower().Contains(a.MerchantName.ToLower())))
                 {
                     var autoTransaction = automaticTransactions.First(a => transaction.MerchantName.ToLower().Contains(a.MerchantName.ToLower()));
 

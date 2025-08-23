@@ -78,7 +78,7 @@ export default function LoginPage() {
                 mt="xl"
                 onClick={handleLogin}
                 loading={loading}
-                disabled={!email || !password}
+                disabled={email === '' || password === ''}
               >
                 Sign in
               </Button>

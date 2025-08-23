@@ -7,12 +7,16 @@ using FinanceManager.Domain.Interfaces.Helpers;
 using FinanceManager.Domain.Services;
 using Hangfire;
 using Hangfire.Dashboard.BasicAuthorization;
-using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
+#if DEBUG
+using Hangfire.MemoryStorage;
+#else
+using Hangfire.PostgreSql;
+#endif
 
 Log.Logger = new LoggerConfiguration().WriteTo.Async(x => x.File("/app/Logs/log.log", retainedFileCountLimit: 7, rollingInterval: RollingInterval.Day)).WriteTo.Console().CreateLogger();
 Log.Information("Logger Setup");
@@ -87,19 +91,17 @@ builder.Services.AddHangfire(configuration => configuration
 #else
 builder.Services.AddDbContext<PostgresqlContext>(options =>
     options.UseLazyLoadingProxies()
-           .UseNpgsql(Environment.GetEnvironmentVariable("xxxConnStringLive")));
+           .UseNpgsql(Environment.GetEnvironmentVariable("FMApiLive")));
 builder.Services.AddScoped<AppDbContext>(provider => provider.GetService<PostgresqlContext>());
 
-GlobalConfiguration.Configuration.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("xxxConnString")));
+GlobalConfiguration.Configuration.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("FMApiLive")));
 
 builder.Services.AddHangfire(configuration => configuration
         .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
         .UseSimpleAssemblyNameTypeSerializer()
         .UseRecommendedSerializerSettings()
-        .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("xxxConnString")))
+        .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("FMApiLive")))
         );
-
-
 #endif
 
 // hangfire
@@ -158,5 +160,7 @@ app.MapHangfireDashboard("/hangfire", new DashboardOptions
 {
     Authorization = auth
 }, JobStorage.Current);
+
+HangfireJobSetup.SetupRecurringJobs();
 
 app.Run();

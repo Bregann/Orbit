@@ -37,7 +37,7 @@ export default function RegisterPage() {
   }
 
   const passwordValidation = validatePassword(password)
-  const passwordsMatch = password && confirmPassword && password === confirmPassword
+  const passwordsMatch = password !== '' && confirmPassword !== '' && password === confirmPassword
 
   const handleRegister = async () => {
     setLoading(true)
@@ -63,7 +63,7 @@ export default function RegisterPage() {
     }
   }
 
-  const isFormValid = email && passwordValidation.isValid && passwordsMatch
+  const isFormValid = email !== '' && passwordValidation.isValid && passwordsMatch
 
   return (
     <Container size={420} my={40}>
@@ -100,7 +100,7 @@ export default function RegisterPage() {
                 onChange={(event) => setPassword(event.currentTarget.value)}
                 leftSection={<IconLock size={16} />}
                 description="At least 8 characters, 1 uppercase letter, and 1 special character"
-                error={password && !passwordValidation.isValid ?
+                error={password !== '' && !passwordValidation.isValid ?
                   `Password must contain: ${!passwordValidation.minLength ? '8+ characters ' : ''}${!passwordValidation.hasUppercase ? 'uppercase letter ' : ''}${!passwordValidation.hasSpecialChar ? 'special character' : ''}`.trim()
                   : undefined}
                 required
@@ -112,7 +112,7 @@ export default function RegisterPage() {
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.currentTarget.value)}
                 leftSection={<IconLock size={16} />}
-                error={confirmPassword && !passwordsMatch ? 'Passwords do not match' : undefined}
+                error={confirmPassword !== '' && !passwordsMatch ? 'Passwords do not match' : undefined}
                 required
               />
 

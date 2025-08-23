@@ -4,5 +4,6 @@
     {
         Task GetMonzoTransactionsAndAddToDatabase();
         Task GetOpenBankingTransactionsAndAddToDatabase();
+        Task UpdateAutomaticTransactions();
     }
 }

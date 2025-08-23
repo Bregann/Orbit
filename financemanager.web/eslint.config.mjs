@@ -12,6 +12,14 @@ const compat = new FlatCompat({
 })
 
 const eslintConfig = [
+  {
+    ignores: [
+      'node_modules',
+      '.next',
+      'dist',
+      'build'
+    ],
+  },
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -33,8 +41,8 @@ const eslintConfig = [
         named: 'never',
         asyncArrow: 'always'
       }],
-      'space-before-blocks': ['error', 'always'], // ⬅ Space before curly braces
-      'keyword-spacing': ['error', { before: true, after: true }], // ⬅ Space after if/else/for
+      'space-before-blocks': ['error', 'always'],
+      'keyword-spacing': ['error', { before: true, after: true }],
       'eol-last': ['error', 'always'],
       'no-multi-spaces': ['error'],
       'key-spacing': ['error', {

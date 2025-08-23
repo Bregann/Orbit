@@ -3,39 +3,42 @@ using System;
 using FinanceManager.Domain.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace FinanceManager.Domain.Database.Migrations.Sqlite
+namespace FinanceManager.Domain.Database.Migrations
 {
-    [DbContext(typeof(SqliteContext))]
-    [Migration("20250818151206_Initial")]
-    partial class Initial
+    [DbContext(typeof(PostgresqlContext))]
+    partial class PostgresqlContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Proxies:ChangeTracking", false)
                 .HasAnnotation("Proxies:CheckEquality", false)
-                .HasAnnotation("Proxies:LazyLoading", true);
+                .HasAnnotation("Proxies:LazyLoading", true)
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("FinanceManager.Domain.Database.Models.AutomaticTransaction", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("MerchantName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<int>("PotId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -48,15 +51,17 @@ namespace FinanceManager.Domain.Database.Migrations.Sqlite
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -67,45 +72,46 @@ namespace FinanceManager.Domain.Database.Migrations.Sqlite
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("AmountSaved")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("numeric");
 
                     b.Property<decimal>("AmountSpent")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("numeric");
 
                     b.Property<DateTime>("DateAdded")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("MonthlyIncome")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
                     b.ToTable("HistoricData");
                 });
 
-            modelBuilder.Entity("FinanceManager.Domain.Database.Models.HistoricPotData", b =>
+            modelBuilder.Entity("FinanceManager.Domain.Database.Models.HistoricSavingsPotData", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AmountSaved")
+                        .HasColumnType("numeric");
 
                     b.Property<int>("HistoricMonthlyDataId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("PotAmount")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("PotAmountLeft")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("PotAmountSpent")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("numeric");
 
                     b.Property<int>("PotId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -113,24 +119,58 @@ namespace FinanceManager.Domain.Database.Migrations.Sqlite
 
                     b.HasIndex("PotId");
 
-                    b.ToTable("HistoricPotData");
+                    b.ToTable("HistoricSavingsPotData");
+                });
+
+            modelBuilder.Entity("FinanceManager.Domain.Database.Models.HistoricSpendingPotData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("HistoricMonthlyDataId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("PotAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("PotAmountLeft")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("PotAmountSpent")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("PotId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HistoricMonthlyDataId");
+
+                    b.HasIndex("PotId");
+
+                    b.ToTable("HistoricSpendingPotData");
                 });
 
             modelBuilder.Entity("FinanceManager.Domain.Database.Models.SavingsPot", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<long>("AmountToAdd")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<long>("PotAmount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("PotName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -141,23 +181,22 @@ namespace FinanceManager.Domain.Database.Migrations.Sqlite
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<long>("AmountToAdd")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("PotAmount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<long>("PotAmountLeft")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<long>("PotAmountSpent")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("PotName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -167,26 +206,26 @@ namespace FinanceManager.Domain.Database.Migrations.Sqlite
             modelBuilder.Entity("FinanceManager.Domain.Database.Models.Transactions", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ImgUrl")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("MerchantName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<int?>("PotId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("Processed")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<long>("TransactionAmount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -199,31 +238,31 @@ namespace FinanceManager.Domain.Database.Migrations.Sqlite
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("MonzoAccessToken")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("MonzoRefreshToken")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -234,21 +273,23 @@ namespace FinanceManager.Domain.Database.Migrations.Sqlite
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsRevoked")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Token")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -268,7 +309,26 @@ namespace FinanceManager.Domain.Database.Migrations.Sqlite
                     b.Navigation("Pot");
                 });
 
-            modelBuilder.Entity("FinanceManager.Domain.Database.Models.HistoricPotData", b =>
+            modelBuilder.Entity("FinanceManager.Domain.Database.Models.HistoricSavingsPotData", b =>
+                {
+                    b.HasOne("FinanceManager.Domain.Database.Models.HistoricMonthlyData", "HistoricMonthlyData")
+                        .WithMany("HistoricSavingsPotData")
+                        .HasForeignKey("HistoricMonthlyDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FinanceManager.Domain.Database.Models.SavingsPot", "Pot")
+                        .WithMany()
+                        .HasForeignKey("PotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HistoricMonthlyData");
+
+                    b.Navigation("Pot");
+                });
+
+            modelBuilder.Entity("FinanceManager.Domain.Database.Models.HistoricSpendingPotData", b =>
                 {
                     b.HasOne("FinanceManager.Domain.Database.Models.HistoricMonthlyData", "HistoricMonthlyData")
                         .WithMany("HistoricPotData")
@@ -310,6 +370,8 @@ namespace FinanceManager.Domain.Database.Migrations.Sqlite
             modelBuilder.Entity("FinanceManager.Domain.Database.Models.HistoricMonthlyData", b =>
                 {
                     b.Navigation("HistoricPotData");
+
+                    b.Navigation("HistoricSavingsPotData");
                 });
 
             modelBuilder.Entity("FinanceManager.Domain.Database.Models.SpendingPot", b =>
