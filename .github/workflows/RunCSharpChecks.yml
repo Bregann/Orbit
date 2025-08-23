@@ -31,7 +31,7 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore RetroTrack.sln
+        run: dotnet restore FinanceManager.sln
         
       - name: Check C# formatting
         run: dotnet format --verify-no-changes
