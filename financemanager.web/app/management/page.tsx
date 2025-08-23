@@ -18,17 +18,17 @@ export default async function Management() {
 
     await queryClient.prefetchQuery({
       queryKey: ['managePotData'],
-      queryFn: async () => await doQueryGet<GetManagePotDataDto>('/api/pots/GetManagePotData', { cookieHeader })
+      queryFn: async () => await doQueryGet<GetManagePotDataDto>('/api/pots/GetManagePotData', { headers: { Cookie: cookieHeader } })
     })
 
     await queryClient.prefetchQuery({
       queryKey: ['getSpendingPotDropdownOptions'],
-      queryFn: async () => await doQueryGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions', { cookieHeader }),
+      queryFn: async () => await doQueryGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions', { headers: { Cookie: cookieHeader } }),
     })
 
     await queryClient.prefetchQuery({
       queryKey: ['getAutomaticTransactions'],
-      queryFn: async () => await doQueryGet<GetAutomaticTransactionsDto>('/api/transactions/GetAutomaticTransactions', { cookieHeader })
+      queryFn: async () => await doQueryGet<GetAutomaticTransactionsDto>('/api/transactions/GetAutomaticTransactions', { headers: { Cookie: cookieHeader } })
     })
 
     return (

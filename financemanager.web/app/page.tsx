@@ -18,17 +18,17 @@ export default async function Home() {
 
     await queryClient.prefetchQuery({
       queryKey: ['homepage-stats'],
-      queryFn: async () => await doQueryGet<GetHomepageStatsDto>('/api/stats/GetHomepageStats', { cookieHeader }),
+      queryFn: async () => await doQueryGet<GetHomepageStatsDto>('/api/stats/GetHomepageStats', { headers: { Cookie: cookieHeader } }),
     })
 
     await queryClient.prefetchQuery({
       queryKey: ['unprocessedTransactions'],
-      queryFn: async () => await doQueryGet<GetUnprocessedTransactionsDto>('/api/transactions/GetUnprocessedTransactions', { cookieHeader }),
+      queryFn: async () => await doQueryGet<GetUnprocessedTransactionsDto>('/api/transactions/GetUnprocessedTransactions', { headers: { Cookie: cookieHeader } }),
     })
 
     await queryClient.prefetchQuery({
       queryKey: ['getSpendingPotDropdownOptions'],
-      queryFn: async () => await doQueryGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions', { cookieHeader }),
+      queryFn: async () => await doQueryGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions', { headers: { Cookie: cookieHeader } }),
     })
 
     return (
