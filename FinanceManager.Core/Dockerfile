@@ -12,7 +12,7 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["FinanceManager/FinanceManager.Core.csproj", "FinanceManager/"]
+COPY ["FinanceManager.Core/FinanceManager.Core.csproj", "FinanceManager/"]
 COPY ["FinanceManager.Domain/FinanceManager.Domain.csproj", "FinanceManager.Domain/"]
 RUN dotnet restore "./FinanceManager/FinanceManager.Core.csproj"
 COPY . .
