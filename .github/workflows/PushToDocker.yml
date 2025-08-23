@@ -19,7 +19,7 @@ jobs:
         run: docker push 192.168.1.100:5000/financemanagerapi:latest
         
       - name: Build Next.js Docker image
-        run: docker build -f financemanager.web/Dockerfile -t 192.168.1.100:5000/financemanager:latest ./financemanager.web
+        run: docker build -f financemanager.web/Dockerfile -t 192.168.1.100:5000/financemanagerweb:latest ./financemanager.web
 
       - name: Push Docker image
-        run: docker push 192.168.1.100:5000/financemanager:latest
+        run: docker push 192.168.1.100:5000/financemanagerweb:latest
