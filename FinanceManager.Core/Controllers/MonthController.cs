@@ -1,11 +1,13 @@
 ﻿using FinanceManager.Domain.DTOs.Month.Request;
 using FinanceManager.Domain.Interfaces.Api;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceManager.Core.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class MonthController(IMonthService monthService) : ControllerBase
     {
         [HttpPost("AddNewMonth")]
