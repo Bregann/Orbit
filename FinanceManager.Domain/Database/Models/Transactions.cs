@@ -14,7 +14,7 @@ namespace FinanceManager.Domain.Database.Models
         public string? ImgUrl { get; set; }
 
         [Required]
-        public required DateTime TransactionDate { get; set; }
+        public required DateTimeOffset TransactionDate { get; set; }
 
         [Required]
         public required string MerchantName { get; set; }

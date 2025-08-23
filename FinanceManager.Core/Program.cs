@@ -23,7 +23,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .Enrich.WithProperty("Application", "Fm-Api" + (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" ? "-Test" : ""))
     .WriteTo.Seq("http://192.168.1.20:5341")
-    .CreateLogger(); 
+    .CreateLogger();
 
 Log.Information("Logger Setup");
 
