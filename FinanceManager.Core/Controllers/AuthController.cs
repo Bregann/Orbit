@@ -14,22 +14,23 @@ namespace FinanceManager.Core.Controllers
         [HttpPost]
         public async Task<ActionResult> RegisterUser([FromBody] RegisterUserRequest request)
         {
-            try
-            {
-                await authService.RegisterUser(request);
-            }
-            catch (DuplicateNameException ex)
-            {
-                Log.Warning(ex, "Error attempting to register user");
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "Unknown error attempting to register user");
-                return BadRequest();
-            }
+            //try
+            //{
+            //    await authService.RegisterUser(request);
+            //}
+            //catch (DuplicateNameException ex)
+            //{
+            //    Log.Warning(ex, "Error attempting to register user");
+            //    return BadRequest(ex.Message);
+            //}
+            //catch (Exception ex)
+            //{
+            //    Log.Fatal(ex, "Unknown error attempting to register user");
+            //    return BadRequest();
+            //}
 
-            return Ok();
+            //return Ok();
+            return NotFound();
         }
 
         [HttpPost]
