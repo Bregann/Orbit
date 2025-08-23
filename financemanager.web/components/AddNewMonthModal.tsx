@@ -1,10 +1,24 @@
-import { Button, Divider, Grid, Group, Input, Modal } from '@mantine/core'
-import classes from '../styles/AddNewMonthModal.module.css'
-import { useEffect, useState } from 'react'
-import fetchHelper from '@/helpers/FetchHelper'
-import notificationHelper from '@/helpers/NotificationHelper'
-import { IconCircleCheck, IconCircleX } from '@tabler/icons-react'
-import { type PotList } from '@/pages/api/pots/GetPotList'
+'use client'
+
+import { doPost, doQueryGet } from '@/helpers/apiClient'
+import notificationHelper from '@/helpers/notificationHelper'
+import { GetAddMonthPotDataDto } from '@/interfaces/api/pots/GetAddMonthPotDataDto'
+import {
+  Modal,
+  Button,
+  Group,
+  Grid,
+  Text,
+  Title,
+  Divider,
+  Stack,
+  Paper,
+  Checkbox,
+  NumberInput
+} from '@mantine/core'
+import { IconCheck, IconX } from '@tabler/icons-react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 
 export interface AddNewMonthModalProps {
   displayModal: boolean
@@ -12,73 +26,243 @@ export interface AddNewMonthModalProps {
 }
 
 const AddNewMonthModal = (props: AddNewMonthModalProps) => {
-  const [potList, setPotList] = useState<PotList[] | undefined>(undefined)
-  const [totalPotAmount, setTotalPotAmount] = useState(0)
-  const [incomeForMonth, setIncomeForMonth] = useState(0)
+  const queryClient = useQueryClient()
 
-  useEffect(() => {
-    if (props.displayModal) {
-      void (async () => {
-        const fetchResponse = await fetchHelper.doGet('/pots/GetPotList')
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['addMonthPotData'],
+    queryFn: async () => await doQueryGet<GetAddMonthPotDataDto>('/api/pots/GetAddMonthPotData')
+  })
 
-        if (fetchResponse.errored) {
-          notificationHelper.showErrorNotification('Error', 'Error getting pots from database', 5000, <IconCircleX />)
-        } else {
-          const data: PotList[] = fetchResponse.data
-          const summedPotAmounts = data.reduce((sum, { potAmount }) => sum + potAmount, 0)
-          setTotalPotAmount(summedPotAmounts)
-          setPotList(data)
+  const [incomeForMonth, setIncomeForMonth] = useState<number | string>('')
+  const [potRollovers, setPotRollovers] = useState<{ [key: number]: boolean }>({})
+
+  const updateSpendingPotAmountAllocatedAmount = (potId: number, amount: number) => {
+    queryClient.setQueryData<GetAddMonthPotDataDto>(['addMonthPotData'], (oldData) => {
+      if (oldData === undefined) {
+        return
+      }
+      const updatedPots = oldData.spendingPots.map((pot) => {
+        if (pot.potId === potId) {
+          return { ...pot, amountToAdd: amount }
         }
-      })()
-    } else {
-      setPotList(undefined)
-      setTotalPotAmount(0)
-      setIncomeForMonth(0)
+        return pot
+      })
+      return { ...oldData, spendingPots: updatedPots }
+    })
+  }
+
+  const updateSavingsPotAmountAllocatedAmount = (potId: number, amount: number) => {
+    queryClient.setQueryData<GetAddMonthPotDataDto>(['addMonthPotData'], (oldData) => {
+      if (oldData === undefined) {
+        return
+      }
+      const updatedPots = oldData.savingsPots.map((pot) => {
+        if (pot.potId === potId) {
+          return { ...pot, amountToAdd: amount }
+        }
+        return pot
+      })
+      return { ...oldData, savingsPots: updatedPots }
+    })
+  }
+
+  const addNewMonth = async () => {
+    const reqBody = {
+      monthlyIncome: incomeForMonth,
+      potIdsToRollover: Object.keys(potRollovers).filter((potId) => potRollovers[Number(potId)] === true).map(Number),
+      spendingPots: data?.spendingPots.map((pot) => ({
+        potId: pot.potId,
+        amountToAdd: pot.amountToAdd
+      })),
+      savingsPots: data?.savingsPots.map((pot) => ({
+        potId: pot.potId,
+        amountToAdd: pot.amountToAdd
+      }))
     }
-  }, [props.displayModal])
 
-  const addMonth = async (): Promise<void> => {
-    const fetchResult = await fetchHelper.doPost('/newMonth/AddNewMonth', { income: incomeForMonth })
+    const res = await doPost('/api/Month/AddNewMonth', { body: reqBody })
 
-    if (fetchResult.errored || fetchResult.data === false) {
-      notificationHelper.showErrorNotification('Error', 'Failed to add month', 5000, <IconCircleX />)
-    } else {
-      notificationHelper.showSuccessNotification('Success', 'Month added successfully', 2000, <IconCircleCheck />)
-      setPotList(undefined)
-      setTotalPotAmount(0)
-      setIncomeForMonth(0)
+    if (res.ok) {
       props.hideModal()
+      queryClient.invalidateQueries({ queryKey: ['addMonthPotData'] })
+      queryClient.invalidateQueries({ queryKey: ['homepage-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['potBreakdownData'] })
+      queryClient.invalidateQueries({ queryKey: ['thisMonthTransactions'] })
+      queryClient.invalidateQueries({ queryKey: ['unprocessedTransactions'] })
+      setPotRollovers([])
+      setIncomeForMonth('')
+
+      notificationHelper.showSuccessNotification('Success', 'New month added successfully!', 3000, <IconCheck />)
+    }
+    else {
+      notificationHelper.showErrorNotification('Error', 'Failed to add new month.', 3000, <IconX />)
     }
   }
 
   return (
-    <>
-      <Modal opened={props.displayModal} onClose={() => { props.hideModal() }} closeOnClickOutside={false} title="Add Month" classNames={{ title: classes.modalTitle }}>
-        <Input.Wrapper label="Income This Month" className={classes.inputWrapper}>
-          <Input onChange={(e) => { setIncomeForMonth(Number.parseFloat(e.target.value)) }} />
-        </Input.Wrapper>
-        <h4 className={classes.h4}>Pot Breakdown</h4>
-        <Grid>
-          {potList?.map((pot) => {
-            return (
-              <Grid.Col span={4} key={pot.potId}>
-              <h5>{pot.potName}</h5>
-              <p>&pound;{pot.potAmount}</p>
-            </Grid.Col>
-            )
-          })
-        }
-        </Grid>
-        <Divider style={{ paddingBottom: 20 }} />
-        <h5>Spare Money</h5>
-        <p>{isNaN(incomeForMonth) ? 'Invalid input' : `£${(incomeForMonth - totalPotAmount).toFixed(2)}`}</p>
-        <Group justify='center'>
-          <Button color='green' onClick={async () => { await addMonth() }}>Add Month</Button>
-          <Button color='red' onClick={() => { props.hideModal() }}>Cancel</Button>
-        </Group>
+    <Modal
+      opened={props.displayModal}
+      onClose={() => { props.hideModal(); queryClient.invalidateQueries({ queryKey: ['addMonthPotData'] }); setPotRollovers([]) }}
+      title="Add New Month"
+      size="lg"
+      centered
+      closeOnClickOutside={false}
+    >
+      {isLoading && <div>Loading...</div>}
+      {isError && <div>Error loading data</div>}
+      {data !== undefined &&
+        <Stack gap="md">
+          <NumberInput
+            label="Income This Month"
+            placeholder="Enter your income"
+            value={incomeForMonth}
+            onChange={setIncomeForMonth}
+            min={0}
+            decimalScale={2}
+            fixedDecimalScale
+            thousandSeparator=","
+            prefix="£"
+            size="md"
+          />
 
-      </Modal>
-    </>
+          <div>
+            <Title order={4} mb="sm">Spending Pots</Title>
+            <Grid gutter="sm">
+              {data.spendingPots.map((pot) => (
+                <Grid.Col span={6} key={pot.potId}>
+                  <Paper withBorder p="md" radius="md" ta="center">
+                    <Stack gap="xs">
+                      <div>
+                        <Text fw={500} size="md">{pot.potName}</Text>
+                        <NumberInput
+                          value={pot.amountToAdd}
+                          onChange={(value) => { updateSpendingPotAmountAllocatedAmount(pot.potId, Number(value)) }}
+                          min={0}
+                          decimalScale={2}
+                          fixedDecimalScale
+                          thousandSeparator=","
+                          prefix="£"
+                          size="sm"
+                          styles={{
+                            input: {
+                              textAlign: 'center',
+                              fontWeight: 700,
+                              fontSize: '16px'
+                            }
+                          }}
+                        />
+                      </div>
+
+                      <div>
+                        <Text size="sm" c="dimmed" mb="xs">
+                          Rollover available: {pot.rolloverAmount}
+                        </Text>
+                        <Checkbox
+                          checked={potRollovers[pot.potId] || false}
+                          onChange={() => { setPotRollovers((prev) => ({ ...prev, [pot.potId]: !prev[pot.potId] })) }}
+                          label="Include rollover"
+                          size="sm"
+                        />
+                      </div>
+                    </Stack>
+                  </Paper>
+                </Grid.Col>
+              ))}
+            </Grid>
+          </div>
+
+          {/* Savings Pots */}
+          <div>
+            <Title order={4} mb="sm">Savings Pots</Title>
+            <Grid gutter="sm">
+              {data.savingsPots.map((pot) => (
+                <Grid.Col span={6} key={pot.potId}>
+                  <Paper withBorder p="md" radius="md" ta="center">
+                    <Text fw={500} size="sm" truncate>
+                      {pot.potName}
+                    </Text>
+                    <NumberInput
+                      value={pot.amountToAdd}
+                      onChange={(value) => { updateSavingsPotAmountAllocatedAmount(pot.potId, Number(value)) }}
+                      min={0}
+                      decimalScale={2}
+                      fixedDecimalScale
+                      thousandSeparator=","
+                      prefix="£"
+                      size="sm"
+                      styles={{
+                        input: {
+                          textAlign: 'center',
+                          fontWeight: 700,
+                          fontSize: '16px'
+                        }
+                      }}
+                    />
+                    <Text size="xs" c="blue">
+                      Savings
+                    </Text>
+                  </Paper>
+                </Grid.Col>
+              ))}
+            </Grid>
+          </div>
+
+          <Divider />
+
+          {/* Summary */}
+          <Paper withBorder p="md" radius="md">
+            <Stack gap="xs">
+              <Group justify="space-between">
+                <Text>Monthly Income:</Text>
+                <Text fw={500}>
+                  {typeof incomeForMonth === 'number' ? `£${incomeForMonth.toFixed(2)}` : '£0.00'}
+                </Text>
+              </Group>
+
+              <Group justify="space-between">
+                <Text>Total Pot Allocations:</Text>
+                <Text fw={500}>
+                  £{(data.spendingPots.reduce((acc, pot) => acc + (pot.amountToAdd), 0) + data.savingsPots.reduce((acc, pot) => acc + (pot.amountToAdd), 0)).toFixed(2)}
+                </Text>
+              </Group>
+
+              <Divider />
+
+              <Group justify="space-between">
+                <Text fw={600} size="lg">Spare Money:</Text>
+                <Text
+                  fw={700}
+                  size="lg"
+                  c={(Number(incomeForMonth) - data.spendingPots.reduce((acc, pot) => acc + (pot.amountToAdd), 0) - data.savingsPots.reduce((acc, pot) => acc + (pot.amountToAdd), 0)) >= 0 ? 'green' : 'red'}
+                >
+                  {`£${(Number(incomeForMonth) - data.spendingPots.reduce((acc, pot) => acc + (pot.amountToAdd), 0) - data.savingsPots.reduce((acc, pot) => acc + (pot.amountToAdd), 0)).toFixed(2)}`}
+                </Text>
+              </Group>
+            </Stack>
+          </Paper>
+
+          {/* Action Buttons */}
+          <Group justify="center" mt="md">
+            <Button
+              color="green"
+              onClick={async () => { await addNewMonth() }}
+              disabled={incomeForMonth === '' || typeof incomeForMonth === 'string'}
+              size="md"
+            >
+            Add Month
+            </Button>
+            <Button
+              color="red"
+              variant="outline"
+              onClick={() => { props.hideModal(); queryClient.invalidateQueries({ queryKey: ['addMonthPotData'] }); setPotRollovers([]) } }
+              size="md"
+            >
+            Cancel
+            </Button>
+          </Group>
+        </Stack>
+      }
+    </Modal>
   )
 }
 

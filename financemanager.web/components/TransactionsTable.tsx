@@ -1,124 +1,113 @@
-import { Table, Select, type ComboboxItem } from '@mantine/core'
-import { IconCircleCheck, IconCircleX, IconTrash, IconPhotoX } from '@tabler/icons-react'
-import classes from '../styles/TransactionsTable.module.css'
-import Image from 'next/image'
-import { useState } from 'react'
-import fetchHelper from '@/helpers/FetchHelper'
-import notificationHelper from '@/helpers/NotificationHelper'
-import YesNoModal from './Shared/YesNoModal'
+'use client'
 
-export interface TransactionTableData {
-  id: string
-  merchantName: string
-  iconUrl: string
-  transactionAmount: string
-  transactionDate: string
-  potId?: string
-}
+import { doPatch } from '@/helpers/apiClient'
+import notificationHelper from '@/helpers/notificationHelper'
+import { PotDropdownValue } from '@/interfaces/api/pots/PotDropdownValue'
+import { TransactionsTableRow } from '@/interfaces/api/transactions/TransactionsTableRow'
+import {
+  Table,
+  Select,
+  ActionIcon,
+  Image,
+  Text,
+  Paper
+} from '@mantine/core'
+import {
+  IconTrash,
+  IconPhotoX,
+  IconCheck,
+  IconX
+} from '@tabler/icons-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface TransactionsTableProps {
-  rows: TransactionTableData[]
-  dropdownValues: ComboboxItem[]
-  removeRow: boolean
+  transactions: TransactionsTableRow[]
+  potOptions: PotDropdownValue[]
 }
 
-const TransactionsTable = (props: TransactionsTableProps) => {
-  const [tableRows, setTableRows] = useState<TransactionTableData[]>(props.rows)
-  const [showYesNoModal, setShowYesNoModal] = useState(false)
-  const [clickedRow, setClickedRow] = useState<TransactionTableData | null>(null)
-  const UpdateDropdownChange = async (row: TransactionTableData, potId: number): Promise<void> => {
-    const data = {
-      transactionId: row.id,
-      potId
+export default function TransactionsTableComponent(props: TransactionsTableProps) {
+  const queryClient = useQueryClient()
+
+  const updateTransactionMutation = useMutation({
+    mutationFn: async (data: { transactionId: string, potId: number | null }) => {
+      await doPatch('/api/Transactions/UpdateTransaction', { body: { transactionId: data.transactionId, potId: data.potId } })
+    },
+    onSuccess: () =>{
+      queryClient.invalidateQueries({ queryKey: ['unprocessedTransactions'] })
+      queryClient.invalidateQueries({ queryKey: ['homepage-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['thisMonthTransactions'] })
+      notificationHelper.showSuccessNotification('Success', 'Transaction updated successfully', 3000, <IconCheck />)
+    },
+    onError: () =>{
+      notificationHelper.showErrorNotification('Error', 'Failed to update transaction', 3000, <IconX />)
     }
-
-    const fetchResult = await fetchHelper.doPost('/transactions/UpdateTransaction', data)
-
-    if (fetchResult.data === false || fetchResult.errored) {
-      notificationHelper.showErrorNotification('Error', 'Transaction failed to update', 5000, <IconCircleX />)
-    } else {
-      if (props.removeRow) {
-        setTableRows(tableRows.filter(x => x !== row))
-      }
-
-      notificationHelper.showSuccessNotification('Success', 'Transaction processed successfully', 2000, <IconCircleCheck />)
-    }
-  }
-
-  const DeleteTransaction = async (): Promise<void> => {
-    if (clickedRow !== null) {
-      const fetchResult = await fetchHelper.doPost(`/transactions/DeleteTransaction/${clickedRow.id}`, null)
-
-      if (fetchResult.data === false || fetchResult.errored) {
-        notificationHelper.showErrorNotification('Error', 'Transaction failed to remove', 5000, <IconCircleX />)
-      } else {
-        setTableRows(tableRows.filter(x => x !== clickedRow))
-        notificationHelper.showSuccessNotification('Success', 'Transaction removed successfully', 2000, <IconCircleCheck />)
-      }
-
-      setShowYesNoModal(false)
-      setClickedRow(null)
-    }
-  }
+  })
 
   return (
-    <>
-      <div className={classes.tableBox}>
-        <Table striped>
-          <Table.Thead>
-            <Table.Tr className={classes.tr}>
-              <Table.Th>Icon</Table.Th>
-              <Table.Th>Merchant</Table.Th>
-              <Table.Th>Transaction Amount</Table.Th>
-              <Table.Th>Date</Table.Th>
-              <Table.Th>Pot Type</Table.Th>
-              <Table.Th></Table.Th>
+    <Paper withBorder radius="md" p="md" shadow="sm">
+      <Table striped highlightOnHover>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Icon</Table.Th>
+            <Table.Th>Merchant</Table.Th>
+            <Table.Th>Amount</Table.Th>
+            <Table.Th>Date</Table.Th>
+            <Table.Th>Pot Type</Table.Th>
+            <Table.Th>Actions</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {props.transactions.map((transaction) => (
+            <Table.Tr key={transaction.id}>
+              <Table.Td>
+                {transaction.iconUrl !== '' ?
+                  <Image
+                    src={transaction.iconUrl}
+                    alt="Merchant icon"
+                    width={32}
+                    height={32}
+                    radius="sm"
+                  />
+                  :
+                  <IconPhotoX size={32} color="gray" />
+                }
+              </Table.Td>
+              <Table.Td>
+                <Text fw={500}>{transaction.merchantName}</Text>
+              </Table.Td>
+              <Table.Td>
+                <Text fw={500}>{transaction.transactionAmount}</Text>
+              </Table.Td>
+              <Table.Td>
+                <Text c="dimmed">{new Date(transaction.transactionDate).toLocaleDateString().concat(' ', new Date(transaction.transactionDate).toLocaleTimeString())}</Text>
+              </Table.Td>
+              <Table.Td>
+                <Select
+                  placeholder="Pick pot"
+                  data={props.potOptions.map(option => ({
+                    value: option.potId.toString(),
+                    label: option.potName
+                  }))}
+                  defaultValue={transaction.potId?.toString() ?? null}
+                  comboboxProps={{
+                    transitionProps: { transition: 'pop', duration: 200 }
+                  }}
+                  onChange={async (value) => { await updateTransactionMutation.mutateAsync({ transactionId: transaction.id, potId: value !== null ? Number(value) : null }) }}
+                />
+              </Table.Td>
+              <Table.Td>
+                <ActionIcon
+                  variant="light"
+                  color="red"
+                  onClick={async () => { await updateTransactionMutation.mutateAsync({ transactionId: transaction.id, potId: null }) }}
+                >
+                  <IconTrash size={16} />
+                </ActionIcon>
+              </Table.Td>
             </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {tableRows.map((row) => {
-              return (
-                  <Table.Tr key={row.id}>
-                    <Table.Td>
-                      {row.iconUrl !== ''
-                        ? <Image
-                        className={classes.logo}
-                        src={row.iconUrl}
-                        width={48}
-                        height={48}
-                        alt='logo'
-                      />
-                        : <IconPhotoX className={classes.logoMissing} /> }
-                    </Table.Td>
-                    <Table.Td>{row.merchantName}</Table.Td>
-                    <Table.Td>{row.transactionAmount}</Table.Td>
-                    <Table.Td>{row.transactionDate}</Table.Td>
-                    <Table.Td>
-                      <Select
-                        onChange={async (e) => { await UpdateDropdownChange(row, Number(e)) }}
-                        defaultValue={row.potId !== null ? row.potId : undefined}
-                        placeholder='Pick value'
-                        data={props.dropdownValues}
-                        comboboxProps={{ transitionProps: { transition: 'pop', duration: 200 } }}
-                      />
-                    </Table.Td>
-                    <Table.Td>
-                      <IconTrash className={classes.binIco} onClick={() => { setClickedRow(row); setShowYesNoModal(true) }}/>
-                    </Table.Td>
-                  </Table.Tr>
-              )
-            })}
+          ))}
         </Table.Tbody>
       </Table>
-    </div>
-
-    <YesNoModal
-      text='Are you sure you want to delete this transaction? This cannot be undone!'
-      displayModal={showYesNoModal}
-      onHideModal={setShowYesNoModal}
-      onYesClicked={async () => { await DeleteTransaction() }} />
-    </>
+    </Paper>
   )
 }
-
-export default TransactionsTable
