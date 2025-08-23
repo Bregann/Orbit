@@ -3,7 +3,6 @@ using FinanceManager.Domain.DTOs.Auth.Responses;
 using FinanceManager.Domain.Interfaces.Api;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using System.Data;
 
 namespace FinanceManager.Core.Controllers
 {
