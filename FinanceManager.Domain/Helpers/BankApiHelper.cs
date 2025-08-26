@@ -50,7 +50,7 @@ namespace FinanceManager.Domain.Helpers
         public async Task<List<Transaction>?> GetMonzoTransactions()
         {
             var monzoAccessToken = envSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.MonzoAccessToken);
-            var monzoClientId = envSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.MonzoClientId);
+            var monzoAccountId = envSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.MonzoAccountId);
 
             //Create the request
             var clientOptions = new RestClientOptions("https://api.monzo.com/")
@@ -59,7 +59,7 @@ namespace FinanceManager.Domain.Helpers
             };
 
             var client = new RestClient(clientOptions);
-            var request = new RestRequest($"/transactions?expand[]=merchant&account_id={monzoClientId}&since={DateTime.UtcNow.AddDays(-7).ToString("yyyy-MM-ddTh:mm:ssZ")}", Method.Get);
+            var request = new RestRequest($"/transactions?expand[]=merchant&account_id={monzoAccountId}&since={DateTime.UtcNow.AddDays(-7).ToString("yyyy-MM-ddTh:mm:ssZ")}", Method.Get);
 
             //Get the response and Deserialize
             var response = await client.ExecuteAsync(request);
