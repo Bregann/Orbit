@@ -1,7 +1,7 @@
-﻿using Orbit.Domain.Database.Context;
+﻿using Microsoft.AspNetCore.Http;
+using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.Interfaces.Helpers;
-using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
 namespace Orbit.Domain.Helpers

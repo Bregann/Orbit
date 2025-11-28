@@ -1,7 +1,7 @@
-﻿using Orbit.Domain.Database.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using Orbit.Domain.Database.Context;
 using Orbit.Domain.DTOs.Stats.Responses;
 using Orbit.Domain.Interfaces.Api;
-using Microsoft.EntityFrameworkCore;
 
 namespace Orbit.Domain.Services
 {

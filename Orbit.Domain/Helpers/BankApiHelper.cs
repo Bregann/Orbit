@@ -1,7 +1,7 @@
-﻿using Orbit.Domain.DTOs.Banking;
+﻿using Newtonsoft.Json;
+using Orbit.Domain.DTOs.Banking;
 using Orbit.Domain.Enums;
 using Orbit.Domain.Interfaces.Helpers;
-using Newtonsoft.Json;
 using RestSharp;
 using RestSharp.Authenticators.OAuth2;
 using Serilog;

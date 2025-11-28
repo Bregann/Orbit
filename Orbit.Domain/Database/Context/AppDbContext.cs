@@ -1,5 +1,5 @@
-﻿using Orbit.Domain.Database.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Orbit.Domain.Database.Models;
 
 namespace Orbit.Domain.Database.Context
 {

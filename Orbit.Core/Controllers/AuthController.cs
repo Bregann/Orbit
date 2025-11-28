@@ -1,7 +1,7 @@
-﻿using Orbit.Domain.DTOs.Auth.Requests;
+﻿using Microsoft.AspNetCore.Mvc;
+using Orbit.Domain.DTOs.Auth.Requests;
 using Orbit.Domain.DTOs.Auth.Responses;
 using Orbit.Domain.Interfaces.Api;
-using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
 namespace Orbit.Core.Controllers

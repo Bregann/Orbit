@@ -1,7 +1,7 @@
 ﻿
+using Hangfire;
 using Orbit.Domain.Interfaces;
 using Orbit.Domain.Interfaces.Helpers;
-using Hangfire;
 
 namespace Orbit.Domain.Helpers
 {

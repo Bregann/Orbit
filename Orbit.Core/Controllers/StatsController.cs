@@ -1,7 +1,7 @@
-﻿using Orbit.Domain.DTOs.Stats.Responses;
-using Orbit.Domain.Interfaces.Api;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Orbit.Domain.DTOs.Stats.Responses;
+using Orbit.Domain.Interfaces.Api;
 
 namespace Orbit.Core.Controllers
 {

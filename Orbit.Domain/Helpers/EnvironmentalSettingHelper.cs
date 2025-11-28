@@ -1,8 +1,8 @@
-﻿using Orbit.Domain.Database.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Orbit.Domain.Database.Context;
 using Orbit.Domain.Enums;
 using Orbit.Domain.Interfaces.Helpers;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Orbit.Domain.Helpers
 {

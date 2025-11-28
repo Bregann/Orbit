@@ -1,7 +1,7 @@
-﻿using Orbit.Domain.Database.Context;
+﻿using Microsoft.AspNetCore.Identity;
+using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.Interfaces.Helpers;
-using Microsoft.AspNetCore.Identity;
 
 namespace Orbit.Domain.Helpers
 {
