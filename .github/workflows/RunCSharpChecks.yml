@@ -5,17 +5,17 @@ on:
     branches:
       - main
     paths:
-      - "FinanceManager.Domain/**"
-      - "FinanceManager.Core/**"
-      - "FinanceManager.sln"
+      - "Orbit.Domain/**"
+      - "Orbit.Core/**"
+      - "Orbit.sln"
 
   push:
     branches:
       - main
     paths:
-      - "FinanceManager.Domain/**"
-      - "FinanceManager.Core/**"
-      - "FinanceManager.sln"
+      - "Orbit.Domain/**"
+      - "Orbit.Core/**"
+      - "Orbit.sln"
 
 jobs:
   format-csharp-code:
@@ -31,7 +31,7 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore FinanceManager.sln
+        run: dotnet restore Orbit.sln
         
       - name: Check C# formatting
         run: dotnet format --verify-no-changes

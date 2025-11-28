@@ -13,13 +13,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build C# Docker image
-        run: docker build -f FinanceManager.Core/Dockerfile -t 192.168.1.100:5000/financemanagerapi:latest .
+        run: docker build -f Orbit.Core/Dockerfile -t 192.168.1.100:5000/financemanagerapi:latest .
 
       - name: Push Docker image
         run: docker push 192.168.1.100:5000/financemanagerapi:latest
         
       - name: Build Next.js Docker image
-        run: docker build -f financemanager.web/Dockerfile -t 192.168.1.100:5000/financemanagerweb:latest ./financemanager.web
+        run: docker build -f orbit.web/Dockerfile -t 192.168.1.100:5000/financemanagerweb:latest ./orbit.web
 
       - name: Push Docker image
         run: docker push 192.168.1.100:5000/financemanagerweb:latest
