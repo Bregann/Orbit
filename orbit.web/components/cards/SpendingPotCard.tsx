@@ -15,7 +15,6 @@ export const SpendingPotCard = ({ data }: SpendingPotCardProps) => {
 
   const allocated = parseAmount(data.amountAllocated)
   const spent = parseAmount(data.amountSpent)
-  const left = parseAmount(data.amountLeft)
   const spentPercentage = allocated > 0 ? (spent / allocated) * 100 : 0
 
   return (

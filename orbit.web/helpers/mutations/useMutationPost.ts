@@ -5,8 +5,8 @@ interface MutationPostOptions<TOutput> {
   url: string
   queryKey: string[]
   invalidateQuery: boolean
-  onError?: (error: Error) => void
-  onSuccess?: (data: TOutput | undefined) => void
+  onError?: (_error: Error) => void
+  onSuccess?: (_data: TOutput | undefined) => void
 }
 
 export function useMutationPost<TInput, TOutput>(options: MutationPostOptions<TOutput>) {

@@ -16,8 +16,7 @@ import {
   Loader,
   Center,
   Alert,
-  ThemeIcon,
-  Progress
+  ThemeIcon
 } from '@mantine/core'
 import { useState } from 'react'
 import TransactionsTable from '../../components/TransactionsTable'

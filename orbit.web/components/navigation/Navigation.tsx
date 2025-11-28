@@ -81,16 +81,16 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
             {navigationItems
               .filter(item => !item.isSubItem || pathname.startsWith('/finance'))
               .map((item) => (
-              <Button
-                key={item.href}
-                variant={pathname === item.href ? 'filled' : 'subtle'}
-                leftSection={<item.icon size="1rem" />}
-                onClick={() => router.push(item.href)}
-                size={item.isSubItem ? 'compact-sm' : 'sm'}
-              >
-                {item.label}
-              </Button>
-            ))}
+                <Button
+                  key={item.href}
+                  variant={pathname === item.href ? 'filled' : 'subtle'}
+                  leftSection={<item.icon size="1rem" />}
+                  onClick={() => router.push(item.href)}
+                  size={item.isSubItem ? 'compact-sm' : 'sm'}
+                >
+                  {item.label}
+                </Button>
+              ))}
           </Group>
 
           <Group>
