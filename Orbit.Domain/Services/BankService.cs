@@ -46,7 +46,7 @@ namespace Orbit.Domain.Services
 
                 await context.SaveChangesAsync();
 
-                await commonsSender.SendPushNotification("New Transaction Added", $"A new transaction has been added: {transaction.Merchant?.Name ?? "Unknown"} - £{positiveTransactionAmount / 100.0:0.00}");
+                //await commonsSender.SendPushNotification("New Transaction Added", $"A new transaction has been added: {transaction.Merchant?.Name ?? "Unknown"} - £{positiveTransactionAmount / 100.0:0.00}");
 
                 Log.Information($"[Monzo Transactions Job] Added transaction {transaction.Id} - {transaction.Merchant?.Name ?? "Unknown"} - £{positiveTransactionAmount / 100.0:0.00}");
             }
@@ -108,7 +108,7 @@ namespace Orbit.Domain.Services
 
                 await context.SaveChangesAsync();
 
-                await commonsSender.SendPushNotification("New Transaction Added", $"A new transaction has been added: {transaction.RemittanceInformationUnstructured ?? "Unknown"} - £{positiveTransactionAmount / 100.0:0.00}");
+                //await commonsSender.SendPushNotification("New Transaction Added", $"A new transaction has been added: {transaction.RemittanceInformationUnstructured ?? "Unknown"} - £{positiveTransactionAmount / 100.0:0.00}");
 
                 Log.Information($"[Open Banking Transactions Job] Added transaction {transaction.TransactionId} - {transaction.RemittanceInformationUnstructured ?? "Unknown"} - £{positiveTransactionAmount / 100.0:0.00}");
             }
@@ -137,7 +137,7 @@ namespace Orbit.Domain.Services
                         pot.PotAmountSpent += transaction.TransactionAmount;
                         transaction.PotId = autoTransaction.PotId;
 
-                        await commonsSender.SendPushNotification("Automatic Transaction Processed", $"An automatic transaction has been processed: {transaction.MerchantName} - £{transaction.TransactionAmount / 100.0:0.00}. Money left in pot: £{pot.PotAmountLeft / 100.0:0.00}. Pot Name: {pot.PotName}");
+                        //await commonsSender.SendPushNotification("Automatic Transaction Processed", $"An automatic transaction has been processed: {transaction.MerchantName} - £{transaction.TransactionAmount / 100.0:0.00}. Money left in pot: £{pot.PotAmountLeft / 100.0:0.00}. Pot Name: {pot.PotName}");
                     }
 
                     transaction.Processed = true;
