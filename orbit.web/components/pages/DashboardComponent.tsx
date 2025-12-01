@@ -44,48 +44,42 @@ export default function DashboardComponent() {
       description: 'To-do lists & reminders',
       icon: IconCheckbox,
       color: 'blue',
-      href: '/tasks',
-      comingSoon: true
+      href: '/tasks'
     },
     {
       title: 'Documents',
       description: 'Personal vault',
       icon: IconFiles,
       color: 'violet',
-      href: '/documents',
-      comingSoon: true
+      href: '/documents'
     },
     {
       title: 'Grocery List',
       description: 'Shopping items',
       icon: IconShoppingCart,
       color: 'orange',
-      href: '/grocery',
-      comingSoon: true
+      href: '/grocery'
     },
     {
       title: 'Journal',
       description: 'Mood & energy tracking',
       icon: IconMoodSmile,
       color: 'pink',
-      href: '/journal',
-      comingSoon: true
+      href: '/journal'
     },
     {
       title: 'Calendar',
       description: 'Chores, maintenance & events',
       icon: IconCalendar,
       color: 'cyan',
-      href: '/calendar',
-      comingSoon: true
+      href: '/calendar'
     },
     {
       title: 'Notes',
       description: 'General notes & ideas',
       icon: IconNotes,
       color: 'gray',
-      href: '/notes',
-      comingSoon: true
+      href: '/notes'
     }
   ]
 

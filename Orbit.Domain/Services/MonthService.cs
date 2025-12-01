@@ -8,7 +8,7 @@ namespace Orbit.Domain.Services
 {
     public class MonthService(AppDbContext context) : IMonthService
     {
-        public async Task AddNewMonth(AddNewMonthRequest request)
+        public async System.Threading.Tasks.Task AddNewMonth(AddNewMonthRequest request)
         {
             // get the current historic month from the database
             var currentHistoricMonth = await context.HistoricData

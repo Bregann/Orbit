@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
-using Orbit.Domain.DTOs.Month.Request;
 using Orbit.Domain.DTOs.Pots.Request;
 using Orbit.Domain.DTOs.Pots.Responses;
 using Orbit.Domain.DTOs.Shared;

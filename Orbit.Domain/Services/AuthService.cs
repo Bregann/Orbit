@@ -19,7 +19,7 @@ namespace Orbit.Domain.Services
     {
         private readonly PasswordHasher<User> _passwordHasher = new();
 
-        public async Task RegisterUser(RegisterUserRequest request)
+        public async System.Threading.Tasks.Task RegisterUser(RegisterUserRequest request)
         {
             Log.Information($"Registering user {request.Username}");
 
@@ -145,7 +145,7 @@ namespace Orbit.Domain.Services
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(128));
         }
 
-        private async Task SaveRefreshToken(string token, string userId)
+        private async System.Threading.Tasks.Task SaveRefreshToken(string token, string userId)
         {
             var refreshToken = new UserRefreshToken
             {

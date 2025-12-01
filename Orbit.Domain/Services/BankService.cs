@@ -10,7 +10,7 @@ namespace Orbit.Domain.Services
 {
     public class BankService(IBankApiHelper bankApiHelper, IEnvironmentalSettingHelper environmentalSettingHelper, ICommsSenderClient commonsSender, AppDbContext context) : IBankService
     {
-        public async Task GetMonzoTransactionsAndAddToDatabase()
+        public async System.Threading.Tasks.Task GetMonzoTransactionsAndAddToDatabase()
         {
             var monzoTransactions = await bankApiHelper.GetMonzoTransactions();
 
@@ -52,7 +52,7 @@ namespace Orbit.Domain.Services
             }
         }
 
-        public async Task GetOpenBankingTransactionsAndAddToDatabase()
+        public async System.Threading.Tasks.Task GetOpenBankingTransactionsAndAddToDatabase()
         {
             var accessToken = await bankApiHelper.GetGoCardlessBankingDataAccessToken();
 
@@ -114,7 +114,7 @@ namespace Orbit.Domain.Services
             }
         }
 
-        public async Task UpdateAutomaticTransactions()
+        public async System.Threading.Tasks.Task UpdateAutomaticTransactions()
         {
             // get all unproecessed transactions
             var unprocessedTransactions = await context.Transactions

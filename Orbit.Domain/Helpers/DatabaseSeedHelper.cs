@@ -9,7 +9,7 @@ namespace Orbit.Domain.Helpers
     {
         private static readonly PasswordHasher<User> _passwordHasher = new();
 
-        public static async Task SeedDatabase(AppDbContext context, IEnvironmentalSettingHelper settingsHelper, IServiceProvider serviceProvider)
+        public static async System.Threading.Tasks.Task SeedDatabase(AppDbContext context, IEnvironmentalSettingHelper settingsHelper, IServiceProvider serviceProvider)
         {
             // Generate the data
             // blah blah blah

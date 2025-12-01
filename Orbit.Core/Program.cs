@@ -110,10 +110,9 @@ builder.Services.AddHangfire(configuration => configuration
         );
 
 #else
-builder.Services.AddDbContext<PostgresqlContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseLazyLoadingProxies()
            .UseNpgsql(Environment.GetEnvironmentVariable("FMApiLive")));
-builder.Services.AddScoped<AppDbContext>(provider => provider.GetService<PostgresqlContext>());
 
 GlobalConfiguration.Configuration.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("FMApiLive")));
 
@@ -170,7 +169,7 @@ var auth = new[] { new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFi
         new BasicAuthAuthorizationUser
         {
             Login = environmentalSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.HangfireUsername),
-            PasswordClear = environmentalSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.HangfirePassword)
+            PasswordClear = environmentalSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.HangfireUsername)
         }
     }
 })};
