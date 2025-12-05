@@ -1,4 +1,4 @@
-﻿using Orbit.Domain.DTOs.Banking;
+﻿using Orbit.Domain.DTOs.Finance.Banking;
 
 namespace Orbit.Domain.Interfaces.Helpers
 {

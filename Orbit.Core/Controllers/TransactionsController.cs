@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Orbit.Domain.DTOs.Transactions.Requests;
-using Orbit.Domain.DTOs.Transactions.Responses;
-using Orbit.Domain.Interfaces.Api;
+using Orbit.Domain.DTOs.Finance.Transactions.Requests;
+using Orbit.Domain.DTOs.Finance.Transactions.Responses;
+using Orbit.Domain.Interfaces.Api.Finance;
 
 namespace Orbit.Core.Controllers
 {

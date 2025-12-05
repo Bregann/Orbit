@@ -2,7 +2,6 @@ using Orbit.Domain.Database.Context;
 using Orbit.Domain.Enums;
 using Orbit.Domain.Helpers;
 using Orbit.Domain.Interfaces;
-using Orbit.Domain.Interfaces.Api;
 using Orbit.Domain.Interfaces.Helpers;
 using Orbit.Domain.Services;
 using Hangfire;
@@ -12,6 +11,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
+using Orbit.Domain.Services.Finance;
+using Orbit.Domain.Interfaces.Api.Finance;
+using Orbit.Domain.Interfaces.Api.Tasks;
+using Orbit.Domain.Services.Tasks;
 
 #if DEBUG
 using Hangfire.MemoryStorage;
@@ -53,6 +56,7 @@ builder.Services.AddScoped<ITransactionsService, TransactionsService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<IPotsService, PotsService>();
 builder.Services.AddScoped<IMonthService, MonthService>();
+builder.Services.AddScoped<ITasksService, TasksService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddHttpClient<ICommsSenderClient, CommsSenderClient>();
 

@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using Orbit.Domain.DTOs.Banking;
+using Orbit.Domain.DTOs.Finance.Banking;
 using Orbit.Domain.Enums;
 using Orbit.Domain.Interfaces.Helpers;
 using RestSharp;

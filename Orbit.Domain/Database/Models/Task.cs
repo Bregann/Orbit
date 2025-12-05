@@ -16,7 +16,7 @@ namespace Orbit.Domain.Database.Models
         public required string Description { get; set; }
 
         [Required]
-        public required PriorityType Priority { get; set; }
+        public required TaskPriorityType Priority { get; set; }
 
         [Required]
         public required DateTime CreatedAt { get; set; }

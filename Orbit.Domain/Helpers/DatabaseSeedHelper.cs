@@ -142,6 +142,87 @@ namespace Orbit.Domain.Helpers
             });
 
             await context.SaveChangesAsync();
+
+            await context.TaskCategories.AddRangeAsync(new List<TaskCategory>
+            {
+                new TaskCategory
+                {
+                    Name = "Work"
+                },
+                new TaskCategory
+                {
+                    Name = "Personal"
+                },
+                new TaskCategory
+                {
+                    Name = "Shopping"
+                },
+                new TaskCategory
+                {
+                    Name = "Misc"
+                }
+            });
+
+            await context.SaveChangesAsync();
+
+            await context.Tasks.AddRangeAsync(new List<Database.Models.Task>
+            {
+                new Database.Models.Task
+                {
+                    Name = "Complete project report",
+                    Description = "Finish the quarterly project report and submit to management",
+                    Priority = Enums.TaskPriorityType.High,
+                    TaskCategoryId = 1,
+                    DueDate = DateTime.UtcNow.AddDays(3),
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Database.Models.Task
+                {
+                    Name = "Team meeting preparation",
+                    Description = "Prepare slides and agenda for next week's team meeting",
+                    Priority = Enums.TaskPriorityType.Medium,
+                    TaskCategoryId = 1,
+                    DueDate = DateTime.UtcNow.AddDays(7),
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Database.Models.Task
+                {
+                    Name = "Call dentist",
+                    Description = "Schedule dental check up appointment",
+                    Priority = Enums.TaskPriorityType.Low,
+                    TaskCategoryId = 2,
+                    DueDate = DateTime.UtcNow.AddDays(5),
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Database.Models.Task
+                {
+                    Name = "Grocery shopping",
+                    Description = "Buy milk, bread, eggs, and vegetables",
+                    Priority = Enums.TaskPriorityType.Medium,
+                    TaskCategoryId = 3,
+                    DueDate = DateTime.UtcNow.AddDays(1),
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Database.Models.Task
+                {
+                    Name = "Review budget",
+                    Description = "Go through monthly expenses and update budget spreadsheet",
+                    Priority = Enums.TaskPriorityType.High,
+                    TaskCategoryId = 2,
+                    CompletedAt = DateTime.UtcNow.AddDays(-2),
+                    CreatedAt = DateTime.UtcNow.AddDays(-5)
+                },
+                new Database.Models.Task
+                {
+                    Name = "Random task",
+                    Description = "This is an uncategorised task that needs to be sorted later",
+                    Priority = Enums.TaskPriorityType.Low,
+                    TaskCategoryId = 4,
+                    CreatedAt = DateTime.UtcNow
+                }
+            });
+
+            await context.SaveChangesAsync();
         }
     }
 }

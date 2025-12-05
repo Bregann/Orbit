@@ -5,7 +5,7 @@ using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.Auth.Requests;
 using Orbit.Domain.DTOs.Auth.Responses;
-using Orbit.Domain.Interfaces.Api;
+using Orbit.Domain.Interfaces.Api.Finance;
 using Serilog;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;

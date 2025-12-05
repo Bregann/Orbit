@@ -11,21 +11,18 @@ import {
   Stack,
   Badge,
   Checkbox,
-  TextInput,
   ActionIcon,
   Divider,
   ThemeIcon,
   Progress,
-  Select,
-  Modal,
-  Textarea
+  Loader,
+  Center
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { useState } from 'react'
 import {
   IconPlus,
   IconTrash,
-  IconEdit,
   IconCalendar,
   IconFlag,
   IconCheckbox,
@@ -34,129 +31,142 @@ import {
   IconCircleCheck,
   IconClock,
   IconCategory,
-  IconX
+  IconX,
+  IconCheck
 } from '@tabler/icons-react'
-
-// Mock data - replace with real data later
-const mockTasks = [
-  { id: 1, title: 'Review monthly budget', description: 'Check all expenses and income for the month', completed: false, priority: 'high', dueDate: '2025-12-05', category: 'Finance' },
-  { id: 2, title: 'Grocery shopping', description: 'Buy weekly groceries', completed: false, priority: 'medium', dueDate: '2025-12-02', category: 'Shopping' },
-  { id: 3, title: 'Call plumber', description: 'Fix the kitchen sink leak', completed: true, priority: 'high', dueDate: '2025-11-30', category: 'Home' },
-  { id: 4, title: 'Schedule car maintenance', description: 'Book appointment for oil change', completed: false, priority: 'low', dueDate: '2025-12-15', category: 'Vehicle' },
-  { id: 5, title: 'Pay electricity bill', description: 'Due by end of month', completed: true, priority: 'high', dueDate: '2025-11-28', category: 'Finance' },
-  { id: 6, title: 'Organize documents', description: 'Sort through paperwork and file important documents', completed: false, priority: 'low', dueDate: '2025-12-10', category: 'Home' },
-]
-
-const defaultCategories = ['Finance', 'Shopping', 'Home', 'Vehicle', 'Work', 'Personal']
-const priorities = [
-  { value: 'high', label: 'High', color: 'red' },
-  { value: 'medium', label: 'Medium', color: 'yellow' },
-  { value: 'low', label: 'Low', color: 'blue' },
-]
+import { useQuery } from '@tanstack/react-query'
+import { doQueryGet } from '@/helpers/apiClient'
+import { useMutationPatch } from '@/helpers/mutations/useMutationPatch'
+import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
+import notificationHelper from '@/helpers/notificationHelper'
+import {
+  GetTasksResponse,
+  GetTaskCategoriesResponse,
+  TaskPriorityType
+} from '@/interfaces/api/tasks'
+import AddTaskModal from '@/components/modals/AddTaskModal'
+import ManageCategoriesModal from '@/components/modals/ManageCategoriesModal'
 
 export default function TasksComponent() {
-  const [tasks, setTasks] = useState(mockTasks)
-  const [categories, setCategories] = useState(defaultCategories)
-  const [selectedCategory, setSelectedCategory] = useState('All')
-  const [showCompleted, setShowCompleted] = useState(true)
+  const [selectedCategory, setSelectedCategory] = useState<number | 'All'>('All')
+  const [showCompleted, setShowCompleted] = useState(false)
   const [addModalOpened, { open: openAddModal, close: closeAddModal }] = useDisclosure(false)
   const [categoryModalOpened, { open: openCategoryModal, close: closeCategoryModal }] = useDisclosure(false)
 
-  // New task form state
-  const [newTaskTitle, setNewTaskTitle] = useState('')
-  const [newTaskDescription, setNewTaskDescription] = useState('')
-  const [newTaskPriority, setNewTaskPriority] = useState<string | null>('medium')
-  const [newTaskCategory, setNewTaskCategory] = useState<string | null>('Personal')
-  const [newTaskDueDate, setNewTaskDueDate] = useState('')
+  // Fetch tasks
+  const { data: tasksData, isLoading: isLoadingTasks } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: async () => await doQueryGet<GetTasksResponse>('/api/tasks/GetTasks')
+  })
 
-  // New category form state
-  const [newCategoryName, setNewCategoryName] = useState('')
+  // Fetch categories
+  const { data: categoriesData, isLoading: isLoadingCategories } = useQuery({
+    queryKey: ['taskCategories'],
+    queryFn: async () => await doQueryGet<GetTaskCategoriesResponse>('/api/tasks/GetTaskCategories')
+  })
 
-  const toggleTaskComplete = (taskId: number) => {
-    setTasks(tasks.map(task =>
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ))
-  }
+  const tasks = tasksData?.tasks ?? []
+  const categories = categoriesData?.categories ?? []
 
-  const deleteTask = (taskId: number) => {
-    setTasks(tasks.filter(task => task.id !== taskId))
-  }
-
-  const handleAddTask = () => {
-    if (!newTaskTitle.trim()) return
-
-    const newTask = {
-      id: Math.max(...tasks.map(t => t.id), 0) + 1,
-      title: newTaskTitle,
-      description: newTaskDescription,
-      completed: false,
-      priority: newTaskPriority || 'medium',
-      dueDate: newTaskDueDate || new Date().toISOString().split('T')[0],
-      category: newTaskCategory || categories[0] || 'General'
+  // Delete task mutation
+  const { mutate: deleteTask, isPending: isDeletingTask } = useMutationDelete<number, void>({
+    url: (taskId) => `/api/tasks/DeleteTask?taskId=${taskId}`,
+    queryKey: ['tasks'],
+    invalidateQuery: true,
+    onSuccess: () => {
+      notificationHelper.showSuccessNotification('Success', 'Task deleted successfully', 3000, <IconCheck />)
+    },
+    onError: (error) => {
+      notificationHelper.showErrorNotification('Error', error.message || 'Failed to delete task', 3000, <IconX />)
     }
+  })
 
-    setTasks([...tasks, newTask])
-    setNewTaskTitle('')
-    setNewTaskDescription('')
-    setNewTaskPriority('medium')
-    setNewTaskCategory(categories[0] || null)
-    setNewTaskDueDate('')
-    closeAddModal()
-  }
-
-  const handleAddCategory = () => {
-    if (!newCategoryName.trim()) return
-    if (categories.includes(newCategoryName.trim())) return
-
-    setCategories([...categories, newCategoryName.trim()])
-    setNewCategoryName('')
-  }
-
-  const handleDeleteCategory = (categoryToDelete: string) => {
-    // Don't allow deleting if tasks are using this category
-    const tasksUsingCategory = tasks.filter(t => t.category === categoryToDelete)
-    if (tasksUsingCategory.length > 0) {
-      return // Could show a notification here
+  // Complete task mutation
+  const { mutate: completeTask, isPending: isCompletingTask } = useMutationPatch<number, void>({
+    url: (taskId) => `/api/tasks/CompleteTask?taskId=${taskId}`,
+    queryKey: ['tasks'],
+    invalidateQuery: true,
+    onSuccess: () => {
+      notificationHelper.showSuccessNotification('Success', 'Task completed!', 3000, <IconCheck />)
+    },
+    onError: (error) => {
+      notificationHelper.showErrorNotification('Error', error.message || 'Failed to complete task', 3000, <IconX />)
     }
-    setCategories(categories.filter(c => c !== categoryToDelete))
-    if (selectedCategory === categoryToDelete) {
+  })
+
+  const handleCategoryDeleted = () => {
+    if (selectedCategory !== 'All') {
       setSelectedCategory('All')
     }
   }
 
+  const getCategoryName = (categoryId: number): string => {
+    const category = categories.find(c => c.id === categoryId)
+    return category?.name ?? 'Unknown'
+  }
+
   const filteredTasks = tasks.filter(task => {
-    const categoryMatch = selectedCategory === 'All' || task.category === selectedCategory
-    const completedMatch = showCompleted || !task.completed
+    const categoryMatch = selectedCategory === 'All' || task.taskCategoryId === selectedCategory
+    const completedMatch = showCompleted || task.dateCompleted === null
     return categoryMatch && completedMatch
   })
 
-  const completedCount = tasks.filter(t => t.completed).length
+  const completedCount = tasks.filter(t => t.dateCompleted !== null).length
   const totalCount = tasks.length
   const completionPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0
 
   const todaysTasks = tasks.filter(t => {
+    if (!t.dueDate || t.dateCompleted !== null) return false
     const today = new Date().toISOString().split('T')[0]
-    return t.dueDate === today && !t.completed
+    const taskDate = new Date(t.dueDate).toISOString().split('T')[0]
+    return taskDate === today
   })
 
   const overdueTasks = tasks.filter(t => {
+    if (!t.dueDate || t.dateCompleted !== null) return false
     const today = new Date().toISOString().split('T')[0]
-    return t.dueDate < today && !t.completed
+    const taskDate = new Date(t.dueDate).toISOString().split('T')[0]
+    return taskDate < today
   })
 
   const upcomingTasks = tasks.filter(t => {
-    const today = new Date().toISOString().split('T')[0]
-    const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    return t.dueDate > today && t.dueDate <= nextWeek && !t.completed
+    if (!t.dueDate || t.dateCompleted !== null) return false
+    const today = new Date()
+    const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    const taskDate = new Date(t.dueDate)
+    return taskDate > today && taskDate <= nextWeek
   })
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority: TaskPriorityType) => {
     switch (priority) {
-      case 'high': return 'red'
-      case 'medium': return 'yellow'
-      case 'low': return 'blue'
+      case TaskPriorityType.Critical: return 'red'
+      case TaskPriorityType.High: return 'orange'
+      case TaskPriorityType.Medium: return 'yellow'
+      case TaskPriorityType.Low: return 'blue'
       default: return 'gray'
     }
+  }
+
+  const getPriorityLabel = (priority: TaskPriorityType) => {
+    switch (priority) {
+      case TaskPriorityType.Critical: return 'Critical'
+      case TaskPriorityType.High: return 'High'
+      case TaskPriorityType.Medium: return 'Medium'
+      case TaskPriorityType.Low: return 'Low'
+      default: return 'Unknown'
+    }
+  }
+
+  const isLoading = isLoadingTasks || isLoadingCategories
+
+  if (isLoading) {
+    return (
+      <Container size="xl" px={{ base: 'xs', sm: 'md' }}>
+        <Center h={400}>
+          <Loader size="lg" />
+        </Center>
+      </Container>
+    )
   }
 
   return (
@@ -247,12 +257,12 @@ export default function TasksComponent() {
               </Button>
               {categories.map(category => (
                 <Button
-                  key={category}
-                  variant={selectedCategory === category ? 'filled' : 'light'}
+                  key={category.id}
+                  variant={selectedCategory === category.id ? 'filled' : 'light'}
                   size="xs"
-                  onClick={() => setSelectedCategory(category)}
+                  onClick={() => setSelectedCategory(category.id)}
                 >
-                  {category}
+                  {category.name}
                 </Button>
               ))}
               <ActionIcon
@@ -301,46 +311,56 @@ export default function TasksComponent() {
                       withBorder
                       p="sm"
                       radius="sm"
-                      style={{ opacity: task.completed ? 0.6 : 1 }}
+                      style={{ opacity: task.dateCompleted !== null ? 0.6 : 1 }}
                     >
                       <Group justify="space-between" wrap="nowrap">
                         <Group gap="sm" wrap="nowrap" style={{ flex: 1 }}>
                           <Checkbox
-                            checked={task.completed}
-                            onChange={() => toggleTaskComplete(task.id)}
+                            checked={task.dateCompleted !== null}
+                            onChange={() => {
+                              if (task.dateCompleted === null) {
+                                completeTask(task.id)
+                              }
+                            }}
+                            disabled={task.dateCompleted !== null || isCompletingTask}
                             size="md"
                           />
                           <Stack gap={2} style={{ flex: 1 }}>
                             <Text
                               size="sm"
                               fw={500}
-                              td={task.completed ? 'line-through' : undefined}
+                              td={task.dateCompleted !== null ? 'line-through' : undefined}
                             >
                               {task.title}
                             </Text>
-                            <Group gap="xs">
+                            {task.description && (
+                              <Text size="xs" c="dimmed" lineClamp={1}>
+                                {task.description}
+                              </Text>
+                            )}
+                            <Group gap="xs" mt={5}>
                               <Badge size="xs" variant="light" color={getPriorityColor(task.priority)}>
-                                {task.priority}
+                                {getPriorityLabel(task.priority)}
                               </Badge>
                               <Badge size="xs" variant="outline">
-                                {task.category}
+                                {getCategoryName(task.taskCategoryId)}
                               </Badge>
-                              <Text size="xs" c="dimmed">
-                                <IconCalendar size="0.75rem" style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                                {new Date(task.dueDate).toLocaleDateString()}
-                              </Text>
+                              {task.dueDate && (
+                                <Text size="xs" c="dimmed">
+                                  <IconCalendar size="0.75rem" style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                                  {new Date(task.dueDate).toLocaleDateString()}
+                                </Text>
+                              )}
                             </Group>
                           </Stack>
                         </Group>
                         <Group gap="xs">
-                          <ActionIcon variant="subtle" color="gray" size="sm">
-                            <IconEdit size="1rem" />
-                          </ActionIcon>
                           <ActionIcon
                             variant="subtle"
                             color="red"
                             size="sm"
                             onClick={() => deleteTask(task.id)}
+                            disabled={isDeletingTask}
                           >
                             <IconTrash size="1rem" />
                           </ActionIcon>
@@ -375,7 +395,7 @@ export default function TasksComponent() {
                       <Group key={task.id} justify="space-between" wrap="nowrap">
                         <Text size="sm" lineClamp={1} style={{ flex: 1 }}>{task.title}</Text>
                         <Badge size="xs" variant="light" color={getPriorityColor(task.priority)}>
-                          {new Date(task.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                          {task.dueDate && new Date(task.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                         </Badge>
                       </Group>
                     ))
@@ -399,7 +419,7 @@ export default function TasksComponent() {
                     onClick={openCategoryModal}
                     title="Manage Categories"
                   >
-                    <IconEdit size="0.9rem" />
+                    <IconCategory size="0.9rem" />
                   </ActionIcon>
                 </Group>
                 <Divider mb="md" />
@@ -410,11 +430,11 @@ export default function TasksComponent() {
                     </Text>
                   ) : (
                     categories.map(category => {
-                      const categoryTasks = tasks.filter(t => t.category === category)
-                      const completed = categoryTasks.filter(t => t.completed).length
+                      const categoryTasks = tasks.filter(t => t.taskCategoryId === category.id)
+                      const completed = categoryTasks.filter(t => t.dateCompleted !== null).length
                       return (
-                        <Group key={category} justify="space-between">
-                          <Text size="sm">{category}</Text>
+                        <Group key={category.id} justify="space-between">
+                          <Text size="sm">{category.name}</Text>
                           <Badge variant="light" color={completed === categoryTasks.length && categoryTasks.length > 0 ? 'green' : 'gray'}>
                             {completed}/{categoryTasks.length}
                           </Badge>
@@ -429,129 +449,19 @@ export default function TasksComponent() {
         </Grid>
       </Stack>
 
-      {/* Add Task Modal */}
-      <Modal
+      <AddTaskModal
         opened={addModalOpened}
         onClose={closeAddModal}
-        title="Add New Task"
-        size="md"
-      >
-        <Stack gap="md">
-          <TextInput
-            label="Task Title"
-            placeholder="Enter task title"
-            value={newTaskTitle}
-            onChange={(e) => setNewTaskTitle(e.currentTarget.value)}
-            required
-          />
-          <Textarea
-            label="Description"
-            placeholder="Enter task description (optional)"
-            value={newTaskDescription}
-            onChange={(e) => setNewTaskDescription(e.currentTarget.value)}
-            rows={3}
-          />
-          <Grid>
-            <Grid.Col span={6}>
-              <Select
-                label="Priority"
-                placeholder="Select priority"
-                data={priorities.map(p => ({ value: p.value, label: p.label }))}
-                value={newTaskPriority}
-                onChange={setNewTaskPriority}
-              />
-            </Grid.Col>
-            <Grid.Col span={6}>
-              <Select
-                label="Category"
-                placeholder="Select category"
-                data={categories}
-                value={newTaskCategory}
-                onChange={setNewTaskCategory}
-              />
-            </Grid.Col>
-          </Grid>
-          <TextInput
-            label="Due Date"
-            type="date"
-            value={newTaskDueDate}
-            onChange={(e) => setNewTaskDueDate(e.currentTarget.value)}
-          />
-          <Group justify="flex-end" mt="md">
-            <Button variant="light" onClick={closeAddModal}>Cancel</Button>
-            <Button onClick={handleAddTask}>Add Task</Button>
-          </Group>
-        </Stack>
-      </Modal>
+        categories={categories}
+      />
 
-      {/* Manage Categories Modal */}
-      <Modal
+      <ManageCategoriesModal
         opened={categoryModalOpened}
         onClose={closeCategoryModal}
-        title="Manage Categories"
-        size="md"
-      >
-        <Stack gap="md">
-          <Group gap="xs">
-            <TextInput
-              placeholder="New category name"
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.currentTarget.value)}
-              style={{ flex: 1 }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleAddCategory()
-              }}
-            />
-            <Button onClick={handleAddCategory} leftSection={<IconPlus size="1rem" />}>
-              Add
-            </Button>
-          </Group>
-
-          <Divider />
-
-          <Stack gap="xs">
-            {categories.length === 0 ? (
-              <Text size="sm" c="dimmed" ta="center" py="md">
-                No categories yet. Add one above!
-              </Text>
-            ) : (
-              categories.map(category => {
-                const taskCount = tasks.filter(t => t.category === category).length
-                return (
-                  <Card key={category} withBorder p="xs" radius="sm">
-                    <Group justify="space-between">
-                      <Group gap="sm">
-                        <Text size="sm" fw={500}>{category}</Text>
-                        <Badge size="xs" variant="light">
-                          {taskCount} {taskCount === 1 ? 'task' : 'tasks'}
-                        </Badge>
-                      </Group>
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        size="sm"
-                        onClick={() => handleDeleteCategory(category)}
-                        disabled={taskCount > 0}
-                        title={taskCount > 0 ? 'Cannot delete category with tasks' : 'Delete category'}
-                      >
-                        <IconX size="1rem" />
-                      </ActionIcon>
-                    </Group>
-                  </Card>
-                )
-              })
-            )}
-          </Stack>
-
-          <Text size="xs" c="dimmed">
-            Note: Categories with tasks cannot be deleted. Remove or reassign tasks first.
-          </Text>
-
-          <Group justify="flex-end">
-            <Button variant="light" onClick={closeCategoryModal}>Close</Button>
-          </Group>
-        </Stack>
-      </Modal>
+        categories={categories}
+        tasks={tasks}
+        onCategoryDeleted={handleCategoryDeleted}
+      />
     </Container>
   )
 }
