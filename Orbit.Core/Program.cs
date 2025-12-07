@@ -91,7 +91,7 @@ builder.Services.AddCors(options =>
 GlobalConfiguration.Configuration.UseMemoryStorage();
 
 var postgresContainer = new PostgreSqlBuilder()
-    .WithImage("postgres:15-alpine")
+    .WithImage("postgres:16")
     .WithDatabase("financemanager")
     .WithUsername("testuser")
     .WithPassword("testpass")
@@ -173,7 +173,7 @@ var auth = new[] { new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFi
         new BasicAuthAuthorizationUser
         {
             Login = environmentalSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.HangfireUsername),
-            PasswordClear = environmentalSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.HangfireUsername)
+            PasswordClear = environmentalSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.HangfirePassword)
         }
     }
 })};
