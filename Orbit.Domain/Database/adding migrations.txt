@@ -1,5 +1,5 @@
-﻿﻿Add migrations with:
-Add-Migration <name> -Context PostgresqlContext -o Database/Migrations
+﻿Add migrations with:
+Add-Migration <name> -o Database/Migrations
 
 Update database with:
-Update-Database -Context PostgresqlContext
+Update-Database -Context AppDbContext

@@ -2,7 +2,6 @@ using Orbit.Domain.Database.Context;
 using Orbit.Domain.Enums;
 using Orbit.Domain.Helpers;
 using Orbit.Domain.Interfaces;
-using Orbit.Domain.Interfaces.Api;
 using Orbit.Domain.Interfaces.Helpers;
 using Orbit.Domain.Services;
 using Hangfire;
@@ -12,6 +11,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
+using Orbit.Domain.Services.Finance;
+using Orbit.Domain.Interfaces.Api.Finance;
+using Orbit.Domain.Interfaces.Api.Tasks;
+using Orbit.Domain.Services.Tasks;
 
 #if DEBUG
 using Hangfire.MemoryStorage;
@@ -53,6 +56,7 @@ builder.Services.AddScoped<ITransactionsService, TransactionsService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<IPotsService, PotsService>();
 builder.Services.AddScoped<IMonthService, MonthService>();
+builder.Services.AddScoped<ITasksService, TasksService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddHttpClient<ICommsSenderClient, CommsSenderClient>();
 
@@ -87,7 +91,7 @@ builder.Services.AddCors(options =>
 GlobalConfiguration.Configuration.UseMemoryStorage();
 
 var postgresContainer = new PostgreSqlBuilder()
-    .WithImage("postgres:15-alpine")
+    .WithImage("postgres:16")
     .WithDatabase("financemanager")
     .WithUsername("testuser")
     .WithPassword("testpass")
@@ -110,10 +114,9 @@ builder.Services.AddHangfire(configuration => configuration
         );
 
 #else
-builder.Services.AddDbContext<PostgresqlContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseLazyLoadingProxies()
            .UseNpgsql(Environment.GetEnvironmentVariable("FMApiLive")));
-builder.Services.AddScoped<AppDbContext>(provider => provider.GetService<PostgresqlContext>());
 
 GlobalConfiguration.Configuration.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(Environment.GetEnvironmentVariable("FMApiLive")));
 
