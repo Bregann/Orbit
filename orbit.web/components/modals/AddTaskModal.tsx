@@ -14,7 +14,8 @@ import { useState } from 'react'
 import { IconCheck, IconX } from '@tabler/icons-react'
 import { useMutationPost } from '@/helpers/mutations/useMutationPost'
 import notificationHelper from '@/helpers/notificationHelper'
-import { AddTaskRequest, TaskPriorityType } from '@/interfaces/api/tasks'
+import type { AddTaskRequest } from '@/interfaces/api/tasks/AddTaskRequest'
+import { TaskPriorityType } from '@/interfaces/api/tasks/TaskPriorityType'
 
 const priorities = [
   { value: TaskPriorityType.Low.toString(), label: 'Low' },

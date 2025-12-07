@@ -1,6 +1,7 @@
 import TasksComponent from '@/components/pages/TasksComponent'
 import { doQueryGet } from '@/helpers/apiClient'
-import { GetTasksResponse, GetTaskCategoriesResponse } from '@/interfaces/api/tasks'
+import type { GetTasksResponse } from '@/interfaces/api/tasks/GetTasksResponse'
+import type { GetTaskCategoriesResponse } from '@/interfaces/api/tasks/GetTaskCategoriesResponse'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { cookies } from 'next/headers'
 import type { Metadata } from 'next'

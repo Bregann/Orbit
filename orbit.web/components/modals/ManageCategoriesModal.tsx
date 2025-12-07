@@ -17,7 +17,9 @@ import { IconPlus, IconX, IconCheck } from '@tabler/icons-react'
 import { useMutationPost } from '@/helpers/mutations/useMutationPost'
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import notificationHelper from '@/helpers/notificationHelper'
-import { AddNewCategoryRequest, TaskCategoryItem, TaskItem } from '@/interfaces/api/tasks'
+import type { AddNewCategoryRequest } from '@/interfaces/api/tasks/AddNewCategoryRequest'
+import type { TaskCategoryItem } from '@/interfaces/api/tasks/TaskCategoryItem'
+import type { TaskItem } from '@/interfaces/api/tasks/TaskItem'
 
 interface ManageCategoriesModalProps {
   opened: boolean

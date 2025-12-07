@@ -39,11 +39,9 @@ import { doQueryGet } from '@/helpers/apiClient'
 import { useMutationPatch } from '@/helpers/mutations/useMutationPatch'
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import notificationHelper from '@/helpers/notificationHelper'
-import {
-  GetTasksResponse,
-  GetTaskCategoriesResponse,
-  TaskPriorityType
-} from '@/interfaces/api/tasks'
+import type { GetTasksResponse } from '@/interfaces/api/tasks/GetTasksResponse'
+import type { GetTaskCategoriesResponse } from '@/interfaces/api/tasks/GetTaskCategoriesResponse'
+import { TaskPriorityType } from '@/interfaces/api/tasks/TaskPriorityType'
 import AddTaskModal from '@/components/modals/AddTaskModal'
 import ManageCategoriesModal from '@/components/modals/ManageCategoriesModal'
 
