@@ -275,11 +275,11 @@ export default function DashboardComponent() {
               radius="md"
               withBorder
               style={{
-                cursor: section.comingSoon === true ? 'default' : 'pointer',
-                opacity: section.comingSoon === true ? 0.6 : 1,
+                cursor: 'pointer',
+                opacity: 1,
                 transition: 'transform 0.2s'
               }}
-              onClick={() => section.comingSoon !== true && router.push(section.href)}
+              onClick={() => router.push(section.href)}
               className="hover-card"
             >
               <Stack gap="sm" align="center" ta="center">
@@ -294,11 +294,6 @@ export default function DashboardComponent() {
                     {section.description}
                   </Text>
                 </div>
-                {section.comingSoon === true && (
-                  <Badge size="xs" variant="outline" color="gray">
-                    Coming Soon
-                  </Badge>
-                )}
               </Stack>
             </Card>
           ))}
