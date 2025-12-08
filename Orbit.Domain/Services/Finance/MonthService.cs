@@ -94,7 +94,8 @@ namespace Orbit.Domain.Services.Finance
                 DateAdded = DateTime.UtcNow,
                 MonthlyIncome = (long)(request.MonthlyIncome * 100),
                 AmountSaved = savingsPots.Sum(p => p.AmountToAdd),
-                AmountSpent = 0 // This will be updated at the end of the month
+                AmountSpent = 0, // This will be updated at the end of the month
+                SubscriptionCostAmount = context.Subscriptions.Sum(s => s.SubscriptionMonthlyAmount)
             };
 
             await context.HistoricData.AddAsync(newHistoricMonth);

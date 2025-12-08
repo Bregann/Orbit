@@ -1,7 +1,4 @@
 ﻿using Orbit.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Orbit.Domain.DTOs.Tasks
 {

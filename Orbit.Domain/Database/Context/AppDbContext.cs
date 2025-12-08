@@ -12,10 +12,12 @@ namespace Orbit.Domain.Database.Context
         public DbSet<Transactions> Transactions { get; set; } = null!;
         public DbSet<SpendingPot> SpendingPots { get; set; } = null!;
         public DbSet<SavingsPot> SavingsPots { get; set; } = null!;
+        public DbSet<Subscription> Subscriptions { get; set; } = null!;
         public DbSet<AutomaticTransaction> AutomaticTransactions { get; set; } = null!;
         public DbSet<HistoricMonthlyData> HistoricData { get; set; } = null!;
         public DbSet<HistoricSpendingPotData> HistoricSpendingPotData { get; set; } = null!;
         public DbSet<HistoricSavingsPotData> HistoricSavingsPotData { get; set; } = null!;
+
         public DbSet<Models.Task> Tasks { get; set; } = null!;
         public DbSet<TaskCategory> TaskCategories { get; set; } = null!;
     }

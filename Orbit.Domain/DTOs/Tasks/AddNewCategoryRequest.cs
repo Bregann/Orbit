@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Orbit.Domain.DTOs.Tasks
+﻿namespace Orbit.Domain.DTOs.Tasks
 {
     public class AddNewCategoryRequest
     {

@@ -34,6 +34,7 @@ namespace Orbit.Domain.Helpers
                 {
                     AmountSaved = 500,
                     AmountSpent = 1500,
+                    SubscriptionCostAmount = 300,
                     DateAdded = DateTime.UtcNow.AddDays(-11),
                     MonthlyIncome = 2000,
                 },
@@ -41,6 +42,7 @@ namespace Orbit.Domain.Helpers
                 {
                     AmountSaved = 600,
                     AmountSpent = 1400,
+                    SubscriptionCostAmount = 300,
                     DateAdded = DateTime.UtcNow.AddMonths(-1),
                     MonthlyIncome = 2000,
                 },
@@ -88,6 +90,54 @@ namespace Orbit.Domain.Helpers
                     PotName = "Car Fund",
                     PotAmount = 10000,
                     AmountToAdd = 500
+                }
+            });
+
+            await context.SaveChangesAsync();
+
+            await context.Subscriptions.AddRangeAsync(new List<Subscription>
+            {
+                new Subscription
+                {
+                    SubscriptionName = "Netflix",
+                    SubscriptionAmount = 1599,
+                    BillingDay = 15,
+                    SubscriptionMonthlyAmount = 1599,
+                    BillingFrequency = Enums.SubscriptionBillingFrequencyType.Monthly
+                },
+                new Subscription
+                {
+                    SubscriptionName = "Spotify Premium",
+                    SubscriptionAmount = 999,
+                    BillingDay = 1,
+                    SubscriptionMonthlyAmount = 999,
+                    BillingFrequency = Enums.SubscriptionBillingFrequencyType.Monthly
+                },
+                new Subscription
+                {
+                    SubscriptionName = "Amazon Prime",
+                    SubscriptionAmount = 8999,
+                    BillingDay = 10,
+                    SubscriptionMonthlyAmount = 750,
+                    BillingMonth = 10,
+                    BillingFrequency = Enums.SubscriptionBillingFrequencyType.Yearly
+                },
+                new Subscription
+                {
+                    SubscriptionName = "Gym Membership",
+                    SubscriptionAmount = 2999,
+                    BillingDay = 5,
+                    SubscriptionMonthlyAmount = 2999,
+                    BillingFrequency = Enums.SubscriptionBillingFrequencyType.Monthly
+                },
+                new Subscription
+                {
+                    SubscriptionName = "Microsoft 365",
+                    SubscriptionAmount = 5999,
+                    BillingDay = 20,
+                    SubscriptionMonthlyAmount = 500,
+                    BillingMonth = 12,
+                    BillingFrequency = Enums.SubscriptionBillingFrequencyType.Yearly
                 }
             });
 

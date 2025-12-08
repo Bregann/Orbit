@@ -1,6 +1,4 @@
-﻿using Orbit.Domain.DTOs.Finance.Transactions;
-
-namespace Orbit.Domain.DTOs.Finance.Transactions.Responses
+﻿namespace Orbit.Domain.DTOs.Finance.Transactions.Responses
 {
     public class GetUnprocessedTransactionsDto
     {

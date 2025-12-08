@@ -1,6 +1,4 @@
-﻿using Orbit.Domain.DTOs.Finance.Pots;
-
-namespace Orbit.Domain.DTOs.Finance.Pots.Responses
+﻿namespace Orbit.Domain.DTOs.Finance.Pots.Responses
 {
     public class GetSpendingPotDropdownOptionsDto
     {

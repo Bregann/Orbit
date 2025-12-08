@@ -16,7 +16,8 @@ import {
   Loader,
   Center,
   Alert,
-  ThemeIcon
+  ThemeIcon,
+  Table
 } from '@mantine/core'
 import { useState } from 'react'
 import TransactionsTable from '../../components/TransactionsTable'
@@ -25,6 +26,8 @@ import { doQueryGet } from '@/helpers/apiClient'
 import { useQuery } from '@tanstack/react-query'
 import { GetTransactionsForCurrentMonthDto } from '@/interfaces/api/transactions/GetTransactionsForCurrentMonthDto'
 import { GetAllPotDataDto, SavingsPotData } from '@/interfaces/api/pots/GetAllPotDataDto'
+import { GetSubscriptionsDto } from '@/interfaces/api/subscriptions/GetSubscriptionsDto'
+import { BillingFrequency, SubscriptionItem } from '@/interfaces/api/subscriptions/MonthlyPayment'
 import { SpendingPotCard } from '../cards/SpendingPotCard'
 import { SavingsPotCard } from '../cards/SavingsPotCard'
 import {
@@ -33,8 +36,20 @@ import {
   IconPigMoney,
   IconReceipt,
   IconChartBar,
-  IconTrendingUp
+  IconTrendingUp,
+  IconCalendarRepeat
 } from '@tabler/icons-react'
+
+// Helper function to get ordinal suffix for day numbers (1st, 2nd, 3rd, etc.)
+const getOrdinalSuffix = (day: number): string => {
+  if (day > 3 && day < 21) return 'th'
+  switch (day % 10) {
+    case 1: return 'st'
+    case 2: return 'nd'
+    case 3: return 'rd'
+    default: return 'th'
+  }
+}
 
 export default function ThisMonthComponent() {
   const { data: potOptions, isLoading: isLoadingPotOptions } = useQuery({
@@ -50,6 +65,11 @@ export default function ThisMonthComponent() {
   const { data: thisMonthTransactionsData, isLoading: isLoadingThisMonthTransactionsData } = useQuery({
     queryKey: ['thisMonthTransactions'],
     queryFn: async () => await doQueryGet<GetTransactionsForCurrentMonthDto>('/api/transactions/GetTransactionsForMonth')
+  })
+
+  const { data: subscriptionsData, isLoading: isLoadingSubscriptions } = useQuery({
+    queryKey: ['getSubscriptions'],
+    queryFn: async () => await doQueryGet<GetSubscriptionsDto>('/api/subscriptions/GetSubscriptions')
   })
 
   const [openEditSavingsModal, setOpenEditSavingsModal] = useState(false)
@@ -75,7 +95,7 @@ export default function ThisMonthComponent() {
     </Card>
   )
 
-  if (isLoadingPotOptions || isLoadingAllPotData || isLoadingThisMonthTransactionsData) {
+  if (isLoadingPotOptions || isLoadingAllPotData || isLoadingThisMonthTransactionsData || isLoadingSubscriptions) {
     return (
       <Container size="xl" px={{ base: 'xs', sm: 'md' }}>
         <Center h={400}>
@@ -88,7 +108,7 @@ export default function ThisMonthComponent() {
     )
   }
 
-  if (potOptions === undefined || allPotData === undefined || thisMonthTransactionsData === undefined) {
+  if (potOptions === undefined || allPotData === undefined || thisMonthTransactionsData === undefined || subscriptionsData === undefined) {
     return (
       <Container size="xl" px={{ base: 'xs', sm: 'md' }}>
         <Alert
@@ -165,6 +185,101 @@ export default function ThisMonthComponent() {
             ))}
           </Grid>
         </div>
+
+        <Divider />
+
+        {/* Monthly Payments / Subscriptions Section */}
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
+          <Stack gap="md">
+            <Group justify="space-between" align="center">
+              <Group gap="sm">
+                <ThemeIcon size="lg" radius="md" variant="light" color="grape">
+                  <IconCalendarRepeat size="1.2rem" />
+                </ThemeIcon>
+                <Title order={2} size="h3">
+                  Monthly Payments
+                </Title>
+              </Group>
+              <Badge size="lg" variant="light" color="grape">
+                {subscriptionsData.subscriptions.length} subscriptions
+              </Badge>
+            </Group>
+            <Divider />
+
+            {subscriptionsData.subscriptions.length === 0 ? (
+              <Center py="xl">
+                <Stack align="center" gap="sm">
+                  <Text size="lg" fw={500} c="dimmed">
+                    No subscriptions set up
+                  </Text>
+                  <Text size="sm" c="dimmed">
+                    Add subscriptions in the Management page to track them here
+                  </Text>
+                </Stack>
+              </Center>
+            ) : (
+              <>
+                {/* Subscriptions Table */}
+                <Table striped highlightOnHover>
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Subscription</Table.Th>
+                      <Table.Th>Amount</Table.Th>
+                      <Table.Th>Monthly Amount</Table.Th>
+                      <Table.Th>Billing Day</Table.Th>
+                      <Table.Th>Frequency</Table.Th>
+                      <Table.Th>Next Billing</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {subscriptionsData.subscriptions
+                      .sort((a: SubscriptionItem, b: SubscriptionItem) => a.billingDay - b.billingDay)
+                      .map((subscription: SubscriptionItem) => (
+                        <Table.Tr key={subscription.id}>
+                          <Table.Td>
+                            <Text fw={500}>{subscription.name}</Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text fw={600}>£{subscription.amount.toFixed(2)}</Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text fw={600} c="grape">£{subscription.monthlyAmount.toFixed(2)}</Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge variant="light" color="blue">
+                              {subscription.billingDay}{getOrdinalSuffix(subscription.billingDay)}
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge variant="light" color="grape">
+                              {subscription.billingFrequency === BillingFrequency.Monthly ? 'Monthly' : 'Yearly'}
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm" c="dimmed">
+                              {new Date(subscription.nextBillingDate).toLocaleDateString()}
+                            </Text>
+                          </Table.Td>
+                        </Table.Tr>
+                      ))}
+                  </Table.Tbody>
+                </Table>
+
+                {/* Total Summary */}
+                <Card withBorder p="md" radius="md" style={{ backgroundColor: 'var(--mantine-color-dark-8)' }}>
+                  <Group justify="space-between">
+                    <Text fw={600}>Total Monthly Subscriptions:</Text>
+                    <Text fw={700} size="lg" c="grape">
+                      £{subscriptionsData.subscriptions
+                        .reduce((acc, s) => acc + s.monthlyAmount, 0)
+                        .toFixed(2)}/month
+                    </Text>
+                  </Group>
+                </Card>
+              </>
+            )}
+          </Stack>
+        </Card>
 
         <Divider />
 
