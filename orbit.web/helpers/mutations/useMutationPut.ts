@@ -1,24 +1,23 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { doDelete, FetchResponse } from '../apiClient'
+import { doPut, FetchResponse } from '../apiClient'
 
-interface MutationDeleteOptions<TInput, TOutput> {
-  url: string | ((_input: TInput) => string)
+interface MutationPutOptions<TOutput> {
+  url: string
   queryKey: string[]
   invalidateQuery: boolean
   onError?: (_error: Error) => void
   onSuccess?: (_data: TOutput | undefined) => void
 }
 
-export function useMutationDelete<TInput, TOutput>(options: MutationDeleteOptions<TInput, TOutput>) {
+export function useMutationPut<TInput, TOutput>(options: MutationPutOptions<TOutput>) {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (input: TInput) => {
-      const url = typeof options.url === 'function' ? options.url(input) : options.url
-      const res: FetchResponse<TOutput> = await doDelete<TOutput>(url, { body: input })
+      const res: FetchResponse<TOutput> = await doPut<TOutput>(options.url, { body: input })
 
       if (!res.ok) {
-        throw new Error(res.statusMessage ?? 'Failed to delete')
+        throw new Error(res.statusMessage ?? 'Failed to update')
       }
 
       return res.data

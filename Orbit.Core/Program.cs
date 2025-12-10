@@ -15,6 +15,8 @@ using Orbit.Domain.Services.Finance;
 using Orbit.Domain.Interfaces.Api.Finance;
 using Orbit.Domain.Interfaces.Api.Tasks;
 using Orbit.Domain.Services.Tasks;
+using Orbit.Domain.Interfaces.Api.Calendar;
+using Orbit.Domain.Services.Calendar;
 
 #if DEBUG
 using Hangfire.MemoryStorage;
@@ -58,6 +60,7 @@ builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IPotsService, PotsService>();
 builder.Services.AddScoped<IMonthService, MonthService>();
 builder.Services.AddScoped<ITasksService, TasksService>();
+builder.Services.AddScoped<ICalendarService, CalendarService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddHttpClient<ICommsSenderClient, CommsSenderClient>();
 
@@ -184,6 +187,6 @@ app.MapHangfireDashboard("/hangfire", new DashboardOptions
     Authorization = auth
 }, JobStorage.Current);
 
-HangfireJobSetup.SetupRecurringJobs();
+//HangfireJobSetup.SetupRecurringJobs();
 
 app.Run();

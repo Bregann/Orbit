@@ -20,5 +20,9 @@ namespace Orbit.Domain.Database.Context
 
         public DbSet<Models.Task> Tasks { get; set; } = null!;
         public DbSet<TaskCategory> TaskCategories { get; set; } = null!;
+
+        public DbSet<CalendarEvent> CalendarEvents { get; set; } = null!;
+        public DbSet<CalendarEventType> CalendarEventTypes { get; set; } = null!;
+        public DbSet<CalendarEventException> CalendarEventExceptions { get; set; } = null!;
     }
 }

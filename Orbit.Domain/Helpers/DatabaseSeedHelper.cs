@@ -273,6 +273,115 @@ namespace Orbit.Domain.Helpers
             });
 
             await context.SaveChangesAsync();
+
+            await context.CalendarEventTypes.AddRangeAsync(new List<CalendarEventType>
+            {
+                new CalendarEventType
+                {
+                    EventTypeName = "Work",
+                    HexColourCode = "#3B82F6"
+                },
+                new CalendarEventType
+                {
+                    EventTypeName = "Personal",
+                    HexColourCode = "#10B981"
+                },
+                new CalendarEventType
+                {
+                    EventTypeName = "Meeting",
+                    HexColourCode = "#F59E0B"
+                },
+                new CalendarEventType
+                {
+                    EventTypeName = "Appointment",
+                    HexColourCode = "#EF4444"
+                },
+                new CalendarEventType
+                {
+                    EventTypeName = "Social",
+                    HexColourCode = "#8B5CF6"
+                }
+            });
+
+            await context.SaveChangesAsync();
+
+            await context.CalendarEvents.AddRangeAsync(new List<CalendarEvent>
+            {
+                new CalendarEvent
+                {
+                    EventName = "Team Standup",
+                    EventLocation = "Office - Conference Room A",
+                    Description = "Daily team standup meeting to discuss progress and blockers",
+                    StartTime = DateTime.UtcNow.AddDays(1).Date.AddHours(9),
+                    EndTime = DateTime.UtcNow.AddDays(1).Date.AddHours(9).AddMinutes(30),
+                    IsAllDay = false,
+                    CalendarEventTypeId = 3,
+                    RecurrenceRule = "FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR"
+                },
+                new CalendarEvent
+                {
+                    EventName = "Project Deadline",
+                    EventLocation = "Remote",
+                    Description = "Final deadline for Q4 project deliverables",
+                    StartTime = DateTime.UtcNow.AddDays(5).Date,
+                    EndTime = DateTime.UtcNow.AddDays(5).Date.AddHours(23).AddMinutes(59),
+                    IsAllDay = true,
+                    CalendarEventTypeId = 1
+                },
+                new CalendarEvent
+                {
+                    EventName = "Dentist Appointment",
+                    EventLocation = "City Dental Clinic",
+                    Description = "Regular dental checkup and cleaning",
+                    StartTime = DateTime.UtcNow.AddDays(3).Date.AddHours(14),
+                    EndTime = DateTime.UtcNow.AddDays(3).Date.AddHours(15),
+                    IsAllDay = false,
+                    CalendarEventTypeId = 4
+                },
+                new CalendarEvent
+                {
+                    EventName = "Lunch with Sarah",
+                    EventLocation = "Italian Restaurant",
+                    Description = "Catch up with Sarah over lunch",
+                    StartTime = DateTime.UtcNow.AddDays(2).Date.AddHours(12).AddMinutes(30),
+                    EndTime = DateTime.UtcNow.AddDays(2).Date.AddHours(14),
+                    IsAllDay = false,
+                    CalendarEventTypeId = 5
+                },
+                new CalendarEvent
+                {
+                    EventName = "Gym Session",
+                    EventLocation = "Local Fitness Center",
+                    Description = "Evening workout session",
+                    StartTime = DateTime.UtcNow.Date.AddHours(18),
+                    EndTime = DateTime.UtcNow.Date.AddHours(19).AddMinutes(30),
+                    IsAllDay = false,
+                    CalendarEventTypeId = 2,
+                    RecurrenceRule = "FREQ=WEEKLY;BYDAY=MO,WE,FR"
+                },
+                new CalendarEvent
+                {
+                    EventName = "Client Presentation",
+                    EventLocation = "Client Office - Downtown",
+                    Description = "Present Q4 results and roadmap to client stakeholders",
+                    StartTime = DateTime.UtcNow.AddDays(7).Date.AddHours(10),
+                    EndTime = DateTime.UtcNow.AddDays(7).Date.AddHours(12),
+                    IsAllDay = false,
+                    CalendarEventTypeId = 3
+                },
+                new CalendarEvent
+                {
+                    EventName = "Birthday Party",
+                    EventLocation = "Mike's House",
+                    Description = "Mike's 30th birthday celebration",
+                    StartTime = DateTime.UtcNow.AddDays(10).Date.AddHours(19),
+                    EndTime = DateTime.UtcNow.AddDays(10).Date.AddHours(23),
+                    IsAllDay = false,
+                    CalendarEventTypeId = 5
+                }
+            });
+
+            await context.SaveChangesAsync();
         }
     }
 }
