@@ -21,6 +21,9 @@ namespace Orbit.Domain.Database.Models
         [Required]
         public required decimal AmountSpent { get; set; }
 
+        [Required]
+        public required decimal SubscriptionCostAmount { get; set; }
+
         [DeleteBehavior(DeleteBehavior.Cascade)]
         public virtual ICollection<HistoricSpendingPotData> HistoricPotData { get; set; } = null!;
 

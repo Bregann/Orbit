@@ -3,6 +3,8 @@
 import { doPost, doQueryGet } from '@/helpers/apiClient'
 import notificationHelper from '@/helpers/notificationHelper'
 import { GetAddMonthPotDataDto } from '@/interfaces/api/pots/GetAddMonthPotDataDto'
+import { GetSubscriptionsDto } from '@/interfaces/api/subscriptions/GetSubscriptionsDto'
+import { BillingFrequency, SubscriptionItem } from '@/interfaces/api/subscriptions/MonthlyPayment'
 import {
   Modal,
   Button,
@@ -14,9 +16,11 @@ import {
   Stack,
   Paper,
   Checkbox,
-  NumberInput
+  NumberInput,
+  Badge,
+  ThemeIcon
 } from '@mantine/core'
-import { IconCheck, IconX } from '@tabler/icons-react'
+import { IconCheck, IconX, IconCalendarRepeat } from '@tabler/icons-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
@@ -31,6 +35,11 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['addMonthPotData'],
     queryFn: async () => await doQueryGet<GetAddMonthPotDataDto>('/api/pots/GetAddMonthPotData')
+  })
+
+  const { data: subscriptionsData, isLoading: isLoadingSubscriptions } = useQuery({
+    queryKey: ['getSubscriptions'],
+    queryFn: async () => await doQueryGet<GetSubscriptionsDto>('/api/subscriptions/GetSubscriptions')
   })
 
   const [incomeForMonth, setIncomeForMonth] = useState<number | string>('')
@@ -67,6 +76,14 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
   }
 
   const addNewMonth = async () => {
+    // Get monthly subscriptions for this month
+    const subscriptions = subscriptionsData?.subscriptions
+      .map((s: SubscriptionItem) => ({
+        subscriptionId: s.id,
+        amount: s.amount,
+        billingFrequency: s.billingFrequency
+      })) ?? []
+
     const reqBody = {
       monthlyIncome: incomeForMonth,
       potIdsToRollover: Object.keys(potRollovers).filter((potId) => potRollovers[Number(potId)] === true).map(Number),
@@ -77,7 +94,8 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
       savingsPots: data?.savingsPots.map((pot) => ({
         potId: pot.potId,
         amountToAdd: pot.amountToAdd
-      }))
+      })),
+      subscriptions: subscriptions
     }
 
     const res = await doPost('/api/Month/AddNewMonth', { body: reqBody })
@@ -89,6 +107,7 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
       queryClient.invalidateQueries({ queryKey: ['potBreakdownData'] })
       queryClient.invalidateQueries({ queryKey: ['thisMonthTransactions'] })
       queryClient.invalidateQueries({ queryKey: ['unprocessedTransactions'] })
+      queryClient.invalidateQueries({ queryKey: ['monthlyPaymentsForMonth'] })
       setPotRollovers([])
       setIncomeForMonth('')
 
@@ -207,6 +226,50 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
             </Grid>
           </div>
 
+          {/* Monthly Payments / Subscriptions */}
+          {!isLoadingSubscriptions && subscriptionsData && subscriptionsData.subscriptions.length > 0 && (
+            <div>
+              <Group justify="space-between" align="center" mb="sm">
+                <Group gap="xs">
+                  <ThemeIcon size="sm" radius="md" variant="light" color="grape">
+                    <IconCalendarRepeat size="0.9rem" />
+                  </ThemeIcon>
+                  <Title order={4}>Monthly Subscriptions</Title>
+                </Group>
+                <Badge size="sm" variant="light" color="grape">
+                  {subscriptionsData.subscriptions.length} subscriptions
+                </Badge>
+              </Group>
+
+              <Paper withBorder p="md" radius="md">
+                <Stack gap="xs">
+                  {subscriptionsData.subscriptions
+                    .map((subscription: SubscriptionItem) => (
+                      <Group key={subscription.id} justify="space-between">
+                        <Text size="sm">{subscription.name}</Text>
+                        <Group gap="xs">
+                          <Badge size="xs" variant="light" color="dimmed">
+                            {subscription.billingFrequency === BillingFrequency.Monthly ? 'Monthly' : 'Yearly'}
+                          </Badge>
+                          <Text size="sm" fw={600}>£{subscription.amount.toFixed(2)}</Text>
+                          <Text size="sm" fw={600} c="grape">(£{subscription.monthlyAmount.toFixed(2)}/mo)</Text>
+                        </Group>
+                      </Group>
+                    ))}
+                  <Divider />
+                  <Group justify="space-between">
+                    <Text size="sm" fw={600}>Total Subscriptions:</Text>
+                    <Text size="sm" fw={700} c="grape">
+                      £{subscriptionsData.subscriptions
+                        .reduce((acc: number, s: SubscriptionItem) => acc + s.monthlyAmount, 0)
+                        .toFixed(2)}/month
+                    </Text>
+                  </Group>
+                </Stack>
+              </Paper>
+            </div>
+          )}
+
           <Divider />
 
           {/* Summary */}
@@ -226,6 +289,17 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
                 </Text>
               </Group>
 
+              {subscriptionsData && subscriptionsData.subscriptions.length > 0 && (
+                <Group justify="space-between">
+                  <Text>Monthly Subscriptions:</Text>
+                  <Text fw={500} c="grape">
+                    £{subscriptionsData.subscriptions
+                      .reduce((acc: number, s: SubscriptionItem) => acc + s.monthlyAmount, 0)
+                      .toFixed(2)}
+                  </Text>
+                </Group>
+              )}
+
               <Divider />
 
               <Group justify="space-between">
@@ -233,9 +307,21 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
                 <Text
                   fw={700}
                   size="lg"
-                  c={(Number(incomeForMonth) - data.spendingPots.reduce((acc, pot) => acc + (pot.amountToAdd), 0) - data.savingsPots.reduce((acc, pot) => acc + (pot.amountToAdd), 0)) >= 0 ? 'green' : 'red'}
+                  c={(() => {
+                    const potAllocations = data.spendingPots.reduce((acc, pot) => acc + pot.amountToAdd, 0) + data.savingsPots.reduce((acc, pot) => acc + pot.amountToAdd, 0)
+                    const subscriptionTotal = subscriptionsData
+                      ? subscriptionsData.subscriptions.reduce((acc: number, s: SubscriptionItem) => acc + s.monthlyAmount, 0)
+                      : 0
+                    return (Number(incomeForMonth) - potAllocations - subscriptionTotal) >= 0 ? 'green' : 'red'
+                  })()}
                 >
-                  {`£${(Number(incomeForMonth) - data.spendingPots.reduce((acc, pot) => acc + (pot.amountToAdd), 0) - data.savingsPots.reduce((acc, pot) => acc + (pot.amountToAdd), 0)).toFixed(2)}`}
+                  {(() => {
+                    const potAllocations = data.spendingPots.reduce((acc, pot) => acc + pot.amountToAdd, 0) + data.savingsPots.reduce((acc, pot) => acc + pot.amountToAdd, 0)
+                    const subscriptionTotal = subscriptionsData
+                      ? subscriptionsData.subscriptions.reduce((acc: number, s: SubscriptionItem) => acc + s.monthlyAmount, 0)
+                      : 0
+                    return `£${(Number(incomeForMonth) - potAllocations - subscriptionTotal).toFixed(2)}`
+                  })()}
                 </Text>
               </Group>
             </Stack>

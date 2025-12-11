@@ -15,7 +15,7 @@ export function useMutationDelete<TInput, TOutput>(options: MutationDeleteOption
   return useMutation({
     mutationFn: async (input: TInput) => {
       const url = typeof options.url === 'function' ? options.url(input) : options.url
-      const res: FetchResponse<TOutput> = await doDelete<TOutput>(url)
+      const res: FetchResponse<TOutput> = await doDelete<TOutput>(url, { body: input })
 
       if (!res.ok) {
         throw new Error(res.statusMessage ?? 'Failed to delete')
