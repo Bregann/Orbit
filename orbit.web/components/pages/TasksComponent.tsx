@@ -42,8 +42,8 @@ import notificationHelper from '@/helpers/notificationHelper'
 import type { GetTasksResponse } from '@/interfaces/api/tasks/GetTasksResponse'
 import type { GetTaskCategoriesResponse } from '@/interfaces/api/tasks/GetTaskCategoriesResponse'
 import { TaskPriorityType } from '@/interfaces/api/tasks/TaskPriorityType'
-import AddTaskModal from '@/components/modals/AddTaskModal'
-import ManageCategoriesModal from '@/components/modals/ManageCategoriesModal'
+import AddTaskModal from '@/components/tasks/AddTaskModal'
+import ManageCategoriesModal from '@/components/tasks/ManageCategoriesModal'
 
 export default function TasksComponent() {
   const [selectedCategory, setSelectedCategory] = useState<number | 'All'>('All')

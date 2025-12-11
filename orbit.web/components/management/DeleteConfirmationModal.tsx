@@ -7,20 +7,26 @@ interface DeleteConfirmationModalProps {
   opened: boolean
   onClose: () => void
   onConfirm: () => void
-  deleteType: 'pot' | 'transaction' | 'payment'
+  deleteType: 'pot' | 'transaction' | 'payment' | 'document'
+  itemName?: string
 }
 
 export default function DeleteConfirmationModal({
   opened,
   onClose,
   onConfirm,
-  deleteType
+  deleteType,
+  itemName
 }: DeleteConfirmationModalProps) {
-  const itemName = deleteType === 'pot'
+  const defaultItemName = deleteType === 'pot'
     ? 'pot'
     : deleteType === 'transaction'
       ? 'automatic transaction rule'
-      : 'subscription'
+      : deleteType === 'payment'
+        ? 'subscription'
+        : 'document'
+
+  const displayName = itemName || defaultItemName
 
   return (
     <Modal
@@ -40,7 +46,7 @@ export default function DeleteConfirmationModal({
       <Stack gap="lg">
         <Alert icon={<IconAlertCircle size="1rem" />} color="red" variant="light">
           <Text size="sm">
-            Are you sure you want to delete this {itemName}?
+            Are you sure you want to delete this {displayName}?
             This action cannot be undone.
           </Text>
         </Alert>

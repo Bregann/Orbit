@@ -1,0 +1,28 @@
+SERVICE AGREEMENT
+==================
+
+This Service Agreement ('Agreement') is entered into as of January 1, 2024
+
+Between:
+Service Provider: Orbit Services Ltd
+Client: Test User
+
+1. SERVICES
+The Service Provider agrees to provide professional services as outlined in this agreement.
+
+2. PAYMENT TERMS
+- Monthly Fee: £1,500
+- Payment Due: 15th of each month
+- Late Payment: 2% interest per month
+
+3. TERM
+This agreement commences on January 1, 2024 and continues for 12 months.
+
+4. TERMINATION
+Either party may terminate with 30 days written notice.
+
+5. CONFIDENTIALITY
+Both parties agree to maintain confidentiality of proprietary information.
+
+Signed:
+Date: 2024-01-01

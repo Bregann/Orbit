@@ -25,7 +25,7 @@ import {
 } from '@tabler/icons-react'
 import { RRule } from 'rrule'
 import type { CalendarEvent, CalendarEventType } from '@/interfaces/calendar/CalendarEvent'
-import AddEventTypeModal from '@/components/modals/AddEventTypeModal'
+import AddEventTypeModal from '@/components/calendars/AddEventTypeModal'
 import AddEventModal from '@/components/calendars/AddEventModal'
 import ViewEventModal from '@/components/calendars/ViewEventModal'
 import EditEventModal from '@/components/calendars/EditEventModal'

@@ -150,3 +150,166 @@ export async function doQueryGet<T>(endpoint: string, options?: RequestOptions):
 
   return res.data as T
 }
+
+// Helper for downloading files as blobs
+export async function doGetBlob(endpoint: string, options?: RequestOptions): Promise<Blob> {
+  const {
+    headers = {},
+    retry = true,
+    cookieHeader,
+  } = options || {}
+
+  const MAX_RETRIES = 3
+  let attempt = 0
+
+  while (attempt < MAX_RETRIES) {
+    try {
+      console.log(`🔗 GET (Blob) ${API_BASE_URL}${endpoint} (attempt ${attempt + 1})`)
+
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          ...(cookieHeader !== undefined ? { Cookie: cookieHeader } : {}),
+          ...headers,
+        },
+      })
+
+      // Handle 401 with refresh
+      if (res.status === 401 && retry) {
+        console.warn('401 detected. Attempting refresh...')
+
+        const refreshRes = await fetch(`${API_BASE_URL}/api/auth/RefreshToken`, {
+          method: 'POST',
+          credentials: 'include',
+        })
+
+        if (refreshRes.ok) {
+          console.log('Refresh successful! Retrying request...')
+          return doGetBlob(endpoint, {
+            headers,
+            retry: false,
+          })
+        } else {
+          throw new Error('Authentication failed')
+        }
+      }
+
+      if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text || 'Failed to download file')
+      }
+
+      return await res.blob()
+    } catch (error) {
+      console.error(`Error in doGetBlob (attempt ${attempt + 1}):`, error)
+      attempt++
+      if (attempt >= MAX_RETRIES) {
+        throw error
+      }
+    }
+  }
+
+  throw new Error('Failed to download file after retries')
+}
+
+// Helper for uploading files with FormData
+export async function doPostFormData<T>(
+  endpoint: string,
+  formData: FormData,
+  options: RequestOptions = {}
+): Promise<FetchResponse<T>> {
+  const {
+    headers = {},
+    retry = true,
+    next: nextFetchOptions,
+    cookieHeader,
+  } = options
+
+  const MAX_RETRIES = 3
+  let attempt = 0
+
+  while (attempt < MAX_RETRIES) {
+    try {
+      console.log(`🔗 POST (FormData) ${API_BASE_URL}${endpoint} (attempt ${attempt + 1})`)
+
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          // Don't set Content-Type for FormData - browser will set it with boundary
+          ...(cookieHeader !== undefined ? { Cookie: cookieHeader } : {}),
+          ...headers,
+        },
+        body: formData,
+        ...(nextFetchOptions !== undefined && { next: nextFetchOptions }),
+      })
+
+      // Handle 401 with refresh
+      if (res.status === 401 && retry) {
+        console.warn('401 detected. Attempting refresh...')
+
+        const refreshRes = await fetch(`${API_BASE_URL}/api/auth/RefreshToken`, {
+          method: 'POST',
+          credentials: 'include',
+        })
+
+        if (refreshRes.ok) {
+          console.log('Refresh successful! Retrying request...')
+          return doPostFormData<T>(endpoint, formData, {
+            headers,
+            retry: false,
+          })
+        } else {
+          console.error('Refresh failed.')
+          return {
+            data: undefined,
+            status: res.status,
+            ok: false,
+          }
+        }
+      }
+
+      let data: T | undefined = undefined
+      let statusMessage: string | undefined = undefined
+
+      if (res.status !== 200) {
+        const text = await res.text()
+        statusMessage = text
+      } else {
+        try {
+          const text = await res.text()
+          if (text !== '') {
+            const parsed = JSON.parse(text)
+            data = parsed
+          }
+        } catch {
+          console.warn('⚠️ Failed to parse JSON response')
+        }
+      }
+
+      return {
+        data,
+        status: res.status,
+        ok: res.ok,
+        statusMessage: statusMessage
+      }
+    } catch (error) {
+      console.error(`Error in doPostFormData (attempt ${attempt + 1}):`, error)
+      attempt++
+      if (attempt >= MAX_RETRIES) {
+        return {
+          data: undefined,
+          status: 500,
+          ok: false,
+        }
+      }
+    }
+  }
+
+  return {
+    data: undefined,
+    status: 500,
+    ok: false,
+  }
+}

@@ -1,0 +1,25 @@
+MEDICAL RECORD
+===============
+
+Patient Name: Test User
+Date of Birth: 1990-05-15
+Patient ID: MED-001
+
+Last Visit: 2024-01-10
+Next Appointment: 2024-02-10
+
+Medical History:
+- No major allergies reported
+- Blood Type: O+
+- Current Medications: None
+
+Last Checkup Results:
+- Blood Pressure: 120/80 mmHg (Normal)
+- Heart Rate: 72 bpm (Normal)
+- Temperature: 98.6°F (Normal)
+- Weight: 75 kg
+- Height: 180 cm
+
+Notes:
+Patient in good health. Continue current lifestyle.
+Schedule annual checkup for next year.
