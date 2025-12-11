@@ -12,7 +12,6 @@ namespace Orbit.Domain.Helpers
         public static async System.Threading.Tasks.Task SeedDatabase(AppDbContext context, IEnvironmentalSettingHelper settingsHelper, IServiceProvider serviceProvider)
         {
             // Generate the data
-            // blah blah blah
 
             await context.EnvironmentalSettings.AddAsync(new EnvironmentalSetting
             {
@@ -378,6 +377,202 @@ namespace Orbit.Domain.Helpers
                     EndTime = DateTime.UtcNow.AddDays(10).Date.AddHours(23),
                     IsAllDay = false,
                     CalendarEventTypeId = 5
+                }
+            });
+
+            await context.SaveChangesAsync();
+
+            await context.DocumentCategories.AddRangeAsync(new List<DocumentCategory>
+            {
+                new DocumentCategory
+                {
+                    CategoryName = "Financial"
+                },
+                new DocumentCategory
+                {
+                    CategoryName = "Personal"
+                },
+                new DocumentCategory
+                {
+                    CategoryName = "Legal"
+                },
+                new DocumentCategory
+                {
+                    CategoryName = "Medical"
+                }
+            });
+
+            await context.SaveChangesAsync();
+
+            // Create test files in DocumentsStorage directory
+            var currentPath = Directory.GetCurrentDirectory();
+            var documentStoragePath = Path.Combine(currentPath, "DocumentsStorage");
+
+            if (!Directory.Exists(documentStoragePath))
+            {
+                Directory.CreateDirectory(documentStoragePath);
+            }
+
+            // Create test text file
+            var textFilePath = Path.Combine(documentStoragePath, "sample-invoice.txt");
+            if (!File.Exists(textFilePath))
+            {
+                var textContent = @"INVOICE
+================
+
+Invoice Number: INV-2024-001
+Date: 2024-01-15
+Due Date: 2024-02-15
+
+Bill To:
+Test User
+test@test.com
+
+Description: Monthly Service
+Amount: £1,500.00
+VAT (20%): £300.00
+
+Total Due: £1,800.00
+
+Thank you for your business!";
+                await File.WriteAllTextAsync(textFilePath, textContent);
+            }
+
+            // Create sample PDF metadata file
+            var pdfFilePath = Path.Combine(documentStoragePath, "financial-report.txt");
+            if (!File.Exists(pdfFilePath))
+            {
+                var pdfContent = @"FINANCIAL REPORT Q4 2024
+==========================
+
+Executive Summary:
+This financial report provides a comprehensive overview of the company's financial performance for Q4 2024.
+
+Key Metrics:
+- Total Revenue: £250,000
+- Operating Expenses: £180,000
+- Net Profit: £70,000
+- Profit Margin: 28%
+
+Revenue Breakdown:
+- Product Sales: £150,000 (60%)
+- Services: £100,000 (40%)
+
+Expense Breakdown:
+- Salaries: £120,000 (67%)
+- Operational Costs: £50,000 (28%)
+- Miscellaneous: £10,000 (5%)
+
+Recommendations:
+1. Increase marketing spend for Q1 2025
+2. Optimize operational costs
+3. Focus on service revenue growth
+
+Report Generated: 2024-12-31";
+                await File.WriteAllTextAsync(pdfFilePath, pdfContent);
+            }
+
+            // Create sample medical document file
+            var medicalFilePath = Path.Combine(documentStoragePath, "medical-record.txt");
+            if (!File.Exists(medicalFilePath))
+            {
+                var medicalContent = @"MEDICAL RECORD
+===============
+
+Patient Name: Test User
+Date of Birth: 1990-05-15
+Patient ID: MED-001
+
+Last Visit: 2024-01-10
+Next Appointment: 2024-02-10
+
+Medical History:
+- No major allergies reported
+- Blood Type: O+
+- Current Medications: None
+
+Last Checkup Results:
+- Blood Pressure: 120/80 mmHg (Normal)
+- Heart Rate: 72 bpm (Normal)
+- Temperature: 98.6°F (Normal)
+- Weight: 75 kg
+- Height: 180 cm
+
+Notes:
+Patient in good health. Continue current lifestyle.
+Schedule annual checkup for next year.";
+                await File.WriteAllTextAsync(medicalFilePath, medicalContent);
+            }
+
+            // Create sample legal document file
+            var legalFilePath = Path.Combine(documentStoragePath, "contract-agreement.txt");
+            if (!File.Exists(legalFilePath))
+            {
+                var legalContent = @"SERVICE AGREEMENT
+==================
+
+This Service Agreement ('Agreement') is entered into as of January 1, 2024
+
+Between:
+Service Provider: Orbit Services Ltd
+Client: Test User
+
+1. SERVICES
+The Service Provider agrees to provide professional services as outlined in this agreement.
+
+2. PAYMENT TERMS
+- Monthly Fee: £1,500
+- Payment Due: 15th of each month
+- Late Payment: 2% interest per month
+
+3. TERM
+This agreement commences on January 1, 2024 and continues for 12 months.
+
+4. TERMINATION
+Either party may terminate with 30 days written notice.
+
+5. CONFIDENTIALITY
+Both parties agree to maintain confidentiality of proprietary information.
+
+Signed:
+Date: 2024-01-01";
+                await File.WriteAllTextAsync(legalFilePath, legalContent);
+            }
+
+            // Seed documents
+            await context.Documents.AddRangeAsync(new List<Document>
+            {
+                new Document
+                {
+                    DocumentName = "sample-invoice.txt",
+                    DocumentPath = Path.Combine("DocumentsStorage", "sample-invoice.txt"),
+                    DocumentType = "text/plain",
+                    DocumentCategoryId = 1,
+                    UploadedAt = DateTime.UtcNow.AddDays(-30)
+                },
+                new Document
+                {
+                    DocumentName = "financial-report.txt",
+                    DocumentPath = Path.Combine("DocumentsStorage", "financial-report.txt"),
+                    DocumentType = "text/plain",
+                    DocumentCategoryId = 1,
+                    UploadedAt = DateTime.UtcNow.AddDays(-20)
+                },
+                new Document
+                {
+                    DocumentName = "medical-record.txt",
+                    DocumentPath = Path.Combine("DocumentsStorage", "medical-record.txt"),
+                    DocumentType = "text/plain",
+                    DocumentCategoryId = 4,
+                    UploadedAt = DateTime.UtcNow.AddDays(-15)
+                },
+                new Document
+                {
+                    DocumentName = "contract-agreement.txt",
+                    DocumentPath = Path.Combine("DocumentsStorage", "contract-agreement.txt"),
+                    DocumentType = "text/plain",
+                    DocumentCategoryId = 3,
+                    UploadedAt = DateTime.UtcNow.AddDays(-10)
                 }
             });
 

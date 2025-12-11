@@ -24,5 +24,8 @@ namespace Orbit.Domain.Database.Context
         public DbSet<CalendarEvent> CalendarEvents { get; set; } = null!;
         public DbSet<CalendarEventType> CalendarEventTypes { get; set; } = null!;
         public DbSet<CalendarEventException> CalendarEventExceptions { get; set; } = null!;
+
+        public DbSet<Document> Documents { get; set; } = null!;
+        public DbSet<DocumentCategory> DocumentCategories { get; set; } = null!;
     }
 }

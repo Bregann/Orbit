@@ -17,6 +17,8 @@ using Orbit.Domain.Interfaces.Api.Tasks;
 using Orbit.Domain.Services.Tasks;
 using Orbit.Domain.Interfaces.Api.Calendar;
 using Orbit.Domain.Services.Calendar;
+using Orbit.Domain.Interfaces.Api.Documents;
+using Orbit.Domain.Services.Documents;
 
 #if DEBUG
 using Hangfire.MemoryStorage;
@@ -61,6 +63,7 @@ builder.Services.AddScoped<IPotsService, PotsService>();
 builder.Services.AddScoped<IMonthService, MonthService>();
 builder.Services.AddScoped<ITasksService, TasksService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
+builder.Services.AddScoped<IDocumentsService, DocumentsService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddHttpClient<ICommsSenderClient, CommsSenderClient>();
 
@@ -84,7 +87,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontendLocalhost", builder =>
     {
         builder
-            .WithOrigins("http://localhost:3000", "https://fm.bregan.me")
+            .WithOrigins("http://localhost:3000", "https://orbit.bregan.me")
             .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod();

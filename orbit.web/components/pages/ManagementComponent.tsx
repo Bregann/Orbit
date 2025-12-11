@@ -3,7 +3,7 @@
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import notificationHelper from '@/helpers/notificationHelper'
 import { DeleteSubscriptionRequest } from '@/interfaces/api/subscriptions/DeleteSubscriptionRequest'
-import DeleteConfirmationModal from '@/components/modals/DeleteConfirmationModal'
+import DeleteConfirmationModal from '@/components/management/DeleteConfirmationModal'
 import PotsManagement from '@/components/management/PotsManagement'
 import AutomaticTransactionsManagement from '@/components/management/AutomaticTransactionsManagement'
 import SubscriptionsManagement from '@/components/management/SubscriptionsManagement'
