@@ -92,9 +92,9 @@ export default function UploadDocumentModal({
         />
         <Group justify="flex-end" mt="md">
           <Button variant="light" onClick={handleClose}>Cancel</Button>
-          <Button 
-            onClick={handleUpload} 
-            leftSection={<IconUpload size="1rem" />} 
+          <Button
+            onClick={handleUpload}
+            leftSection={<IconUpload size="1rem" />}
             loading={isUploading}
             disabled={!uploadFile || !uploadCategory || isUploading}
           >
