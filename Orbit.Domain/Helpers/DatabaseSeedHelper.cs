@@ -577,6 +577,265 @@ Date: 2024-01-01";
             });
 
             await context.SaveChangesAsync();
+
+            await context.ShoppingListItems.AddRangeAsync(new List<ShoppingListItem>
+            {
+                new ShoppingListItem
+                {
+                    Name = "Milk",
+                    AddedAt = DateTime.UtcNow.AddDays(-5),
+                    IsPurchased = false
+                },
+                new ShoppingListItem
+                {
+                    Name = "Bread",
+                    AddedAt = DateTime.UtcNow.AddDays(-4),
+                    IsPurchased = false
+                },
+                new ShoppingListItem
+                {
+                    Name = "Eggs",
+                    AddedAt = DateTime.UtcNow.AddDays(-3),
+                    IsPurchased = true
+                },
+                new ShoppingListItem
+                {
+                    Name = "Chicken Breast",
+                    AddedAt = DateTime.UtcNow.AddDays(-2),
+                    IsPurchased = false
+                },
+                new ShoppingListItem
+                {
+                    Name = "Pasta",
+                    AddedAt = DateTime.UtcNow.AddDays(-1),
+                    IsPurchased = false
+                },
+                new ShoppingListItem
+                {
+                    Name = "Tomato Sauce",
+                    AddedAt = DateTime.UtcNow,
+                    IsPurchased = true
+                },
+                new ShoppingListItem
+                {
+                    Name = "Cheese",
+                    AddedAt = DateTime.UtcNow,
+                    IsPurchased = false
+                },
+                new ShoppingListItem
+                {
+                    Name = "Apples",
+                    AddedAt = DateTime.UtcNow.AddHours(-2),
+                    IsPurchased = false
+                }
+            });
+
+            await context.SaveChangesAsync();
+
+            await context.ShoppingListQuickAddItems.AddRangeAsync(new List<ShoppingListQuickAddItem>
+            {
+                new ShoppingListQuickAddItem
+                {
+                    Name = "Milk"
+                },
+                new ShoppingListQuickAddItem
+                {
+                    Name = "Bread"
+                },
+                new ShoppingListQuickAddItem
+                {
+                    Name = "Eggs"
+                },
+                new ShoppingListQuickAddItem
+                {
+                    Name = "Butter"
+                },
+                new ShoppingListQuickAddItem
+                {
+                    Name = "Pasta"
+                },
+                new ShoppingListQuickAddItem
+                {
+                    Name = "Rice"
+                },
+                new ShoppingListQuickAddItem
+                {
+                    Name = "Chicken"
+                },
+                new ShoppingListQuickAddItem
+                {
+                    Name = "Bananas"
+                }
+            });
+
+            await context.SaveChangesAsync();
+
+            await context.JournalEntries.AddRangeAsync(new List<JournalEntry>
+            {
+                new JournalEntry
+                {
+                    Title = "First day of the new year",
+                    Content = "Today marks the beginning of a new chapter in my life. I'm feeling optimistic about the opportunities ahead and excited to start working on my personal goals. The weather is beautiful, and I took a long walk to clear my mind.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-10),
+                    Mood = Enums.JournalMoodEnum.Good
+                },
+                new JournalEntry
+                {
+                    Title = "Productive work day",
+                    Content = "Had a really productive day at work. Managed to complete the main tasks on my list and even had time to help a colleague with their project. Feeling accomplished and energized.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-8),
+                    Mood = Enums.JournalMoodEnum.Good
+                },
+                new JournalEntry
+                {
+                    Title = "Rainy afternoon reflections",
+                    Content = "The rain outside matches my mood today. Been thinking about some life decisions and what I really want to achieve. It's one of those days where everything feels uncertain, but I know this feeling will pass.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-5),
+                    Mood = Enums.JournalMoodEnum.Bad
+                },
+                new JournalEntry
+                {
+                    Title = "Gym session success",
+                    Content = "Finally got back into my fitness routine! Completed a great workout at the gym today and felt energized afterwards. Small wins like this help build confidence and momentum.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-3),
+                    Mood = Enums.JournalMoodEnum.Great
+                },
+                new JournalEntry
+                {
+                    Title = "Mixed feelings",
+                    Content = "Today was a bit chaotic. Had some great moments but also faced a few unexpected challenges. Overall, it balanced out. Trying to maintain perspective and focus on what I can control.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    Mood = Enums.JournalMoodEnum.Neutral
+                },
+                new JournalEntry
+                {
+                    Title = "Grateful for the small things",
+                    Content = "Spent the evening with friends and it reminded me how important these connections are. We laughed, shared stories, and just enjoyed each other's company. Feeling thankful for the people in my life.",
+                    CreatedAt = DateTime.UtcNow,
+                    Mood = Enums.JournalMoodEnum.Awful
+                },
+                new JournalEntry
+                {
+                    Title = "Anxious about upcoming presentation",
+                    Content = "Can't shake this nervous feeling about the presentation next week. Keep rehearsing in my head and imagining different scenarios. Need to remember that preparation is key and I've done this before successfully.",
+                    CreatedAt = DateTime.UtcNow.AddHours(-6),
+                    Mood = Enums.JournalMoodEnum.Awful
+                }
+            });
+
+            await context.SaveChangesAsync();
+
+            await context.NoteFolders.AddRangeAsync(new List<NoteFolder>
+            {
+                new NoteFolder
+                {
+                    FolderName = "Work",
+                    FolderIcon = "💼"
+                },
+                new NoteFolder
+                {
+                    FolderName = "Personal",
+                    FolderIcon = "❤️"
+                },
+                new NoteFolder
+                {
+                    FolderName = "Ideas",
+                    FolderIcon = "💡"
+                },
+                new NoteFolder
+                {
+                    FolderName = "Learning",
+                    FolderIcon = "📖"
+                }
+            });
+
+            await context.SaveChangesAsync();
+
+            await context.NotePages.AddRangeAsync(new List<NotePage>
+            {
+                new NotePage
+                {
+                    Title = "Project Requirements",
+                    Content = "Gather and document all project requirements from stakeholders. Need to schedule meetings with the design and development teams to align on scope and timeline.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-14),
+                    IsFavourite = true,
+                    FolderId = 1
+                },
+                new NotePage
+                {
+                    Title = "Meeting Notes - Q1 Planning",
+                    Content = "Discussed Q1 roadmap with the team. Key points:\n- Focus on performance optimization\n- User feedback implementation\n- Bug fixes and technical debt\n\nAction items assigned to team members.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-10),
+                    IsFavourite = false,
+                    FolderId = 1
+                },
+                new NotePage
+                {
+                    Title = "Code Review Checklist",
+                    Content = "1. Check for code style consistency\n2. Verify test coverage\n3. Look for potential performance issues\n4. Check security implications\n5. Ensure documentation is updated\n6. Verify no breaking changes",
+                    CreatedAt = DateTime.UtcNow.AddDays(-7),
+                    IsFavourite = true,
+                    FolderId = 1
+                },
+                new NotePage
+                {
+                    Title = "Fitness Goals 2024",
+                    Content = "Goals for this year:\n- Run a 10K by June\n- Reach gym 3x per week consistently\n- Improve flexibility through yoga\n- Track nutrition weekly\n\nStarting measurements recorded on January 1st.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-9),
+                    IsFavourite = false,
+                    FolderId = 2
+                },
+                new NotePage
+                {
+                    Title = "Travel Bucket List",
+                    Content = "Places to visit:\n- Japan (spring 2025)\n- Norway - Northern Lights\n- Bali, Indonesia\n- Iceland\n- New Zealand\n- Peru - Machu Picchu\n\nNeed to save and plan budget.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-5),
+                    IsFavourite = true,
+                    FolderId = 2
+                },
+                new NotePage
+                {
+                    Title = "Book Recommendations",
+                    Content = "Books to read:\n- 'Atomic Habits' by James Clear\n- 'The Midnight Library' by Matt Haig\n- 'Project Hail Mary' by Andy Weir\n- 'Educated' by Tara Westover\n- '1984' by George Orwell\n\nStarted: Atomic Habits",
+                    CreatedAt = DateTime.UtcNow.AddDays(-3),
+                    IsFavourite = false,
+                    FolderId = 2
+                },
+                new NotePage
+                {
+                    Title = "App Feature Ideas",
+                    Content = "Ideas for future app enhancements:\n- Dark mode implementation\n- Offline support\n- Real-time collaboration\n- Advanced search with filters\n- Export to PDF/CSV\n- Mobile app native version\n\nNeed to prioritize and estimate effort.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-6),
+                    IsFavourite = true,
+                    FolderId = 3
+                },
+                new NotePage
+                {
+                    Title = "Brainstorm: New Side Project",
+                    Content = "Considering building a tool for:\n- Personal finance management\n- Time tracking\n- Habit formation\n- Community features\n\nTech stack options: .NET, React, PostgreSQL vs Node.js, Vue, MongoDB",
+                    CreatedAt = DateTime.UtcNow.AddDays(-4),
+                    IsFavourite = false,
+                    FolderId = 3
+                },
+                new NotePage
+                {
+                    Title = "C# Advanced Topics",
+                    Content = "Topics to deep dive into:\n- LINQ performance optimization\n- Entity Framework advanced patterns\n- Async/await patterns\n- Dependency injection best practices\n- Middleware and filters\n- Background jobs and scheduling\n\nResources: Microsoft docs, blog posts, conference talks",
+                    CreatedAt = DateTime.UtcNow.AddDays(-2),
+                    IsFavourite = true,
+                    FolderId = 4
+                },
+                new NotePage
+                {
+                    Title = "Database Design Patterns",
+                    Content = "Study repository pattern, unit of work pattern, and data access layers. Compare ORM vs raw SQL approaches. Document findings and best practices for team.",
+                    CreatedAt = DateTime.UtcNow,
+                    IsFavourite = false,
+                    FolderId = 4
+                }
+            });
+
+            await context.SaveChangesAsync();
         }
     }
 }

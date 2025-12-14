@@ -60,7 +60,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
   const appItems = [
     { label: 'Tasks', icon: IconCheckbox, href: '/tasks' },
     { label: 'Documents', icon: IconFiles, href: '/documents' },
-    { label: 'Grocery', icon: IconShoppingCart, href: '/grocery' },
+    { label: 'Shopping', icon: IconShoppingCart, href: '/shopping' },
     { label: 'Journal', icon: IconMoodSmile, href: '/journal' },
     { label: 'Calendar', icon: IconCalendarEvent, href: '/calendar' },
     { label: 'Notes', icon: IconNote, href: '/notes' },

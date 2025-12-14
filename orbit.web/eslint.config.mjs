@@ -28,6 +28,11 @@ const eslintConfig = [
         atob: 'readonly',
         btoa: 'readonly',
         React: 'readonly',
+        NodeJS: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
       },
       parser: tsParser,
       parserOptions: {

@@ -19,6 +19,12 @@ using Orbit.Domain.Interfaces.Api.Calendar;
 using Orbit.Domain.Services.Calendar;
 using Orbit.Domain.Interfaces.Api.Documents;
 using Orbit.Domain.Services.Documents;
+using Orbit.Domain.Interfaces.Api.Shopping;
+using Orbit.Domain.Services.Shopping;
+using Orbit.Domain.Interfaces.Api.Journal;
+using Orbit.Domain.Services.Journal;
+using Orbit.Domain.Interfaces.Api.Notes;
+using Orbit.Domain.Services.Notes;
 
 #if DEBUG
 using Hangfire.MemoryStorage;
@@ -64,6 +70,9 @@ builder.Services.AddScoped<IMonthService, MonthService>();
 builder.Services.AddScoped<ITasksService, TasksService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
 builder.Services.AddScoped<IDocumentsService, DocumentsService>();
+builder.Services.AddScoped<IShoppingService, ShoppingService>();
+builder.Services.AddScoped<IJournalService, JournalService>();
+builder.Services.AddScoped<INoteService, NotesService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddHttpClient<ICommsSenderClient, CommsSenderClient>();
 
