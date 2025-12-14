@@ -367,3 +367,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /BreganTwitchbot.Infrastructure/Database/DbSettings.cs
+Orbit.Core/DocumentsStorage/contract-agreement.txt
+Orbit.Core/DocumentsStorage/financial-report.txt
+Orbit.Core/DocumentsStorage/medical-record.txt
+Orbit.Core/DocumentsStorage/sample-invoice.txt

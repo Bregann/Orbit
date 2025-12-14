@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { doPut, FetchResponse } from '../apiClient'
 
 interface MutationPutOptions<TOutput> {
-  url: string
+  url: string | ((_input: any) => string)
   queryKey: string[]
   invalidateQuery: boolean
   onError?: (_error: Error) => void
@@ -14,7 +14,8 @@ export function useMutationPut<TInput, TOutput>(options: MutationPutOptions<TOut
 
   return useMutation({
     mutationFn: async (input: TInput) => {
-      const res: FetchResponse<TOutput> = await doPut<TOutput>(options.url, { body: input })
+      const url = typeof options.url === 'function' ? options.url(input) : options.url
+      const res: FetchResponse<TOutput> = await doPut<TOutput>(url, { body: input })
 
       if (!res.ok) {
         throw new Error(res.statusMessage ?? 'Failed to update')

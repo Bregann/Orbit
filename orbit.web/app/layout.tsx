@@ -6,6 +6,7 @@ import { Notifications } from '@mantine/notifications'
 import Providers from './providers'
 import { AuthProvider } from '@/context/authContext'
 import ClientLayout from '@/components/navigation/ClientLayout'
+import NextTopLoader from 'nextjs-toploader'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -46,6 +47,7 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body>
+        <NextTopLoader color="#339af0" showSpinner={false} />
         <Providers>
           <AuthProvider>
             <MantineProvider defaultColorScheme="auto" theme={theme}>

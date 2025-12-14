@@ -54,11 +54,11 @@ export default function DashboardComponent() {
       href: '/documents'
     },
     {
-      title: 'Grocery List',
+      title: 'Shopping List',
       description: 'Shopping items',
       icon: IconShoppingCart,
       color: 'orange',
-      href: '/grocery'
+      href: '/shopping'
     },
     {
       title: 'Journal',
@@ -86,7 +86,7 @@ export default function DashboardComponent() {
   // Mock data - replace with real data later
   const todayTasks = [
     { id: 1, title: 'Review monthly budget', completed: false },
-    { id: 2, title: 'Grocery shopping', completed: false },
+    { id: 2, title: 'shopping shopping', completed: false },
     { id: 3, title: 'Call plumber', completed: true }
   ]
 

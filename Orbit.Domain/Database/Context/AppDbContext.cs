@@ -27,5 +27,13 @@ namespace Orbit.Domain.Database.Context
 
         public DbSet<Document> Documents { get; set; } = null!;
         public DbSet<DocumentCategory> DocumentCategories { get; set; } = null!;
+
+        public DbSet<ShoppingListItem> ShoppingListItems { get; set; } = null!;
+        public DbSet<ShoppingListQuickAddItem> ShoppingListQuickAddItems { get; set; } = null!;
+
+        public DbSet<JournalEntry> JournalEntries { get; set; } = null!;
+
+        public DbSet<NoteFolder> NoteFolders { get; set; } = null!;
+        public DbSet<NotePage> NotePages { get; set; } = null!;
     }
 }
