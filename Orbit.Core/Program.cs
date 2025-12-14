@@ -26,12 +26,6 @@ using Orbit.Domain.Services.Journal;
 using Orbit.Domain.Interfaces.Api.Notes;
 using Orbit.Domain.Services.Notes;
 
-
-
-
-
-
-
 #if DEBUG
 using Hangfire.MemoryStorage;
 using Testcontainers.PostgreSql;
