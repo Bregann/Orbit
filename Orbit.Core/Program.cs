@@ -215,6 +215,6 @@ app.MapHangfireDashboard("/hangfire", new DashboardOptions
     Authorization = auth
 }, JobStorage.Current);
 
-//HangfireJobSetup.SetupRecurringJobs();
+HangfireJobSetup.SetupRecurringJobs();
 
 app.Run();
