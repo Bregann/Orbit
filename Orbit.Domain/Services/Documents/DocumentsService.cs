@@ -25,7 +25,7 @@ namespace Orbit.Domain.Services.Documents
             };
         }
 
-        public async Task UploadDocument(UploadDocumentRequest request, Stream documentStream)
+        public async Task UploadDocument(UploadDocumentRequest request, Stream documentStream, string fileExtension)
         {
             // add to database
             var document = new Document
@@ -42,7 +42,7 @@ namespace Orbit.Domain.Services.Documents
 
             // save the document to storage
             var currentPath = Directory.GetCurrentDirectory();
-            var documentPath = Path.Combine(currentPath, "DocumentsStorage", request.DocumentName);
+            var documentPath = Path.Combine(currentPath, "DocumentsStorage", request.DocumentName + fileExtension);
 
             using (var fileStream = new FileStream(documentPath, FileMode.Create, FileAccess.Write))
             {

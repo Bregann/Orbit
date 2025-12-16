@@ -29,7 +29,7 @@ namespace Orbit.Core.Controllers
 
                 using (var stream = file.OpenReadStream())
                 {
-                    await documentsService.UploadDocument(request, stream);
+                    await documentsService.UploadDocument(request, stream, Path.GetExtension(file.FileName));
                 }
 
                 return Ok();

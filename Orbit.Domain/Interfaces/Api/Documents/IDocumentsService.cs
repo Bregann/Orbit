@@ -10,6 +10,6 @@ namespace Orbit.Domain.Interfaces.Api.Documents
         Task<byte[]> DownloadDocument(int documentId);
         Task<GetAllDocumentCategoriesDto> GetAllDocumentCategories();
         Task<GetAllDocumentsDto> GetAllDocuments();
-        Task UploadDocument(UploadDocumentRequest request, Stream documentStream);
+        Task UploadDocument(UploadDocumentRequest request, Stream documentStream, string fileExtension);
     }
 }
