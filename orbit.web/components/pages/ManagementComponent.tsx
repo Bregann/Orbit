@@ -111,7 +111,8 @@ export default function ManagementComponent() {
         opened={showDeleteConfirmation}
         onClose={() => setShowDeleteConfirmation(false)}
         onConfirm={confirmDelete}
-        deleteType={deleteType}
+        title="Are You Sure?"
+        message="Do you really want to delete this item? This action cannot be undone."
       />
     </Container>
   )

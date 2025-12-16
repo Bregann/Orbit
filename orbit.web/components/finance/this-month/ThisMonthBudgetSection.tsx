@@ -3,10 +3,10 @@
 import { Grid, Group, Title, Badge, ThemeIcon } from '@mantine/core'
 import { IconWallet } from '@tabler/icons-react'
 import { SpendingPotCard } from '@/components/cards/SpendingPotCard'
-import { SpendingPot } from '@/interfaces/api/pots/GetAllPotDataDto'
+import { SpendingPotData } from '@/interfaces/api/pots/GetAllPotDataDto'
 
 interface ThisMonthBudgetSectionProps {
-  spendingPots: SpendingPot[]
+  spendingPots: SpendingPotData[]
 }
 
 export default function ThisMonthBudgetSection({ spendingPots }: ThisMonthBudgetSectionProps) {

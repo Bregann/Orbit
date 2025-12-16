@@ -159,8 +159,8 @@ export default function JournalEntriesList({ entries, onEntryClick }: JournalEnt
         opened={deleteModalOpened}
         onClose={closeDeleteModal}
         onConfirm={handleConfirmDelete}
-        deleteType="journalEntry"
-        itemName={entryToDelete?.title}
+        title="Are You Sure?"
+        message={'Do you really want to delete this journal entry? This action cannot be undone.'}
       />
     </Card>
   )

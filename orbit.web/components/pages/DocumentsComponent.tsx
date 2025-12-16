@@ -263,7 +263,8 @@ export default function DocumentsComponent() {
         opened={deleteModalOpened}
         onClose={closeDeleteModal}
         onConfirm={confirmDeleteDocument}
-        deleteType="document"
+        title="Are You Sure?"
+        message="Do you really want to delete this document? This action cannot be undone."
       />
     </Container>
   )
