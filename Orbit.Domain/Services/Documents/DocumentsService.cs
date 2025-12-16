@@ -31,7 +31,7 @@ namespace Orbit.Domain.Services.Documents
             var document = new Document
             {
                 DocumentName = request.DocumentName,
-                DocumentPath = Path.Combine("DocumentsStorage", request.DocumentName),
+                DocumentPath = Path.Combine("DocumentsStorage", request.DocumentName + fileExtension),
                 DocumentType = request.DocumentType,
                 UploadedAt = DateTime.UtcNow,
                 DocumentCategoryId = request.CategoryId
