@@ -21,7 +21,7 @@ interface EventsSidebarProps {
   pastEvents: CalendarEvent[]
   onTabChange: (_value: string | null) => void
   onViewEvent: (_event: CalendarEvent) => void
-  getEventTypeColor: (_typeId: string) => string
+  getEventTypeColour: (_typeId: string) => string
 }
 
 export default function EventsSidebar({
@@ -30,7 +30,7 @@ export default function EventsSidebar({
   pastEvents,
   onTabChange,
   onViewEvent,
-  getEventTypeColor
+  getEventTypeColour
 }: EventsSidebarProps) {
   return (
     <Card withBorder p="md" radius="md" shadow="sm" h="100%">
@@ -74,7 +74,7 @@ export default function EventsSidebar({
                           width: 24,
                           height: 24,
                           borderRadius: '50%',
-                          backgroundColor: getEventTypeColor(event.typeId),
+                          backgroundColor: getEventTypeColour(event.typeId),
                           flexShrink: 0,
                         }}
                       />
@@ -125,7 +125,7 @@ export default function EventsSidebar({
                           width: 24,
                           height: 24,
                           borderRadius: '50%',
-                          backgroundColor: getEventTypeColor(event.typeId),
+                          backgroundColor: getEventTypeColour(event.typeId),
                           flexShrink: 0,
                         }}
                       />

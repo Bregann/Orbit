@@ -27,7 +27,7 @@ const colorSwatches = [
 
 export default function AddEventTypeModal({ opened, onClose }: AddEventTypeModalProps) {
   const [label, setLabel] = useState('')
-  const [selectedColor, setSelectedColor] = useState<string>('#3b82f6')
+  const [selectedColour, setSelectedColour] = useState<string>('#3b82f6')
 
   const addEventTypeMutation = useMutationPost<AddCalendarEventTypeRequest, void>({
     url: '/api/calendar/AddCalendarEventType',
@@ -40,7 +40,7 @@ export default function AddEventTypeModal({ opened, onClose }: AddEventTypeModal
 
     const request: AddCalendarEventTypeRequest = {
       eventTypeName: label.trim(),
-      hexColourCode: selectedColor
+      hexColourCode: selectedColour
     }
 
     await addEventTypeMutation.mutateAsync(request)
@@ -50,7 +50,7 @@ export default function AddEventTypeModal({ opened, onClose }: AddEventTypeModal
 
   const resetForm = () => {
     setLabel('')
-    setSelectedColor('#3b82f6')
+    setSelectedColour('#3b82f6')
   }
 
   const handleClose = () => {
@@ -78,8 +78,8 @@ export default function AddEventTypeModal({ opened, onClose }: AddEventTypeModal
           <Text size="sm" fw={500} mb="xs">Color</Text>
           <ColorPicker
             format="hex"
-            value={selectedColor}
-            onChange={setSelectedColor}
+            value={selectedColour}
+            onChange={setSelectedColour}
             swatches={colorSwatches}
             swatchesPerRow={6}
             fullWidth
@@ -90,11 +90,11 @@ export default function AddEventTypeModal({ opened, onClose }: AddEventTypeModal
                 width: 24,
                 height: 24,
                 borderRadius: '4px',
-                backgroundColor: selectedColor,
+                backgroundColor: selectedColour,
                 border: '1px solid var(--mantine-color-dark-4)',
               }}
             />
-            <Text size="xs" c="dimmed">{selectedColor}</Text>
+            <Text size="xs" c="dimmed">{selectedColour}</Text>
           </Group>
         </div>
 

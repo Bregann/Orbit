@@ -25,6 +25,8 @@ using Orbit.Domain.Interfaces.Api.Journal;
 using Orbit.Domain.Services.Journal;
 using Orbit.Domain.Interfaces.Api.Notes;
 using Orbit.Domain.Services.Notes;
+using Orbit.Domain.Interfaces.Api.Dashboard;
+using Orbit.Domain.Services.Dashboard;
 
 #if DEBUG
 using Hangfire.MemoryStorage;
@@ -67,11 +69,13 @@ builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IPotsService, PotsService>();
 builder.Services.AddScoped<IMonthService, MonthService>();
+builder.Services.AddScoped<IHistoricDataService, HistoricDataService>();
 builder.Services.AddScoped<ITasksService, TasksService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
 builder.Services.AddScoped<IDocumentsService, DocumentsService>();
 builder.Services.AddScoped<IShoppingService, ShoppingService>();
 builder.Services.AddScoped<IJournalService, JournalService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<INoteService, NotesService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddHttpClient<ICommsSenderClient, CommsSenderClient>();
@@ -108,7 +112,7 @@ GlobalConfiguration.Configuration.UseMemoryStorage();
 
 var postgresContainer = new PostgreSqlBuilder()
     .WithImage("postgres:16")
-    .WithDatabase("financemanager")
+    .WithDatabase("financemanagercontainer")
     .WithUsername("testuser")
     .WithPassword("testpass")
     .WithPortBinding(5432, true)
@@ -155,13 +159,25 @@ app.UseCors("AllowFrontendLocalhost");
 // Seed the database
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetService<AppDbContext>()!;
+    var dbContext = scope.ServiceProvider.GetService<AppDbContext>();
     var settingsHelper = scope.ServiceProvider.GetRequiredService<IEnvironmentalSettingHelper>();
 
-    dbContext.Database.EnsureDeleted();
-    dbContext.Database.EnsureCreated();
+    if (dbContext == null)
+    {
+        throw new Exception("DbContext is null");
+    }
 
-    await DatabaseSeedHelper.SeedDatabase(dbContext, settingsHelper, scope.ServiceProvider);
+    // protection to only run when the connection string is to the test container
+    var dbConnectionString = dbContext.Database.GetConnectionString();
+    if (!string.IsNullOrEmpty(dbConnectionString) &&
+        (dbConnectionString.Contains("127.0.0.1") ||
+        dbConnectionString.Contains("financemanagercontainer")))
+    {
+        dbContext.Database.EnsureDeleted();
+        dbContext.Database.EnsureCreated();
+
+        await DatabaseSeedHelper.SeedDatabase(dbContext, settingsHelper, scope.ServiceProvider);
+    }
 }
 #endif
 

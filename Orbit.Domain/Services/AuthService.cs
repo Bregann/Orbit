@@ -12,6 +12,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Task = System.Threading.Tasks.Task;
 
 namespace Orbit.Domain.Services
 {
@@ -19,7 +20,7 @@ namespace Orbit.Domain.Services
     {
         private readonly PasswordHasher<User> _passwordHasher = new();
 
-        public async System.Threading.Tasks.Task RegisterUser(RegisterUserRequest request)
+        public async Task RegisterUser(RegisterUserRequest request)
         {
             Log.Information($"Registering user {request.Username}");
 
@@ -145,7 +146,7 @@ namespace Orbit.Domain.Services
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(128));
         }
 
-        private async System.Threading.Tasks.Task SaveRefreshToken(string token, string userId)
+        private async Task SaveRefreshToken(string token, string userId)
         {
             var refreshToken = new UserRefreshToken
             {

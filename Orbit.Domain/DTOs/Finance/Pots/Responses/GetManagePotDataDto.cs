@@ -11,5 +11,6 @@
         public required string PotName { get; set; }
         public required decimal AmountToAdd { get; set; }
         public required bool IsSavingsPot { get; set; }
+        public required bool RolloverByDefault { get; set; } = false;
     }
 }

@@ -15,7 +15,7 @@ const StatCard = (props: StatCardProps) => {
     }).format(amount)
   }
 
-  const getColorByTitle = (title: string) => {
+  const getColourByTitle = (title: string) => {
     if (title.includes('Money In')) return 'green'
     if (title.includes('Money Spent')) return 'red'
     if (title.includes('Money Left')) return 'blue'
@@ -24,7 +24,7 @@ const StatCard = (props: StatCardProps) => {
     return 'gray'
   }
 
-  const color = getColorByTitle(props.title)
+  const color = getColourByTitle(props.title)
 
   return (
     <Card withBorder p="md" radius="md" shadow="sm" h="100%">

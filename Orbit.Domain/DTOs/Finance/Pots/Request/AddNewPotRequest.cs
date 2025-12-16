@@ -5,5 +5,6 @@
         public string PotName { get; set; } = string.Empty;
         public decimal AmountToAdd { get; set; }
         public bool IsSavingsPot { get; set; }
+        public bool RolloverByDefault { get; set; } = false;
     }
 }

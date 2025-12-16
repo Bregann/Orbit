@@ -20,7 +20,7 @@ export default function DocumentsListCard({ documents, onDownload, onDelete, isD
     return <IconFileText size="1.2rem" />
   }
 
-  const getFileIconColor = (type: string) => {
+  const getFileIconColour = (type: string) => {
     const lowerType = type.toLowerCase()
     if (lowerType.includes('pdf')) return 'red'
     if (lowerType.includes('image') || lowerType.includes('jpg') || lowerType.includes('png')) return 'green'
@@ -61,7 +61,7 @@ export default function DocumentsListCard({ documents, onDownload, onDelete, isD
                 <Table.Tr key={doc.documentId}>
                   <Table.Td>
                     <Group gap="sm" wrap="nowrap">
-                      <ThemeIcon size="md" radius="sm" variant="light" color={getFileIconColor(doc.documentType)}>
+                      <ThemeIcon size="md" radius="sm" variant="light" color={getFileIconColour(doc.documentType)}>
                         {getFileIcon(doc.documentType)}
                       </ThemeIcon>
                       <Text size="sm" lineClamp={1}>{doc.documentName}</Text>

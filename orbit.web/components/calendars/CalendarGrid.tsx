@@ -28,7 +28,7 @@ interface CalendarGridProps {
   onGoToToday: () => void
   onSelectDate: (_date: Date) => void
   onViewEvent: (_event: CalendarEvent) => void
-  getEventTypeColor: (_typeId: string) => string
+  getEventTypeColour: (_typeId: string) => string
   getEventsForDate: (_date: Date) => CalendarEvent[]
 }
 
@@ -39,7 +39,7 @@ export default function CalendarGrid({
   onGoToToday,
   onSelectDate,
   onViewEvent,
-  getEventTypeColor,
+  getEventTypeColour,
   getEventsForDate
 }: CalendarGridProps) {
   const getDaysInMonth = (date: Date) => {
@@ -162,7 +162,7 @@ export default function CalendarGrid({
                         py={2}
                         radius="sm"
                         style={{
-                          backgroundColor: `var(--mantine-color-${getEventTypeColor(event.typeId)}-9)`,
+                          backgroundColor: `var(--mantine-color-${getEventTypeColour(event.typeId)}-9)`,
                           cursor: 'pointer',
                         }}
                         onClick={(e) => {
@@ -182,7 +182,7 @@ export default function CalendarGrid({
                           {event.isAllDay && (
                             <IconSun size="0.7rem" style={{ flexShrink: 0 }} />
                           )}
-                          <Text size="xs" lineClamp={1} c={getEventTypeColor(event.typeId)}>
+                          <Text size="xs" lineClamp={1} c={getEventTypeColour(event.typeId)}>
                             {!event.isAllDay && event.startTime && `${event.startTime} `}{event.title}
                           </Text>
                         </Group>

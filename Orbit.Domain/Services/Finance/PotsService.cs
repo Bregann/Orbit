@@ -33,7 +33,8 @@ namespace Orbit.Domain.Services.Finance
                     PotName = p.PotName,
                     AmountAllocated = $"£{p.AmountToAdd / 100m:0.00}",
                     AmountLeft = $"£{p.PotAmountLeft / 100m:0.00}",
-                    AmountSpent = $"£{p.PotAmountSpent / 100m:0.00}"
+                    AmountSpent = $"£{p.PotAmountSpent / 100m:0.00}",
+                    RolloverByDefault = p.RolloverDefaultChecked
                 })
                 .ToArrayAsync();
 
@@ -62,7 +63,8 @@ namespace Orbit.Domain.Services.Finance
                     PotId = p.Id,
                     PotName = p.PotName,
                     AmountToAdd = p.AmountToAdd / 100m,
-                    IsSavingsPot = false
+                    IsSavingsPot = false,
+                    RolloverByDefault = p.RolloverDefaultChecked
                 })
                 .Union(context.SavingsPots
                     .Select(p => new ManagePotData
@@ -70,7 +72,8 @@ namespace Orbit.Domain.Services.Finance
                         PotId = p.Id,
                         PotName = p.PotName,
                         AmountToAdd = p.AmountToAdd / 100m,
-                        IsSavingsPot = true
+                        IsSavingsPot = true,
+                        RolloverByDefault = false
                     }))
                 .ToArrayAsync();
 
@@ -88,7 +91,8 @@ namespace Orbit.Domain.Services.Finance
                     PotId = p.Id,
                     PotName = p.PotName,
                     AmountToAdd = p.AmountToAdd / 100m,
-                    RolloverAmount = $"£{p.PotAmountLeft / 100.0:0.00}"
+                    RolloverAmount = $"£{p.PotAmountLeft / 100.0:0.00}",
+                    RolloverByDefault = p.RolloverDefaultChecked
                 })
                 .ToArrayAsync();
 
@@ -147,6 +151,7 @@ namespace Orbit.Domain.Services.Finance
                     AmountToAdd = (long)(request.AmountToAdd * 100),
                     PotAmountLeft = 0,
                     PotAmountSpent = 0,
+                    RolloverDefaultChecked = request.RolloverByDefault
                 };
 
                 await context.SpendingPots.AddAsync(pot);

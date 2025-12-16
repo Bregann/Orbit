@@ -3,16 +3,17 @@ using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.Finance.Month.Request;
 using Orbit.Domain.Interfaces.Api.Finance;
+using Task = System.Threading.Tasks.Task;
 
 namespace Orbit.Domain.Services.Finance
 {
     public class MonthService(AppDbContext context) : IMonthService
     {
-        public async System.Threading.Tasks.Task AddNewMonth(AddNewMonthRequest request)
+        public async Task AddNewMonth(AddNewMonthRequest request)
         {
             // get the current historic month from the database
             var currentHistoricMonth = await context.HistoricData
-                .OrderByDescending(h => h.DateAdded)
+                .OrderByDescending(h => h.StartDate)
                 .FirstOrDefaultAsync();
 
             var spendingPots = await context.SpendingPots.ToArrayAsync();
@@ -22,6 +23,9 @@ namespace Orbit.Domain.Services.Finance
             {
                 // calculate the total amount spent in the month
                 currentHistoricMonth.AmountSpent = spendingPots.Sum(p => p.PotAmountSpent);
+                currentHistoricMonth.AmountLeftOver = spendingPots.Sum(p => p.PotAmountLeft);
+                currentHistoricMonth.EndDate = DateTime.UtcNow;
+                await context.SaveChangesAsync();
 
                 // Archive spending pots data
                 foreach (var pot in spendingPots)
@@ -91,10 +95,11 @@ namespace Orbit.Domain.Services.Finance
             // Create a new historic month entry
             var newHistoricMonth = new HistoricMonthlyData
             {
-                DateAdded = DateTime.UtcNow,
+                StartDate = DateTime.UtcNow,
                 MonthlyIncome = (long)(request.MonthlyIncome * 100),
                 AmountSaved = savingsPots.Sum(p => p.AmountToAdd),
                 AmountSpent = 0, // This will be updated at the end of the month
+                AmountLeftOver = 0, // calculated at the end of the month
                 SubscriptionCostAmount = context.Subscriptions.Sum(s => s.SubscriptionMonthlyAmount)
             };
 

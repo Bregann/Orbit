@@ -21,7 +21,6 @@ import ThisMonthBudgetSection from '@/components/finance/this-month/ThisMonthBud
 import ThisMonthSavingsSection from '@/components/finance/this-month/ThisMonthSavingsSection'
 import ThisMonthSubscriptionsSection from '@/components/finance/this-month/ThisMonthSubscriptionsSection'
 import ThisMonthTransactionsSection from '@/components/finance/this-month/ThisMonthTransactionsSection'
-import ThisMonthAnalyticsSection from '@/components/finance/this-month/ThisMonthAnalyticsSection'
 
 export default function ThisMonthComponent() {
   const { data: potOptions, isLoading: isLoadingPotOptions } = useQuery({
@@ -133,11 +132,6 @@ export default function ThisMonthComponent() {
           transactions={thisMonthTransactionsData.transactions}
           potOptions={potOptions.potOptions}
         />
-
-        <Divider />
-
-        {/* Analytics Section */}
-        <ThisMonthAnalyticsSection />
       </Stack>
     </Container>
   )

@@ -22,7 +22,7 @@ import {
 } from '@mantine/core'
 import { IconCheck, IconX, IconCalendarRepeat } from '@tabler/icons-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export interface AddNewMonthModalProps {
   displayModal: boolean
@@ -44,6 +44,19 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
 
   const [incomeForMonth, setIncomeForMonth] = useState<number | string>('')
   const [potRollovers, setPotRollovers] = useState<{ [key: number]: boolean }>({})
+
+  // Initialize rollover checkboxes based on rolloverByDefault
+  useEffect(() => {
+    if (data?.spendingPots) {
+      const initialRollovers: { [key: number]: boolean } = {}
+      data.spendingPots.forEach(pot => {
+        if (pot.rolloverByDefault) {
+          initialRollovers[pot.potId] = true
+        }
+      })
+      setPotRollovers(initialRollovers)
+    }
+  }, [data])
 
   const updateSpendingPotAmountAllocatedAmount = (potId: number, amount: number) => {
     queryClient.setQueryData<GetAddMonthPotDataDto>(['addMonthPotData'], (oldData) => {
@@ -174,7 +187,7 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
 
                       <div>
                         <Text size="sm" c="dimmed" mb="xs">
-                          Rollover available: {pot.rolloverAmount}
+                            Rollover available: {pot.rolloverAmount}
                         </Text>
                         <Checkbox
                           checked={potRollovers[pot.potId] || false}

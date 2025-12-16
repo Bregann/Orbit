@@ -10,7 +10,9 @@ namespace Orbit.Domain.Database.Models
         public int Id { get; set; }
 
         [Required]
-        public required DateTime DateAdded { get; set; }
+        public required DateTime StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
 
         [Required]
         public required decimal MonthlyIncome { get; set; }
@@ -20,6 +22,9 @@ namespace Orbit.Domain.Database.Models
 
         [Required]
         public required decimal AmountSpent { get; set; }
+
+        [Required]
+        public required decimal AmountLeftOver { get; set; }
 
         [Required]
         public required decimal SubscriptionCostAmount { get; set; }

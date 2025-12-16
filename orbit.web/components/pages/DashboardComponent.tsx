@@ -19,16 +19,54 @@ import {
   IconCheckbox,
   IconFiles,
   IconShoppingCart,
-  IconMoodSmile,
   IconCalendar,
   IconNotes,
-  IconTrendingUp,
-  IconCalendarEvent
+  IconCalendarEvent,
+  IconTrendingDown
 } from '@tabler/icons-react'
 import { useRouter } from 'next/navigation'
+import { useQuery } from '@tanstack/react-query'
+import { doQueryGet } from '@/helpers/apiClient'
+import type { GetDashboardOverviewDataDto } from '@/interfaces/api/dashboard/GetDashboardOverviewDataDto'
+import { getPriorityColour } from '@/helpers/dataHelper'
 
 export default function DashboardComponent() {
   const router = useRouter()
+
+  const { data: dashboardData, isLoading } = useQuery({
+    queryKey: ['dashboardOverview'],
+    queryFn: async () => await doQueryGet<GetDashboardOverviewDataDto>('/api/Dashboard/GetDashboardOverviewData')
+  })
+
+  const formatDate = (dateString: string): string => {
+    if (!dateString) return 'No date'
+
+    const date = new Date(dateString)
+
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'Invalid date'
+    }
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    const compareDate = new Date(date)
+    compareDate.setHours(0, 0, 0, 0)
+
+    if (compareDate.getTime() === today.getTime()) {
+      return 'Today'
+    } else if (compareDate.getTime() === tomorrow.getTime()) {
+      return 'Tomorrow'
+    } else {
+      return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })
+    }
+  }
+
+  console.log('Dashboard Data:', dashboardData)
 
   // Quick access sections
   const sections = [
@@ -61,13 +99,6 @@ export default function DashboardComponent() {
       href: '/shopping'
     },
     {
-      title: 'Journal',
-      description: 'Mood & energy tracking',
-      icon: IconMoodSmile,
-      color: 'pink',
-      href: '/journal'
-    },
-    {
       title: 'Calendar',
       description: 'Chores, maintenance & events',
       icon: IconCalendar,
@@ -83,18 +114,20 @@ export default function DashboardComponent() {
     }
   ]
 
-  // Mock data - replace with real data later
-  const todayTasks = [
-    { id: 1, title: 'Review monthly budget', completed: false },
-    { id: 2, title: 'shopping shopping', completed: false },
-    { id: 3, title: 'Call plumber', completed: true }
-  ]
+  if (isLoading || !dashboardData) {
+    return (
+      <Container size="xl" px={{ base: 'xs', sm: 'md' }}>
+        <Title order={1} mb="lg">
+          Dashboard
+        </Title>
+        <Text c="dimmed">Loading...</Text>
+      </Container>
+    )
+  }
 
-  const upcomingEvents = [
-    { id: 1, title: 'Car maintenance', date: 'Nov 22', type: 'maintenance' },
-    { id: 2, title: 'Dinner with friends', date: 'Nov 24', type: 'social' },
-    { id: 3, title: 'Pay electricity bill', date: 'Nov 25', type: 'bill' }
-  ]
+  const tasksCompletionPercentage = dashboardData.totalTasks > 0
+    ? Math.round((dashboardData.tasksCompleted / dashboardData.totalTasks) * 100)
+    : 0
 
   return (
     <Container size="xl" px={{ base: 'xs', sm: 'md' }}>
@@ -107,7 +140,7 @@ export default function DashboardComponent() {
         <Title order={2} size="h3">At a Glance</Title>
 
         <Grid gutter="md">
-          {/* Finance Summary */}
+          {/* Money Left */}
           <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
             <Card shadow="sm" padding="md" radius="md" withBorder h="100%">
               <Stack gap="xs">
@@ -117,12 +150,24 @@ export default function DashboardComponent() {
                   </ThemeIcon>
                   <Text size="xs" c="dimmed">This Month</Text>
                 </Group>
-                <Text size="xl" fw={700}>£2,450</Text>
+                <Text size="xl" fw={700}>{dashboardData.moneyLeft}</Text>
                 <Text size="xs" c="dimmed">Money Left</Text>
-                <Group gap="xs">
-                  <IconTrendingUp size="0.9rem" color="green" />
-                  <Text size="xs" c="green">+12% from last month</Text>
+              </Stack>
+            </Card>
+          </Grid.Col>
+
+          {/* Money Spent */}
+          <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+            <Card shadow="sm" padding="md" radius="md" withBorder h="100%">
+              <Stack gap="xs">
+                <Group justify="space-between">
+                  <ThemeIcon size="md" radius="md" color="red" variant="light">
+                    <IconTrendingDown size="1rem" />
+                  </ThemeIcon>
+                  <Text size="xs" c="dimmed">This Month</Text>
                 </Group>
+                <Text size="xl" fw={700}>{dashboardData.moneySpent}</Text>
+                <Text size="xs" c="dimmed">Money Spent</Text>
               </Stack>
             </Card>
           </Grid.Col>
@@ -137,26 +182,9 @@ export default function DashboardComponent() {
                   </ThemeIcon>
                   <Text size="xs" c="dimmed">Today</Text>
                 </Group>
-                <Text size="xl" fw={700}>5/12</Text>
+                <Text size="xl" fw={700}>{dashboardData.tasksCompleted}/{dashboardData.totalTasks}</Text>
                 <Text size="xs" c="dimmed">Tasks Completed</Text>
-                <Progress value={42} size="sm" color="blue" />
-              </Stack>
-            </Card>
-          </Grid.Col>
-
-          {/* Mood Tracker */}
-          <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-            <Card shadow="sm" padding="md" radius="md" withBorder h="100%">
-              <Stack gap="xs">
-                <Group justify="space-between">
-                  <ThemeIcon size="md" radius="md" color="pink" variant="light">
-                    <IconMoodSmile size="1rem" />
-                  </ThemeIcon>
-                  <Text size="xs" c="dimmed">This Week</Text>
-                </Group>
-                <Text size="xl" fw={700}>😊 Good</Text>
-                <Text size="xs" c="dimmed">Average Mood</Text>
-                <Text size="xs" c="dimmed">7 entries logged</Text>
+                <Progress value={tasksCompletionPercentage} size="sm" color="blue" />
               </Stack>
             </Card>
           </Grid.Col>
@@ -171,9 +199,8 @@ export default function DashboardComponent() {
                   </ThemeIcon>
                   <Text size="xs" c="dimmed">Next 7 Days</Text>
                 </Group>
-                <Text size="xl" fw={700}>8</Text>
+                <Text size="xl" fw={700}>{dashboardData.eventsScheduled}</Text>
                 <Text size="xs" c="dimmed">Events Scheduled</Text>
-                <Text size="xs" c="orange" fw={500}>2 require attention</Text>
               </Stack>
             </Card>
           </Grid.Col>
@@ -187,38 +214,48 @@ export default function DashboardComponent() {
             <Stack gap="md">
               <Group justify="space-between">
                 <Title order={3} size="h4">Today&apos;s Tasks</Title>
-                <Badge color="blue" variant="light">3</Badge>
+                <Badge color="blue" variant="light">{dashboardData.todaysTasks.length}</Badge>
               </Group>
               <Divider />
-              <Stack gap="sm">
-                {todayTasks.map((task) => (
-                  <Group key={task.id} justify="space-between">
-                    <Group gap="xs">
-                      <ThemeIcon
-                        size="sm"
-                        radius="xl"
-                        variant={task.completed ? 'filled' : 'light'}
-                        color={task.completed ? 'green' : 'gray'}
-                      >
-                        <IconCheckbox size="0.8rem" />
-                      </ThemeIcon>
-                      <Text
-                        size="sm"
-                        style={{ textDecoration: task.completed ? 'line-through' : 'none' }}
-                        c={task.completed ? 'dimmed' : undefined}
-                      >
-                        {task.title}
-                      </Text>
+              {dashboardData.todaysTasks.length > 0 ? (
+                <Stack gap="sm">
+                  {dashboardData.todaysTasks.map((task) => (
+                    <Group key={task.taskId} justify="space-between">
+                      <Group gap="xs">
+                        <ThemeIcon
+                          size="sm"
+                          radius="xl"
+                          variant={task.isCompleted ? 'filled' : 'light'}
+                          color={task.isCompleted ? 'green' : getPriorityColour(task.priority)}
+                        >
+                          <IconCheckbox size="0.8rem" />
+                        </ThemeIcon>
+                        <Text
+                          size="sm"
+                          style={{ textDecoration: task.isCompleted ? 'line-through' : 'none' }}
+                          c={task.isCompleted ? 'dimmed' : undefined}
+                        >
+                          {task.taskTitle}
+                        </Text>
+                      </Group>
+                      {!task.isCompleted && (
+                        <Badge size="xs" color={getPriorityColour(task.priority)} variant="light">
+                          {task.priority === 2 ? 'High' : task.priority === 1 ? 'Med' : 'Low'}
+                        </Badge>
+                      )}
                     </Group>
-                  </Group>
-                ))}
-              </Stack>
+                  ))}
+                </Stack>
+              ) : (
+                <Text size="sm" c="dimmed" ta="center">No tasks for today</Text>
+              )}
               <Text
                 size="sm"
                 c="blue"
                 style={{ cursor: 'pointer' }}
                 ta="center"
                 mt="xs"
+                onClick={() => router.push('/tasks')}
               >
                 View All Tasks →
               </Text>
@@ -231,30 +268,35 @@ export default function DashboardComponent() {
             <Stack gap="md">
               <Group justify="space-between">
                 <Title order={3} size="h4">Upcoming</Title>
-                <Badge color="cyan" variant="light">{upcomingEvents.length}</Badge>
+                <Badge color="cyan" variant="light">{dashboardData.upcomingEvents.length}</Badge>
               </Group>
               <Divider />
-              <Stack gap="sm">
-                {upcomingEvents.map((event) => (
-                  <Group key={event.id} justify="space-between">
-                    <Group gap="xs">
-                      <ThemeIcon size="sm" radius="md" variant="light" color="cyan">
-                        <IconCalendarEvent size="0.8rem" />
-                      </ThemeIcon>
-                      <div>
-                        <Text size="sm">{event.title}</Text>
-                        <Text size="xs" c="dimmed">{event.date}</Text>
-                      </div>
+              {dashboardData.upcomingEvents.length > 0 ? (
+                <Stack gap="sm">
+                  {dashboardData.upcomingEvents.map((event) => (
+                    <Group key={event.eventId} justify="space-between">
+                      <Group gap="xs">
+                        <ThemeIcon size="sm" radius="md" variant="light" color="cyan">
+                          <IconCalendarEvent size="0.8rem" />
+                        </ThemeIcon>
+                        <div>
+                          <Text size="sm">{event.eventTitle}</Text>
+                          <Text size="xs" c="dimmed">{formatDate(event.eventDate)}</Text>
+                        </div>
+                      </Group>
                     </Group>
-                  </Group>
-                ))}
-              </Stack>
+                  ))}
+                </Stack>
+              ) : (
+                <Text size="sm" c="dimmed" ta="center">No upcoming events</Text>
+              )}
               <Text
                 size="sm"
                 c="cyan"
                 style={{ cursor: 'pointer' }}
                 ta="center"
                 mt="xs"
+                onClick={() => router.push('/calendar')}
               >
                 View Calendar →
               </Text>

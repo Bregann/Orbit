@@ -81,10 +81,10 @@ export default function HomeComponent() {
 
         {/* Financial Stats Grid */}
         <div>
-          <Title order={2} size="h3" mb="md">
+          <Title order={2} size="h3" mb="md" ta="center">
             Current Month Summary
           </Title>
-          <Grid gutter="md">
+          <Grid gutter="md" justify="center">
             <Grid.Col span={{ base: 12, xs: 6, sm: 6, md: 2.4 }}>
               <StatCard title="Money In" amount={statsData.moneyIn} />
             </Grid.Col>
@@ -92,14 +92,12 @@ export default function HomeComponent() {
               <StatCard title="Money Spent" amount={statsData.moneySpent} />
             </Grid.Col>
             <Grid.Col span={{ base: 12, xs: 6, sm: 6, md: 2.4 }}>
+              <StatCard title="Total Saved" amount={statsData.totalInSavings} />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, xs: 6, sm: 6, md: 2.4 }}>
               <StatCard title="Money Left" amount={statsData.moneyLeft} />
             </Grid.Col>
-            <Grid.Col span={{ base: 12, xs: 6, sm: 6, md: 2.4 }}>
-              <StatCard title="Total in Savings" amount={statsData.totalInSavings} />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, xs: 6, sm: 6, md: 2.4 }}>
-              <StatCard title="Total in Spending Pots" amount={statsData.totalInSpendingPots} />
-            </Grid.Col>
+
           </Grid>
         </div>
 

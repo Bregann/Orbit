@@ -77,8 +77,8 @@ namespace Orbit.Domain.Services.Finance
         public async Task<GetTransactionsForCurrentMonthDto> GetTransactionsForMonth()
         {
             // get the current month
-            var startDate = context.HistoricData.OrderByDescending(h => h.DateAdded)
-                .Select(h => h.DateAdded)
+            var startDate = context.HistoricData.OrderByDescending(h => h.StartDate)
+                .Select(h => h.StartDate)
                 .FirstOrDefault();
 
             if (startDate == default)

@@ -66,7 +66,7 @@ export default function ViewEventModal({ opened, onClose, event, onDelete, onEdi
     return eventTypes.find(t => t.id === typeId)?.label || 'Unknown'
   }
 
-  const getEventTypeColor = (typeId: string) => {
+  const getEventTypeColour = (typeId: string) => {
     return eventTypes.find(t => t.id === typeId)?.color || '#6b7280'
   }
 
@@ -176,14 +176,14 @@ export default function ViewEventModal({ opened, onClose, event, onDelete, onEdi
             <Badge
               size="lg"
               variant="light"
-              color={getEventTypeColor(viewingEvent.typeId)}
+              color={getEventTypeColour(viewingEvent.typeId)}
               leftSection={
                 <div
                   style={{
                     width: 12,
                     height: 12,
                     borderRadius: '50%',
-                    backgroundColor: getEventTypeColor(viewingEvent.typeId),
+                    backgroundColor: getEventTypeColour(viewingEvent.typeId),
                   }}
                 />
               }

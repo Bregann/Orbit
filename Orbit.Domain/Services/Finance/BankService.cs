@@ -53,7 +53,7 @@ namespace Orbit.Domain.Services.Finance
             }
         }
 
-        public async System.Threading.Tasks.Task GetOpenBankingTransactionsAndAddToDatabase()
+        public async Task GetOpenBankingTransactionsAndAddToDatabase()
         {
             var accessToken = await bankApiHelper.GetGoCardlessBankingDataAccessToken();
 

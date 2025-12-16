@@ -12,6 +12,7 @@
         public required string PotName { get; set; }
         public required decimal AmountToAdd { get; set; }
         public required string RolloverAmount { get; set; }
+        public required bool RolloverByDefault { get; set; }
     }
 
     public class AddMonthSavingsPot

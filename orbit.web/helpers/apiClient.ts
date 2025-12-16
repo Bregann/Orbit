@@ -72,6 +72,10 @@ async function doRequest<T>(
           })
         } else {
           console.error('Refresh failed. You shall not pass.')
+          // Clear cookies and redirect to login
+          document.cookie = 'accessToken=; Max-Age=0; path=/'
+          document.cookie = 'refreshToken=; Max-Age=0; path=/'
+          window.location.href = '/login'
           return {
             data: undefined,
             status: res.status,
@@ -191,6 +195,10 @@ export async function doGetBlob(endpoint: string, options?: RequestOptions): Pro
             retry: false,
           })
         } else {
+          // Clear cookies and redirect to login
+          document.cookie = 'accessToken=; Max-Age=0; path=/'
+          document.cookie = 'refreshToken=; Max-Age=0; path=/'
+          window.location.href = '/login'
           throw new Error('Authentication failed')
         }
       }

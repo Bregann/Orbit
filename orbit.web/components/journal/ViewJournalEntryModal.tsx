@@ -35,7 +35,7 @@ export default function ViewJournalEntryModal({ opened, onClose, entry }: ViewJo
     return <IconComponent size="1rem" />
   }
 
-  const getMoodColor = (mood: number) => {
+  const getMoodColour = (mood: number) => {
     const moodData = moods.find(m => m.value === mood)
     return moodData?.color || 'gray'
   }
@@ -69,7 +69,7 @@ export default function ViewJournalEntryModal({ opened, onClose, entry }: ViewJo
           <Badge
             size="lg"
             variant="light"
-            color={getMoodColor(entry.mood)}
+            color={getMoodColour(entry.mood)}
             leftSection={getMoodIcon(entry.mood)}
           >
             {getMoodLabel(entry.mood)}

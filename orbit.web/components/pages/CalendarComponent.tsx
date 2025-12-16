@@ -111,7 +111,7 @@ export default function CalendarComponent() {
 
   const [currentMonth, setCurrentMonth] = useState(new Date())
 
-  const getEventTypeColor = (typeId: string) => {
+  const getEventTypeColour = (typeId: string) => {
     const eventType = eventTypes.find(t => t.id === typeId)
     return eventType?.color || '#6b7280'
   }
@@ -354,7 +354,7 @@ export default function CalendarComponent() {
                 openDayEventsModal()
               }}
               onViewEvent={viewEvent}
-              getEventTypeColor={getEventTypeColor}
+              getEventTypeColour={getEventTypeColour}
               getEventsForDate={getEventsForDate}
             />
           </Grid.Col>
@@ -367,7 +367,7 @@ export default function CalendarComponent() {
               pastEvents={getPastEvents()}
               onTabChange={setActiveTab}
               onViewEvent={viewEvent}
-              getEventTypeColor={getEventTypeColor}
+              getEventTypeColour={getEventTypeColour}
             />
           </Grid.Col>
         </Grid>
@@ -409,7 +409,7 @@ export default function CalendarComponent() {
         events={selectedDate ? getEventsForDate(selectedDate) : []}
         onViewEvent={viewEvent}
         onAddEvent={openAddModal}
-        getEventTypeColor={getEventTypeColor}
+        getEventTypeColour={getEventTypeColour}
       />
     </Container>
   )

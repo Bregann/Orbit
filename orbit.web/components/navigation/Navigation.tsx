@@ -53,6 +53,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
   // Finance sub-items
   const financeSubItems = [
     { label: 'This Month', icon: IconCalendar, href: '/finance/this-month' },
+    { label: 'Historic Data', icon: IconCalendarEvent, href: '/finance/historic-data' },
     { label: 'Management', icon: IconSettings, href: '/finance/management' },
   ]
 

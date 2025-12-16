@@ -7,4 +7,5 @@ export interface ManagePotData {
   potName: string
   amountToAdd: number
   isSavingsPot: boolean
+  rolloverByDefault: boolean
 }

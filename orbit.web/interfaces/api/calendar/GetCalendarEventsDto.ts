@@ -14,7 +14,7 @@ export interface EventEntry {
   recurrenceRule: string | null // RRule string
   calendarEventTypeId: number
   calendarEventTypeName: string
-  calendarEventTypeColour: string // hex color
+  calendarEventTypeColour: string // hex colour
 }
 
 export interface EventExceptionEntry {

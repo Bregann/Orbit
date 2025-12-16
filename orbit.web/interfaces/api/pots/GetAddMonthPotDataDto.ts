@@ -8,6 +8,7 @@ export interface AddMonthSpendingPot {
   potName: string
   amountToAdd: number
   rolloverAmount: string
+  rolloverByDefault: boolean
 }
 
 export interface AddMonthSavingsPot {

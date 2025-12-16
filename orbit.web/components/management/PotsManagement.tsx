@@ -42,6 +42,7 @@ export default function PotsManagement({ onDeletePot }: PotsManagementProps) {
   const [addPotName, setAddPotName] = useState('')
   const [addPotAmount, setAddPotAmount] = useState('')
   const [addPotIsSavings, setAddPotIsSavings] = useState(false)
+  const [addPotRollover, setAddPotRollover] = useState(false)
 
   const { data: managePotData } = useQuery({
     queryKey: ['getManagePotData'],
@@ -57,6 +58,7 @@ export default function PotsManagement({ onDeletePot }: PotsManagementProps) {
       setAddPotName('')
       setAddPotAmount('')
       setAddPotIsSavings(false)
+      setAddPotRollover(false)
     },
     onError: (error) => {
       notificationHelper.showErrorNotification('Error', error.message, 3000, <IconCross />)
@@ -67,12 +69,13 @@ export default function PotsManagement({ onDeletePot }: PotsManagementProps) {
     const reqBody = {
       potName: addPotName,
       amountToAdd: addPotAmount,
-      isSavingsPot: addPotIsSavings
+      isSavingsPot: addPotIsSavings,
+      rolloverByDefault: addPotIsSavings ? false : addPotRollover
     }
     await addPotMutation(reqBody)
   }
 
-  const handlePotChange = (index: number, potName?: string, potAmount?: number) => {
+  const handlePotChange = (index: number, potName?: string, potAmount?: number, rollover?: boolean) => {
     queryClient.setQueryData<GetManagePotDataDto>(['getManagePotData'], (oldData) => {
       if (oldData === undefined) {
         return oldData
@@ -80,7 +83,12 @@ export default function PotsManagement({ onDeletePot }: PotsManagementProps) {
 
       const updatedPots = oldData.pots.map((pot, potIndex) => {
         if (potIndex === index) {
-          return { ...pot, potName: potName ?? pot.potName, amountToAdd: potAmount ?? pot.amountToAdd }
+          return {
+            ...pot,
+            potName: potName ?? pot.potName,
+            amountToAdd: potAmount ?? pot.amountToAdd,
+            rolloverByDefault: rollover ?? pot.rolloverByDefault
+          }
         }
         return pot
       })
@@ -141,22 +149,38 @@ export default function PotsManagement({ onDeletePot }: PotsManagementProps) {
                   type="number"
                 />
               </Grid.Col>
-              <Grid.Col span={{ base: 6, xs: 4 }}>
-                <Group gap="xs" h="100%" align="center">
-                  <Checkbox
-                    checked={addPotIsSavings}
-                    onChange={(e) => setAddPotIsSavings(e.currentTarget.checked)}
-                    label="Savings?"
-                    size="sm"
-                  />
+              <Grid.Col span={{ base: 12, xs: 4 }}>
+                <Stack gap="xs">
+                  <Group gap="xs" wrap="nowrap">
+                    <Checkbox
+                      checked={addPotIsSavings}
+                      onChange={(e) => {
+                        setAddPotIsSavings(e.currentTarget.checked)
+                        if (e.currentTarget.checked) {
+                          setAddPotRollover(false)
+                        }
+                      }}
+                      label="Savings?"
+                      size="sm"
+                    />
+                    {!addPotIsSavings && (
+                      <Checkbox
+                        checked={addPotRollover}
+                        onChange={(e) => setAddPotRollover(e.currentTarget.checked)}
+                        label="Auto Rollover?"
+                        size="sm"
+                      />
+                    )}
+                  </Group>
                   <Button
                     onClick={async () => { await handleAddPot() }}
                     size="sm"
+                    fullWidth
                     leftSection={<IconPlus size="1rem" />}
                   >
                     Add
                   </Button>
-                </Group>
+                </Stack>
               </Grid.Col>
             </Grid>
           </Stack>
@@ -170,13 +194,14 @@ export default function PotsManagement({ onDeletePot }: PotsManagementProps) {
                 <Table.Th>Pot Name</Table.Th>
                 <Table.Th>Amount (£)</Table.Th>
                 <Table.Th>Type</Table.Th>
+                <Table.Th>Auto Rollover</Table.Th>
                 <Table.Th ta="right">Actions</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {managePotData.pots.length === 0 ? (
                 <Table.Tr>
-                  <Table.Td colSpan={4}>
+                  <Table.Td colSpan={5}>
                     <Center py="md">
                       <Text size="sm" c="dimmed">No pots created yet</Text>
                     </Center>
@@ -187,16 +212,16 @@ export default function PotsManagement({ onDeletePot }: PotsManagementProps) {
                   <Table.Tr key={index}>
                     <Table.Td>
                       <Input
-                        value={pot.potName}
-                        onChange={(e) => handlePotChange(index, e.target.value, undefined)}
+                        value={pot.potName || ''}
+                        onChange={(e) => handlePotChange(index, e.target.value, undefined, undefined)}
                         size="sm"
                       />
                     </Table.Td>
                     <Table.Td w="20%">
                       <Input
                         type="number"
-                        value={pot.amountToAdd}
-                        onChange={(e) => { handlePotChange(index, undefined, Number(e.target.value)) }}
+                        value={pot.amountToAdd || ''}
+                        onChange={(e) => { handlePotChange(index, undefined, Number(e.target.value), undefined) }}
                         size="sm"
                       />
                     </Table.Td>
@@ -208,6 +233,15 @@ export default function PotsManagement({ onDeletePot }: PotsManagementProps) {
                       >
                         {pot.isSavingsPot ? 'Savings' : 'Spending'}
                       </Badge>
+                    </Table.Td>
+                    <Table.Td w="15%">
+                      {!pot.isSavingsPot && (
+                        <Checkbox
+                          checked={pot.rolloverByDefault || false}
+                          onChange={(e) => handlePotChange(index, undefined, undefined, e.currentTarget.checked)}
+                          size="sm"
+                        />
+                      )}
                     </Table.Td>
                     <Table.Td ta="right">
                       <Group gap="xs" justify="flex-end" wrap="nowrap">

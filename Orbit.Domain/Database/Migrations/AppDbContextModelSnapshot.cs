@@ -11,7 +11,7 @@ using Orbit.Domain.Database.Context;
 namespace Orbit.Domain.Database.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class PostgresqlContextModelSnapshot : ModelSnapshot
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -47,6 +47,139 @@ namespace Orbit.Domain.Database.Migrations
                     b.ToTable("AutomaticTransactions");
                 });
 
+            modelBuilder.Entity("Orbit.Domain.Database.Models.CalendarEvent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CalendarEventTypeId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EventLocation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("EventName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsAllDay")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RecurrenceRule")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CalendarEventTypeId");
+
+                    b.ToTable("CalendarEvents");
+                });
+
+            modelBuilder.Entity("Orbit.Domain.Database.Models.CalendarEventException", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CalendarEventId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ExceptionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CalendarEventId");
+
+                    b.ToTable("CalendarEventExceptions");
+                });
+
+            modelBuilder.Entity("Orbit.Domain.Database.Models.CalendarEventType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("EventTypeName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HexColourCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CalendarEventTypes");
+                });
+
+            modelBuilder.Entity("Orbit.Domain.Database.Models.Document", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DocumentCategoryId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DocumentName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DocumentPath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentCategoryId");
+
+                    b.ToTable("Documents");
+                });
+
+            modelBuilder.Entity("Orbit.Domain.Database.Models.DocumentCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DocumentCategories");
+                });
+
             modelBuilder.Entity("Orbit.Domain.Database.Models.EnvironmentalSetting", b =>
                 {
                     b.Property<int>("Id")
@@ -76,16 +209,25 @@ namespace Orbit.Domain.Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("AmountLeftOver")
+                        .HasColumnType("numeric");
+
                     b.Property<decimal>("AmountSaved")
                         .HasColumnType("numeric");
 
                     b.Property<decimal>("AmountSpent")
                         .HasColumnType("numeric");
 
-                    b.Property<DateTime>("DateAdded")
+                    b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("MonthlyIncome")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("SubscriptionCostAmount")
                         .HasColumnType("numeric");
 
                     b.HasKey("Id");
@@ -154,6 +296,86 @@ namespace Orbit.Domain.Database.Migrations
                     b.ToTable("HistoricSpendingPotData");
                 });
 
+            modelBuilder.Entity("Orbit.Domain.Database.Models.JournalEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Mood")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("JournalEntries");
+                });
+
+            modelBuilder.Entity("Orbit.Domain.Database.Models.NoteFolder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FolderIcon")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FolderName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NoteFolders");
+                });
+
+            modelBuilder.Entity("Orbit.Domain.Database.Models.NotePage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("FolderId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsFavourite")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FolderId");
+
+                    b.ToTable("NotePages");
+                });
+
             modelBuilder.Entity("Orbit.Domain.Database.Models.SavingsPot", b =>
                 {
                     b.Property<int>("Id")
@@ -177,6 +399,46 @@ namespace Orbit.Domain.Database.Migrations
                     b.ToTable("SavingsPots");
                 });
 
+            modelBuilder.Entity("Orbit.Domain.Database.Models.ShoppingListItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsPurchased")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ShoppingListItems");
+                });
+
+            modelBuilder.Entity("Orbit.Domain.Database.Models.ShoppingListQuickAddItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ShoppingListQuickAddItems");
+                });
+
             modelBuilder.Entity("Orbit.Domain.Database.Models.SpendingPot", b =>
                 {
                     b.Property<int>("Id")
@@ -198,9 +460,44 @@ namespace Orbit.Domain.Database.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("RolloverDefaultChecked")
+                        .HasColumnType("boolean");
+
                     b.HasKey("Id");
 
                     b.ToTable("SpendingPots");
+                });
+
+            modelBuilder.Entity("Orbit.Domain.Database.Models.Subscription", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BillingDay")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("BillingFrequency")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("BillingMonth")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("SubscriptionAmount")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("SubscriptionMonthlyAmount")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("SubscriptionName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Subscriptions");
                 });
 
             modelBuilder.Entity("Orbit.Domain.Database.Models.Task", b =>
@@ -364,6 +661,39 @@ namespace Orbit.Domain.Database.Migrations
                     b.Navigation("Pot");
                 });
 
+            modelBuilder.Entity("Orbit.Domain.Database.Models.CalendarEvent", b =>
+                {
+                    b.HasOne("Orbit.Domain.Database.Models.CalendarEventType", "CalendarEventType")
+                        .WithMany("CalendarEvents")
+                        .HasForeignKey("CalendarEventTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CalendarEventType");
+                });
+
+            modelBuilder.Entity("Orbit.Domain.Database.Models.CalendarEventException", b =>
+                {
+                    b.HasOne("Orbit.Domain.Database.Models.CalendarEvent", "CalendarEvent")
+                        .WithMany()
+                        .HasForeignKey("CalendarEventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CalendarEvent");
+                });
+
+            modelBuilder.Entity("Orbit.Domain.Database.Models.Document", b =>
+                {
+                    b.HasOne("Orbit.Domain.Database.Models.DocumentCategory", "DocumentCategory")
+                        .WithMany("Documents")
+                        .HasForeignKey("DocumentCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DocumentCategory");
+                });
+
             modelBuilder.Entity("Orbit.Domain.Database.Models.HistoricSavingsPotData", b =>
                 {
                     b.HasOne("Orbit.Domain.Database.Models.HistoricMonthlyData", "HistoricMonthlyData")
@@ -402,6 +732,16 @@ namespace Orbit.Domain.Database.Migrations
                     b.Navigation("Pot");
                 });
 
+            modelBuilder.Entity("Orbit.Domain.Database.Models.NotePage", b =>
+                {
+                    b.HasOne("Orbit.Domain.Database.Models.NoteFolder", "Folder")
+                        .WithMany("Notes")
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Folder");
+                });
+
             modelBuilder.Entity("Orbit.Domain.Database.Models.Task", b =>
                 {
                     b.HasOne("Orbit.Domain.Database.Models.TaskCategory", "TaskCategory")
@@ -433,11 +773,26 @@ namespace Orbit.Domain.Database.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Orbit.Domain.Database.Models.CalendarEventType", b =>
+                {
+                    b.Navigation("CalendarEvents");
+                });
+
+            modelBuilder.Entity("Orbit.Domain.Database.Models.DocumentCategory", b =>
+                {
+                    b.Navigation("Documents");
+                });
+
             modelBuilder.Entity("Orbit.Domain.Database.Models.HistoricMonthlyData", b =>
                 {
                     b.Navigation("HistoricPotData");
 
                     b.Navigation("HistoricSavingsPotData");
+                });
+
+            modelBuilder.Entity("Orbit.Domain.Database.Models.NoteFolder", b =>
+                {
+                    b.Navigation("Notes");
                 });
 
             modelBuilder.Entity("Orbit.Domain.Database.Models.SpendingPot", b =>

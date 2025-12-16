@@ -44,6 +44,7 @@ import type { GetTaskCategoriesResponse } from '@/interfaces/api/tasks/GetTaskCa
 import { TaskPriorityType } from '@/interfaces/api/tasks/TaskPriorityType'
 import AddTaskModal from '@/components/tasks/AddTaskModal'
 import ManageCategoriesModal from '@/components/tasks/ManageCategoriesModal'
+import { getPriorityColour } from '@/helpers/dataHelper'
 
 export default function TasksComponent() {
   const [selectedCategory, setSelectedCategory] = useState<number | 'All'>('All')
@@ -134,16 +135,6 @@ export default function TasksComponent() {
     const taskDate = new Date(t.dueDate)
     return taskDate > today && taskDate <= nextWeek
   })
-
-  const getPriorityColor = (priority: TaskPriorityType) => {
-    switch (priority) {
-      case TaskPriorityType.Critical: return 'red'
-      case TaskPriorityType.High: return 'orange'
-      case TaskPriorityType.Medium: return 'yellow'
-      case TaskPriorityType.Low: return 'blue'
-      default: return 'gray'
-    }
-  }
 
   const getPriorityLabel = (priority: TaskPriorityType) => {
     switch (priority) {
@@ -337,7 +328,7 @@ export default function TasksComponent() {
                               </Text>
                             )}
                             <Group gap="xs" mt={5}>
-                              <Badge size="xs" variant="light" color={getPriorityColor(task.priority)}>
+                              <Badge size="xs" variant="light" color={getPriorityColour(task.priority)}>
                                 {getPriorityLabel(task.priority)}
                               </Badge>
                               <Badge size="xs" variant="outline">
@@ -392,7 +383,7 @@ export default function TasksComponent() {
                     upcomingTasks.slice(0, 5).map(task => (
                       <Group key={task.id} justify="space-between" wrap="nowrap">
                         <Text size="sm" lineClamp={1} style={{ flex: 1 }}>{task.title}</Text>
-                        <Badge size="xs" variant="light" color={getPriorityColor(task.priority)}>
+                        <Badge size="xs" variant="light" color={getPriorityColour(task.priority)}>
                           {task.dueDate && new Date(task.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                         </Badge>
                       </Group>

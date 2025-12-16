@@ -21,6 +21,9 @@ namespace Orbit.Domain.Database.Models
         [Required]
         public required long PotAmountLeft { get; set; }
 
+        [Required]
+        public required bool RolloverDefaultChecked { get; set; }
+
         [DeleteBehavior(DeleteBehavior.Cascade)]
         public virtual ICollection<HistoricSpendingPotData> HistoricPotData { get; set; } = null!;
     }

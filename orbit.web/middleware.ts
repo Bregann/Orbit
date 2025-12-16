@@ -82,9 +82,22 @@ export async function middleware(request: NextRequest) {
 
           return response
         }
+      } else {
+        // Refresh failed - redirect to login
+        console.error('Token refresh failed in middleware, redirecting to login')
+        const response = NextResponse.redirect(new URL('/login', request.url))
+        // Clear the cookies
+        response.cookies.delete(ACCESS_TOKEN_COOKIE)
+        response.cookies.delete(REFRESH_TOKEN_COOKIE)
+        return response
       }
     } catch (error) {
       console.error('Error during token refresh:', error)
+      // On error, also redirect to login
+      const response = NextResponse.redirect(new URL('/login', request.url))
+      response.cookies.delete(ACCESS_TOKEN_COOKIE)
+      response.cookies.delete(REFRESH_TOKEN_COOKIE)
+      return response
     }
   }
 

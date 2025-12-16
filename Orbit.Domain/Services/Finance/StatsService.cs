@@ -11,35 +11,33 @@ namespace Orbit.Domain.Services.Finance
         {
             // get the latest month from the historic data
             var latestMonth = await context.HistoricData
-                .OrderByDescending(h => h.DateAdded)
+                .OrderByDescending(h => h.StartDate)
                 .FirstOrDefaultAsync();
 
             if (latestMonth == null)
             {
                 return new GetHomepageStatsDto
                 {
-                    MoneyIn = "£0.00",
-                    MoneySpent = "£0.00",
-                    MoneyLeft = "£0.00",
-                    TotalInSavings = "£0.00",
-                    TotalInSpendingPots = "£0.00"
+                    MoneyIn = 0,
+                    MoneySpent = 0,
+                    MoneyLeft = 0,
+                    TotalInSavings = 0,
                 };
             }
 
             // get all the transactions since the date added of the latest month
             var transactions = await context.Transactions
-                .Where(t => t.TransactionDate >= latestMonth.DateAdded)
+                .Where(t => t.TransactionDate >= latestMonth.StartDate)
                 .ToListAsync();
 
             var moneySpent = transactions.Sum(t => t.TransactionAmount);
 
             return new GetHomepageStatsDto
             {
-                MoneyIn = $"£{latestMonth.MonthlyIncome / 100m:0.00}",
-                MoneySpent = $"£{moneySpent / 100m:0.00}",
-                MoneyLeft = $"£{(latestMonth.MonthlyIncome - moneySpent) / 100m:0.00}",
-                TotalInSavings = $"£{await context.SavingsPots.SumAsync(s => s.PotAmount) / 100m:0.00}",
-                TotalInSpendingPots = $"£{await context.SpendingPots.SumAsync(s => s.PotAmountLeft) / 100m:0.00}"
+                MoneyIn = latestMonth.MonthlyIncome / 100m,
+                MoneySpent = moneySpent / 100m,
+                MoneyLeft = (latestMonth.MonthlyIncome - moneySpent) / 100m,
+                TotalInSavings = await context.SavingsPots.SumAsync(s => s.AmountToAdd) / 100m,
             };
         }
     }

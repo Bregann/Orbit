@@ -26,7 +26,7 @@ interface DayEventsModalProps {
   events: CalendarEvent[]
   onViewEvent: (_event: CalendarEvent) => void
   onAddEvent: () => void
-  getEventTypeColor: (_typeId: string) => string
+  getEventTypeColour: (_typeId: string) => string
 }
 
 export default function DayEventsModal({
@@ -36,7 +36,7 @@ export default function DayEventsModal({
   events,
   onViewEvent,
   onAddEvent,
-  getEventTypeColor
+  getEventTypeColour
 }: DayEventsModalProps) {
   if (!selectedDate) return null
 
@@ -108,7 +108,7 @@ export default function DayEventsModal({
                           width: 12,
                           height: 12,
                           borderRadius: '50%',
-                          backgroundColor: getEventTypeColor(event.typeId),
+                          backgroundColor: getEventTypeColour(event.typeId),
                           flexShrink: 0
                         }}
                       />
