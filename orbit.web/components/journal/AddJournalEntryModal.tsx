@@ -10,10 +10,10 @@ import { useState, useEffect } from 'react'
 import { useMutationPost } from '@/helpers/mutations/useMutationPost'
 import notificationHelper from '@/helpers/notificationHelper'
 import { IconCheck, IconX } from '@tabler/icons-react'
-import { moods } from './JournalEntriesList'
 import type { CreateJournalEntryRequest } from '@/interfaces/api/journal/CreateJournalEntryRequest'
 import { JournalMoodEnum } from '@/interfaces/api/journal/JournalMoodEnum'
 import { QueryKeys } from '@/helpers/QueryKeys'
+import { moods } from '@/helpers/moodHelper'
 
 interface AddJournalEntryModalProps {
   opened: boolean
