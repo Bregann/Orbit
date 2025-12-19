@@ -41,10 +41,10 @@ import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import notificationHelper from '@/helpers/notificationHelper'
 import type { GetTasksResponse } from '@/interfaces/api/tasks/GetTasksResponse'
 import type { GetTaskCategoriesResponse } from '@/interfaces/api/tasks/GetTaskCategoriesResponse'
-import { TaskPriorityType } from '@/interfaces/api/tasks/TaskPriorityType'
 import AddTaskModal from '@/components/tasks/AddTaskModal'
 import ManageCategoriesModal from '@/components/tasks/ManageCategoriesModal'
-import { getPriorityColour } from '@/helpers/dataHelper'
+import { getPriorityColour, getPriorityLabel } from '@/helpers/dataHelper'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export default function TasksComponent() {
   const [selectedCategory, setSelectedCategory] = useState<number | 'All'>('All')
@@ -54,13 +54,13 @@ export default function TasksComponent() {
 
   // Fetch tasks
   const { data: tasksData, isLoading: isLoadingTasks } = useQuery({
-    queryKey: ['tasks'],
+    queryKey: [QueryKeys.Tasks],
     queryFn: async () => await doQueryGet<GetTasksResponse>('/api/tasks/GetTasks')
   })
 
   // Fetch categories
   const { data: categoriesData, isLoading: isLoadingCategories } = useQuery({
-    queryKey: ['taskCategories'],
+    queryKey: [QueryKeys.TaskCategories],
     queryFn: async () => await doQueryGet<GetTaskCategoriesResponse>('/api/tasks/GetTaskCategories')
   })
 
@@ -70,7 +70,7 @@ export default function TasksComponent() {
   // Delete task mutation
   const { mutate: deleteTask, isPending: isDeletingTask } = useMutationDelete<number, void>({
     url: (taskId) => `/api/tasks/DeleteTask?taskId=${taskId}`,
-    queryKey: ['tasks'],
+    queryKey: [QueryKeys.Tasks],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Task deleted successfully', 3000, <IconCheck />)
@@ -83,7 +83,7 @@ export default function TasksComponent() {
   // Complete task mutation
   const { mutate: completeTask, isPending: isCompletingTask } = useMutationPatch<number, void>({
     url: (taskId) => `/api/tasks/CompleteTask?taskId=${taskId}`,
-    queryKey: ['tasks'],
+    queryKey: [QueryKeys.Tasks],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Task completed!', 3000, <IconCheck />)
@@ -135,16 +135,6 @@ export default function TasksComponent() {
     const taskDate = new Date(t.dueDate)
     return taskDate > today && taskDate <= nextWeek
   })
-
-  const getPriorityLabel = (priority: TaskPriorityType) => {
-    switch (priority) {
-      case TaskPriorityType.Critical: return 'Critical'
-      case TaskPriorityType.High: return 'High'
-      case TaskPriorityType.Medium: return 'Medium'
-      case TaskPriorityType.Low: return 'Low'
-      default: return 'Unknown'
-    }
-  }
 
   const isLoading = isLoadingTasks || isLoadingCategories
 

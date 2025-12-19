@@ -14,27 +14,28 @@ import {
   Alert
 } from '@mantine/core'
 import TransactionsTable from '@/components/TransactionsTable'
-import StatCard from '@/components/cards/StatCard'
+import StatCard from '@/components/finance/StatCard'
 import { doQueryGet } from '@/helpers/apiClient'
 import { useQuery } from '@tanstack/react-query'
 import { GetHomepageStatsDto } from '@/interfaces/api/stats/GetHomepageStatsDto'
 import { GetUnprocessedTransactionsDto } from '@/interfaces/api/transactions/GetUnprocessedTransactionsDto'
 import { GetSpendingPotDropdownOptionsDto } from '@/interfaces/api/pots/GetSpendingPotDropdownOptionsDto'
 import { IconAlertCircle, IconReceipt } from '@tabler/icons-react'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export default function HomeComponent() {
   const { data: statsData, isLoading: isLoadingStatsData } = useQuery({
-    queryKey: ['homepage-stats'],
+    queryKey: [QueryKeys.HomepageStats],
     queryFn: async () => await doQueryGet<GetHomepageStatsDto>('/api/stats/GetHomepageStats')
   })
 
   const { data: transactions, isLoading: isLoadingTransactions } = useQuery({
-    queryKey: ['unprocessedTransactions'],
+    queryKey: [QueryKeys.GetUnprocessedTransactions],
     queryFn: async () => await doQueryGet<GetUnprocessedTransactionsDto>('/api/transactions/GetUnprocessedTransactions')
   })
 
   const { data: potOptions, isLoading: isLoadingPotOptions } = useQuery({
-    queryKey: ['getSpendingPotDropdownOptions'],
+    queryKey: [QueryKeys.GetSpendingPotDropdownOptions],
     queryFn: async () => await doQueryGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions')
   })
 

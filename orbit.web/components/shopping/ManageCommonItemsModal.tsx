@@ -19,6 +19,7 @@ import { useMutationPost } from '@/helpers/mutations/useMutationPost'
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import notificationHelper from '@/helpers/notificationHelper'
 import type { GetShoppingListQuickAddItemsResponse } from '@/interfaces/api/shopping/GetShoppingListQuickAddItemsResponse'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface ManageCommonItemsModalProps {
   opened: boolean
@@ -29,7 +30,7 @@ export default function ManageCommonItemsModal({ opened, onClose }: ManageCommon
   const [newCommonItem, setNewCommonItem] = useState('')
 
   const { data: quickAddData } = useQuery({
-    queryKey: ['shoppingListQuickAddItems'],
+    queryKey: [QueryKeys.ShoppingListQuickAddItems],
     queryFn: async () => await doQueryGet<GetShoppingListQuickAddItemsResponse>('/api/shopping/GetShoppingListQuickAddItems')
   })
 
@@ -37,7 +38,7 @@ export default function ManageCommonItemsModal({ opened, onClose }: ManageCommon
 
   const { mutate: removeCommonItem } = useMutationDelete<number, void>({
     url: (itemId) => `/api/shopping/RemoveShoppingListQuickAddItem?itemId=${itemId}`,
-    queryKey: ['shoppingListQuickAddItems'],
+    queryKey: [QueryKeys.ShoppingListQuickAddItems],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Common item removed', 3000, <IconCheck />)
@@ -49,7 +50,7 @@ export default function ManageCommonItemsModal({ opened, onClose }: ManageCommon
 
   const { mutate: addCommonItem } = useMutationPost<string, void>({
     url: (name) => `/api/shopping/AddShoppingListQuickAddItem?name=${encodeURIComponent(name)}`,
-    queryKey: ['shoppingListQuickAddItems'],
+    queryKey: [QueryKeys.ShoppingListQuickAddItems],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Common item added', 3000, <IconCheck />)

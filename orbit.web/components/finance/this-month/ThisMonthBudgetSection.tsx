@@ -2,7 +2,7 @@
 
 import { Grid, Group, Title, Badge, ThemeIcon } from '@mantine/core'
 import { IconWallet } from '@tabler/icons-react'
-import { SpendingPotCard } from '@/components/cards/SpendingPotCard'
+import { SpendingPotCard } from '@/components/finance/SpendingPotCard'
 import { SpendingPotData } from '@/interfaces/api/pots/GetAllPotDataDto'
 
 interface ThisMonthBudgetSectionProps {

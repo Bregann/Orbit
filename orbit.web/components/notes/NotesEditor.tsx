@@ -30,6 +30,7 @@ import { IconCheck, IconX } from '@tabler/icons-react'
 import type { GetNotePageDetailsResponse } from '@/interfaces/api/notes/GetNotePageDetailsResponse'
 import type { UpdateNotePageContentRequest } from '@/interfaces/api/notes/UpdateNotePageContentRequest'
 import type { NoteFolder } from '@/interfaces/api/notes/GetNotePagesAndFoldersResponse'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface NotesEditorProps {
   selectedPageId: number | null
@@ -42,7 +43,7 @@ export default function NotesEditor({ selectedPageId, folders, onCreatePage }: N
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   const { data: pageDetails, isLoading } = useQuery({
-    queryKey: ['notePageDetails', selectedPageId?.toString() ?? 'none'],
+    queryKey: [QueryKeys.NotePageDetails, selectedPageId?.toString() ?? 'none'],
     queryFn: async () => {
       if (!selectedPageId) return null
       return await doQueryGet<GetNotePageDetailsResponse>(`/api/notes/GetNotePageDetails?notePageId=${selectedPageId}`)
@@ -54,7 +55,7 @@ export default function NotesEditor({ selectedPageId, folders, onCreatePage }: N
 
   const { mutate: toggleFavourite } = useMutationPut<number, void>({
     url: (pageId) => `/api/notes/ToggleNotePageFavouriteStatus?notePageId=${pageId}`,
-    queryKey: ['notePages'],
+    queryKey: [QueryKeys.NotePages],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Favourite status updated', 3000, <IconCheck />)
@@ -89,7 +90,7 @@ export default function NotesEditor({ selectedPageId, folders, onCreatePage }: N
 
   const { mutateAsync: updateContent, isPending } = useMutationPut<UpdateNotePageContentRequest, void>({
     url: '/api/notes/UpdateNotePageContent',
-    queryKey: ['notePageDetails', selectedPageId?.toString() ?? 'none'],
+    queryKey: [QueryKeys.NotePageDetails, selectedPageId?.toString() ?? 'none'],
     invalidateQuery: false,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Page updated', 3000, <IconCheck />)

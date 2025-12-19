@@ -36,6 +36,7 @@ import {
 } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface SubscriptionsManagementProps {
   onDeleteSubscription: (_subscriptionId: number) => void
@@ -50,13 +51,13 @@ export default function SubscriptionsManagement({ onDeleteSubscription }: Subscr
   const [editedSubscriptions, setEditedSubscriptions] = useState<Record<number, Partial<SubscriptionItem>>>({})
 
   const { data: subscriptionsData } = useQuery({
-    queryKey: ['getSubscriptions'],
+    queryKey: [QueryKeys.GetSubscriptions],
     queryFn: async () => await doQueryGet<GetSubscriptionsDto>('/api/subscriptions/GetSubscriptions')
   })
 
   const { mutateAsync: addSubscriptionMutation } = useMutationPost({
     url: '/api/subscriptions/AddSubscription',
-    queryKey: ['getSubscriptions'],
+    queryKey: [QueryKeys.GetSubscriptions],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Subscription added successfully', 3000, <IconCheck />)
@@ -73,7 +74,7 @@ export default function SubscriptionsManagement({ onDeleteSubscription }: Subscr
 
   const { mutateAsync: updateSubscriptionMutation } = useMutationPatch<UpdateSubscriptionRequest, void>({
     url: '/api/subscriptions/UpdateSubscription',
-    queryKey: ['getSubscriptions'],
+    queryKey: [QueryKeys.GetSubscriptions],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Subscription updated successfully', 3000, <IconCheck />)

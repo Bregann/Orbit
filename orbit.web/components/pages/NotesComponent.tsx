@@ -20,6 +20,7 @@ import NotesSidebar from '@/components/notes/NotesSidebar'
 import NotesEditor from '@/components/notes/NotesEditor'
 import AddNotePageModal from '@/components/notes/AddNotePageModal'
 import AddNoteFolderModal from '@/components/notes/AddNoteFolderModal'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export default function NotesComponent() {
   const [selectedPageId, setSelectedPageId] = useState<number | null>(null)
@@ -28,7 +29,7 @@ export default function NotesComponent() {
   const [addFolderModalOpened, { open: openAddFolderModal, close: closeAddFolderModal }] = useDisclosure(false)
 
   const { data: notesData } = useQuery({
-    queryKey: ['notePages'],
+    queryKey: [QueryKeys.NotePages],
     queryFn: async () => await doQueryGet<GetNotePagesAndFoldersResponse>('/api/notes/GetNotePagesAndFolders')
   })
 

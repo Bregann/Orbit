@@ -20,6 +20,7 @@ import notificationHelper from '@/helpers/notificationHelper'
 import type { AddNewCategoryRequest } from '@/interfaces/api/tasks/AddNewCategoryRequest'
 import type { TaskCategoryItem } from '@/interfaces/api/tasks/TaskCategoryItem'
 import type { TaskItem } from '@/interfaces/api/tasks/TaskItem'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface ManageCategoriesModalProps {
   opened: boolean
@@ -40,7 +41,7 @@ export default function ManageCategoriesModal({
 
   const { mutateAsync: addCategory, isPending: isAddingCategory } = useMutationPost<AddNewCategoryRequest, number>({
     url: '/api/tasks/AddNewCategory',
-    queryKey: ['taskCategories'],
+    queryKey: [QueryKeys.TaskCategories],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Category added successfully', 3000, <IconCheck />)
@@ -53,7 +54,7 @@ export default function ManageCategoriesModal({
 
   const { mutateAsync: deleteCategory, isPending: isDeletingCategory } = useMutationDelete<number, void>({
     url: (categoryId) => `/api/tasks/DeleteCategory?categoryId=${categoryId}`,
-    queryKey: ['taskCategories'],
+    queryKey: [QueryKeys.TaskCategories],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Category deleted successfully', 3000, <IconCheck />)

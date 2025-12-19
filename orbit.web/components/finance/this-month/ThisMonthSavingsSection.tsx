@@ -2,7 +2,7 @@
 
 import { Grid, Group, Title, Badge, ThemeIcon } from '@mantine/core'
 import { IconPigMoney } from '@tabler/icons-react'
-import { SavingsPotCard } from '@/components/cards/SavingsPotCard'
+import { SavingsPotCard } from '@/components/finance/SavingsPotCard'
 import { SavingsPotData } from '@/interfaces/api/pots/GetAllPotDataDto'
 
 interface ThisMonthSavingsSectionProps {

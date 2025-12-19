@@ -18,13 +18,14 @@ import { IconAlertCircle, IconCalendar } from '@tabler/icons-react'
 import { useState } from 'react'
 import type { GetHistoricMonthsDropdownValuesDto } from '@/interfaces/api/historicData/GetHistoricMonthsDropdownValuesDto'
 import HistoricAnalyticsSection from '@/components/finance/historic-data/HistoricAnalyticsSection'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export default function HistoricDataComponent() {
   const [selectedMonthId, setSelectedMonthId] = useState<string | null>(null)
 
   // Fetch month dropdown values
   const { data: monthsDropdown, isLoading: isLoadingMonthsDropdown } = useQuery({
-    queryKey: ['historicMonthsDropdown'],
+    queryKey: [QueryKeys.HistoricMonthsDropdownValues],
     queryFn: async () =>
       await doQueryGet<GetHistoricMonthsDropdownValuesDto>('/api/HistoricMonth/GetHistoricMonthsDropdownValues')
   })

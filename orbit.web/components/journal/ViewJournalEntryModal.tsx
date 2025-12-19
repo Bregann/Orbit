@@ -5,8 +5,10 @@ import { IconTrash } from '@tabler/icons-react'
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import notificationHelper from '@/helpers/notificationHelper'
 import { IconCheck, IconX } from '@tabler/icons-react'
-import { moods } from './JournalEntriesList'
 import type { JournalEntry } from '@/interfaces/api/journal/GetJournalEntriesResponse'
+import { formatLongDate } from '@/helpers/dateHelper'
+import { getMoodColour, getMoodIcon, getMoodLabel } from '@/helpers/moodHelper'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface ViewJournalEntryModalProps {
   opened: boolean
@@ -17,7 +19,7 @@ interface ViewJournalEntryModalProps {
 export default function ViewJournalEntryModal({ opened, onClose, entry }: ViewJournalEntryModalProps) {
   const { mutate: deleteEntry, isPending } = useMutationDelete<number, void>({
     url: (entryId) => `/api/journal/DeleteJournalEntry?id=${entryId}`,
-    queryKey: ['journalEntries'],
+    queryKey: [QueryKeys.JournalEntries],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Journal entry deleted', 3000, <IconCheck />)
@@ -27,33 +29,6 @@ export default function ViewJournalEntryModal({ opened, onClose, entry }: ViewJo
       notificationHelper.showErrorNotification('Error', error.message || 'Failed to delete entry', 3000, <IconX />)
     }
   })
-
-  const getMoodIcon = (mood: number) => {
-    const moodData = moods.find(m => m.value === mood)
-    if (!moodData) return null
-    const IconComponent = moodData.icon
-    return <IconComponent size="1rem" />
-  }
-
-  const getMoodColour = (mood: number) => {
-    const moodData = moods.find(m => m.value === mood)
-    return moodData?.color || 'gray'
-  }
-
-  const getMoodLabel = (mood: number) => {
-    const moodData = moods.find(m => m.value === mood)
-    return moodData?.label || 'Unknown'
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-GB', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    })
-  }
 
   if (!entry) return null
 
@@ -75,7 +50,7 @@ export default function ViewJournalEntryModal({ opened, onClose, entry }: ViewJo
             {getMoodLabel(entry.mood)}
           </Badge>
           <Text size="sm" c="dimmed">
-            {formatDate(entry.createdAt)}
+            {formatLongDate(entry.createdAt)}
           </Text>
         </Group>
 

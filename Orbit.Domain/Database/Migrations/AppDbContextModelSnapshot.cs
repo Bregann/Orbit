@@ -17,7 +17,7 @@ namespace Orbit.Domain.Database.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.0")
+                .HasAnnotation("ProductVersion", "10.0.1")
                 .HasAnnotation("Proxies:ChangeTracking", false)
                 .HasAnnotation("Proxies:CheckEquality", false)
                 .HasAnnotation("Proxies:LazyLoading", true)
@@ -61,6 +61,9 @@ namespace Orbit.Domain.Database.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<int?>("DocumentId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -84,6 +87,8 @@ namespace Orbit.Domain.Database.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CalendarEventTypeId");
+
+                    b.HasIndex("DocumentId");
 
                     b.ToTable("CalendarEvents");
                 });
@@ -669,7 +674,13 @@ namespace Orbit.Domain.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Orbit.Domain.Database.Models.Document", "Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId");
+
                     b.Navigation("CalendarEventType");
+
+                    b.Navigation("Document");
                 });
 
             modelBuilder.Entity("Orbit.Domain.Database.Models.CalendarEventException", b =>

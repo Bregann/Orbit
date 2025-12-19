@@ -1,35 +1,21 @@
 'use client'
 
 import { Card, Stack, Title, Badge, Divider, ThemeIcon, Group, Text, ActionIcon } from '@mantine/core'
-import { IconBook, IconTrash } from '@tabler/icons-react'
+import { IconBook, IconTrash, IconCheck, IconX } from '@tabler/icons-react'
 import { useDisclosure } from '@mantine/hooks'
 import { useState } from 'react'
-import {
-  IconMoodCrazyHappy,
-  IconMoodHappy,
-  IconMoodEmpty,
-  IconMoodSad,
-  IconMoodSmile
-} from '@tabler/icons-react'
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import notificationHelper from '@/helpers/notificationHelper'
-import { IconCheck, IconX } from '@tabler/icons-react'
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal'
 import type { JournalEntry } from '@/interfaces/api/journal/GetJournalEntriesResponse'
-import { JournalMoodEnum } from '@/interfaces/api/journal/JournalMoodEnum'
+import { QueryKeys } from '@/helpers/QueryKeys'
+import { getMoodIcon, getMoodColour } from '@/helpers/moodHelper'
+import { formatLongDate } from '@/helpers/dateHelper'
 
 interface JournalEntriesListProps {
   entries: JournalEntry[]
   onEntryClick: (_entry: JournalEntry) => void
 }
-
-const moods = [
-  { value: JournalMoodEnum.Great, label: 'Great', icon: IconMoodCrazyHappy, color: 'green' },
-  { value: JournalMoodEnum.Good, label: 'Good', icon: IconMoodHappy, color: 'teal' },
-  { value: JournalMoodEnum.Neutral, label: 'Neutral', icon: IconMoodEmpty, color: 'gray' },
-  { value: JournalMoodEnum.Bad, label: 'Bad', icon: IconMoodSad, color: 'orange' },
-  { value: JournalMoodEnum.Awful, label: 'Awful', icon: IconMoodSmile, color: 'red' },
-]
 
 export default function JournalEntriesList({ entries, onEntryClick }: JournalEntriesListProps) {
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false)
@@ -37,7 +23,7 @@ export default function JournalEntriesList({ entries, onEntryClick }: JournalEnt
 
   const { mutate: deleteEntry } = useMutationDelete<number, void>({
     url: (entryId) => `/api/journal/DeleteJournalEntry?id=${entryId}`,
-    queryKey: ['journalEntries'],
+    queryKey: [QueryKeys.JournalEntries],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Journal entry deleted', 3000, <IconCheck />)
@@ -58,28 +44,6 @@ export default function JournalEntriesList({ entries, onEntryClick }: JournalEnt
     if (entryToDelete) {
       deleteEntry(entryToDelete.id)
     }
-  }
-
-  const getMoodIcon = (mood: JournalMoodEnum) => {
-    const moodData = moods.find(m => m.value === mood)
-    if (!moodData) return <IconMoodEmpty size="1rem" />
-    const IconComponent = moodData.icon
-    return <IconComponent size="1rem" />
-  }
-
-  const getMoodColor = (mood: JournalMoodEnum) => {
-    const moodData = moods.find(m => m.value === mood)
-    return moodData?.color || 'gray'
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-GB', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    })
   }
 
   const stripHtml = (html: string) => {
@@ -121,14 +85,14 @@ export default function JournalEntriesList({ entries, onEntryClick }: JournalEnt
             >
               <Group justify="space-between" mb="xs">
                 <Group gap="sm">
-                  <ThemeIcon size="sm" radius="xl" variant="light" color={getMoodColor(entry.mood)}>
+                  <ThemeIcon size="sm" radius="xl" variant="light" color={getMoodColour(entry.mood)}>
                     {getMoodIcon(entry.mood)}
                   </ThemeIcon>
                   <Text size="sm" fw={600}>{entry.title}</Text>
                 </Group>
                 <Group gap="xs">
                   <Text size="xs" c="dimmed">
-                    {formatDate(entry.createdAt)}
+                    {formatLongDate(entry.createdAt)}
                   </Text>
                   <ActionIcon
                     variant="subtle"
@@ -165,5 +129,3 @@ export default function JournalEntriesList({ entries, onEntryClick }: JournalEnt
     </Card>
   )
 }
-
-export { moods }

@@ -15,6 +15,10 @@ export interface EventEntry {
   calendarEventTypeId: number
   calendarEventTypeName: string
   calendarEventTypeColour: string // hex colour
+  instanceDate?: string // Optional client-side field for tracking which occurrence of recurring event was clicked (ISO date string)
+  documentId: number | null
+  documentFileName: string | null
+  documentFileType: string | null
 }
 
 export interface EventExceptionEntry {

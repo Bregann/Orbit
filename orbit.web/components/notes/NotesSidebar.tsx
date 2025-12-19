@@ -30,6 +30,7 @@ import notificationHelper from '@/helpers/notificationHelper'
 import { IconCheck, IconX } from '@tabler/icons-react'
 import type { NotePage, NoteFolder } from '@/interfaces/api/notes/GetNotePagesAndFoldersResponse'
 import AddNotePageModal from './AddNotePageModal'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface NotesSidebarProps {
   pages: NotePage[]
@@ -51,7 +52,7 @@ export default function NotesSidebar({
 
   const { mutate: toggleFavourite } = useMutationPut<number, void>({
     url: (pageId) => `/api/notes/ToggleNotePageFavouriteStatus?notePageId=${pageId}`,
-    queryKey: ['notePages'],
+    queryKey: [QueryKeys.NotePages],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Favourite status updated', 3000, <IconCheck />)
@@ -63,7 +64,7 @@ export default function NotesSidebar({
 
   const { mutate: deletePage } = useMutationDelete<number, void>({
     url: (pageId) => `/api/notes/DeleteNotePage?notePageId=${pageId}`,
-    queryKey: ['notePages'],
+    queryKey: [QueryKeys.NotePages],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Page deleted', 3000, <IconCheck />)
@@ -75,7 +76,7 @@ export default function NotesSidebar({
 
   const { mutate: deleteFolder } = useMutationDelete<number, void>({
     url: (folderId) => `/api/notes/DeleteNoteFolder?noteFolderId=${folderId}`,
-    queryKey: ['notePages'],
+    queryKey: [QueryKeys.NotePages],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Folder deleted', 3000, <IconCheck />)

@@ -7,6 +7,7 @@ import notificationHelper from '@/helpers/notificationHelper'
 import { IconCheck, IconX } from '@tabler/icons-react'
 import type { CreateNotePageRequest } from '@/interfaces/api/notes/CreateNotePageRequest'
 import type { NoteFolder } from '@/interfaces/api/notes/GetNotePagesAndFoldersResponse'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface AddNotePageModalProps {
   opened: boolean
@@ -34,7 +35,7 @@ export default function AddNotePageModal({
 
   const { mutateAsync: createPage, isPending } = useMutationPost<CreateNotePageRequest, void>({
     url: '/api/notes/CreateNotePage',
-    queryKey: ['notePages'],
+    queryKey: [QueryKeys.NotePages],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Note page created', 3000, <IconCheck />)

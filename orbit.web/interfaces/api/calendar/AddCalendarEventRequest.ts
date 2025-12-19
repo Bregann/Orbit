@@ -7,4 +7,5 @@ export interface AddCalendarEventRequest {
   isAllDay: boolean
   calendarEventTypeId: number
   recurrenceRule?: string | null
+  documentId: number | null
 }

@@ -25,48 +25,43 @@ import {
   IconTrendingDown
 } from '@tabler/icons-react'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useDisclosure } from '@mantine/hooks'
 import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import type { GetDashboardOverviewDataDto } from '@/interfaces/api/dashboard/GetDashboardOverviewDataDto'
-import { getPriorityColour } from '@/helpers/dataHelper'
+import { getPriorityColour, getPriorityLabel } from '@/helpers/dataHelper'
+import { formatRelativeDate, formatDateWithTime } from '@/helpers/dateHelper'
+import { GetCalendarEventsDto, type EventEntry } from '@/interfaces/api/calendar/GetCalendarEventsDto'
+import ViewEventModal from '@/components/calendars/ViewEventModal'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export default function DashboardComponent() {
   const router = useRouter()
+  const [viewModalOpened, { open: openViewModal, close: closeViewModal }] = useDisclosure(false)
+  const [viewingEvent, setViewingEvent] = useState<EventEntry | null>(null)
 
   const { data: dashboardData, isLoading } = useQuery({
-    queryKey: ['dashboardOverview'],
+    queryKey: [QueryKeys.DashboardOverview],
     queryFn: async () => await doQueryGet<GetDashboardOverviewDataDto>('/api/Dashboard/GetDashboardOverviewData')
   })
 
-  const formatDate = (dateString: string): string => {
-    if (!dateString) return 'No date'
+  const { data: calendarData } = useQuery({
+    queryKey: [QueryKeys.CalendarEvents],
+    queryFn: async () => await doQueryGet<GetCalendarEventsDto>('/api/calendar/GetCalendarEvents')
+  })
 
-    const date = new Date(dateString)
-
-    // Check if date is valid
-    if (isNaN(date.getTime())) {
-      return 'Invalid date'
-    }
-
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-
-    const compareDate = new Date(date)
-    compareDate.setHours(0, 0, 0, 0)
-
-    if (compareDate.getTime() === today.getTime()) {
-      return 'Today'
-    } else if (compareDate.getTime() === tomorrow.getTime()) {
-      return 'Tomorrow'
-    } else {
-      return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })
+  const handleEventClick = (eventId: number) => {
+    const calendarEvent = calendarData?.events.find(e => e.id === eventId)
+    if (calendarEvent) {
+      setViewingEvent(calendarEvent)
+      openViewModal()
     }
   }
 
-  console.log('Dashboard Data:', dashboardData)
+  const handleDeleteEvent = () => {
+    closeViewModal()
+  }
 
   // Quick access sections
   const sections = [
@@ -213,13 +208,13 @@ export default function DashboardComponent() {
           <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
             <Stack gap="md">
               <Group justify="space-between">
-                <Title order={3} size="h4">Today&apos;s Tasks</Title>
-                <Badge color="blue" variant="light">{dashboardData.todaysTasks.length}</Badge>
+                <Title order={3} size="h4">Upcoming Tasks</Title>
+                <Badge color="blue" variant="light">{dashboardData.upcomingTasks.length}</Badge>
               </Group>
               <Divider />
-              {dashboardData.todaysTasks.length > 0 ? (
+              {dashboardData.upcomingTasks.length > 0 ? (
                 <Stack gap="sm">
-                  {dashboardData.todaysTasks.map((task) => (
+                  {dashboardData.upcomingTasks.map((task) => (
                     <Group key={task.taskId} justify="space-between">
                       <Group gap="xs">
                         <ThemeIcon
@@ -238,11 +233,18 @@ export default function DashboardComponent() {
                           {task.taskTitle}
                         </Text>
                       </Group>
-                      {!task.isCompleted && (
-                        <Badge size="xs" color={getPriorityColour(task.priority)} variant="light">
-                          {task.priority === 2 ? 'High' : task.priority === 1 ? 'Med' : 'Low'}
-                        </Badge>
-                      )}
+                      <Stack gap={4} align="flex-end">
+                        {!task.isCompleted && (
+                          <Badge size="xs" color={getPriorityColour(task.priority)} variant="light">
+                            {getPriorityLabel(task.priority)}
+                          </Badge>
+                        )}
+                        {task.dueDate && (
+                          <Text size="xs" c="dimmed">
+                            {formatRelativeDate(task.dueDate)}
+                          </Text>
+                        )}
+                      </Stack>
                     </Group>
                   ))}
                 </Stack>
@@ -267,21 +269,35 @@ export default function DashboardComponent() {
           <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
             <Stack gap="md">
               <Group justify="space-between">
-                <Title order={3} size="h4">Upcoming</Title>
+                <Title order={3} size="h4">Upcoming Events</Title>
                 <Badge color="cyan" variant="light">{dashboardData.upcomingEvents.length}</Badge>
               </Group>
               <Divider />
               {dashboardData.upcomingEvents.length > 0 ? (
                 <Stack gap="sm">
                   {dashboardData.upcomingEvents.map((event) => (
-                    <Group key={event.eventId} justify="space-between">
+                    <Group
+                      key={event.eventId}
+                      justify="space-between"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleEventClick(event.eventId)}
+                    >
                       <Group gap="xs">
                         <ThemeIcon size="sm" radius="md" variant="light" color="cyan">
                           <IconCalendarEvent size="0.8rem" />
                         </ThemeIcon>
                         <div>
                           <Text size="sm">{event.eventTitle}</Text>
-                          <Text size="xs" c="dimmed">{formatDate(event.eventDate)}</Text>
+                          <Text size="xs" c="dimmed">
+                            {event.isAllDay
+                              ? `${new Date(event.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} (All day)`
+                              : formatDateWithTime(
+                                event.eventDate.split('T')[0],
+                                new Date(event.eventDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                                false
+                              )
+                            }
+                          </Text>
                         </div>
                       </Group>
                     </Group>
@@ -341,6 +357,13 @@ export default function DashboardComponent() {
           ))}
         </SimpleGrid>
       </Stack>
+
+      <ViewEventModal
+        opened={viewModalOpened}
+        onClose={closeViewModal}
+        event={viewingEvent}
+        onDelete={handleDeleteEvent}
+      />
     </Container>
   )
 }

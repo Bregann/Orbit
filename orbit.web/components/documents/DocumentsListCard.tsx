@@ -1,8 +1,9 @@
 'use client'
 
 import { Card, Text, Group, ThemeIcon, Title, Divider, Table, ActionIcon, Tooltip, Badge } from '@mantine/core'
-import { IconFiles, IconDownload, IconTrash, IconFileTypePdf, IconPhoto, IconFileSpreadsheet, IconFileText } from '@tabler/icons-react'
+import { IconFiles, IconDownload, IconTrash } from '@tabler/icons-react'
 import type { DocumentItem } from '@/interfaces/api/documents/GetAllDocumentsDto'
+import { getFileIcon, getFileIconColour } from '@/helpers/documentHelper'
 
 interface DocumentsListCardProps {
   documents: DocumentItem[]
@@ -12,21 +13,6 @@ interface DocumentsListCardProps {
 }
 
 export default function DocumentsListCard({ documents, onDownload, onDelete, isDeletingDocument }: DocumentsListCardProps) {
-  const getFileIcon = (type: string) => {
-    const lowerType = type.toLowerCase()
-    if (lowerType.includes('pdf')) return <IconFileTypePdf size="1.2rem" />
-    if (lowerType.includes('image') || lowerType.includes('jpg') || lowerType.includes('png')) return <IconPhoto size="1.2rem" />
-    if (lowerType.includes('sheet') || lowerType.includes('xls')) return <IconFileSpreadsheet size="1.2rem" />
-    return <IconFileText size="1.2rem" />
-  }
-
-  const getFileIconColour = (type: string) => {
-    const lowerType = type.toLowerCase()
-    if (lowerType.includes('pdf')) return 'red'
-    if (lowerType.includes('image') || lowerType.includes('jpg') || lowerType.includes('png')) return 'green'
-    if (lowerType.includes('sheet') || lowerType.includes('xls')) return 'teal'
-    return 'blue'
-  }
 
   return (
     <Card withBorder p="lg" radius="md" shadow="sm">

@@ -7,6 +7,7 @@ import notificationHelper from '@/helpers/notificationHelper'
 import { IconCheck, IconX } from '@tabler/icons-react'
 import type { CreateNoteFolderRequest } from '@/interfaces/api/notes/CreateNoteFolderRequest'
 import EmojiPicker from './EmojiPicker'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface AddNoteFolderModalProps {
   opened: boolean
@@ -19,7 +20,7 @@ export default function AddNoteFolderModal({ opened, onClose }: AddNoteFolderMod
 
   const { mutateAsync: createFolder, isPending } = useMutationPost<CreateNoteFolderRequest, void>({
     url: '/api/notes/CreateNoteFolder',
-    queryKey: ['notePages'],
+    queryKey: [QueryKeys.NotePages],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Folder created', 3000, <IconCheck />)

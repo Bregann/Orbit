@@ -21,6 +21,7 @@ import JournalEntriesList from '@/components/journal/JournalEntriesList'
 import JournalSidebarCards from '@/components/journal/JournalSidebarCards'
 import AddJournalEntryModal from '@/components/journal/AddJournalEntryModal'
 import ViewJournalEntryModal from '@/components/journal/ViewJournalEntryModal'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export default function JournalComponent() {
   const [addModalOpened, { open: openAddModal, close: closeAddModal }] = useDisclosure(false)
@@ -29,7 +30,7 @@ export default function JournalComponent() {
   const [initialMood, setInitialMood] = useState<JournalMoodEnum | undefined>(undefined)
 
   const { data: entriesData } = useQuery({
-    queryKey: ['journalEntries'],
+    queryKey: [QueryKeys.JournalEntries],
     queryFn: async () => await doQueryGet<GetJournalEntriesResponse>('/api/journal/GetJournalEntries')
   })
 

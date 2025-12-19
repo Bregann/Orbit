@@ -5,6 +5,7 @@ import type { GetTaskCategoriesResponse } from '@/interfaces/api/tasks/GetTaskCa
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export const metadata: Metadata = {
   title: 'Tasks'
@@ -21,12 +22,12 @@ export default async function TasksPage() {
       .join('; ')
 
     await queryClient.prefetchQuery({
-      queryKey: ['tasks'],
+      queryKey: [QueryKeys.Tasks],
       queryFn: async () => await doQueryGet<GetTasksResponse>('/api/tasks/GetTasks', { headers: { Cookie: cookieHeader } })
     })
 
     await queryClient.prefetchQuery({
-      queryKey: ['taskCategories'],
+      queryKey: [QueryKeys.TaskCategories],
       queryFn: async () => await doQueryGet<GetTaskCategoriesResponse>('/api/tasks/GetTaskCategories', { headers: { Cookie: cookieHeader } })
     })
 

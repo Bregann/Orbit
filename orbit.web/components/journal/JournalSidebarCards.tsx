@@ -2,9 +2,9 @@
 
 import { Stack, Card, Title, Badge, Divider, ThemeIcon, Group, Text, ActionIcon } from '@mantine/core'
 import { IconMoodSmile, IconEdit } from '@tabler/icons-react'
-import { moods } from './JournalEntriesList'
 import type { JournalEntry } from '@/interfaces/api/journal/GetJournalEntriesResponse'
 import { JournalMoodEnum } from '@/interfaces/api/journal/JournalMoodEnum'
+import { moods } from '@/helpers/moodHelper'
 
 interface JournalSidebarCardsProps {
   entries: JournalEntry[]

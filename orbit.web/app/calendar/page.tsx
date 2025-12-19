@@ -5,6 +5,7 @@ import { GetCalendarEventTypesDto } from '@/interfaces/api/calendar/GetCalendarE
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export const metadata: Metadata = {
   title: 'Calendar'
@@ -21,12 +22,12 @@ export default async function CalendarPage() {
       .join('; ')
 
     await queryClient.prefetchQuery({
-      queryKey: ['calendarEvents'],
+      queryKey: [QueryKeys.CalendarEvents],
       queryFn: async () => await doQueryGet<GetCalendarEventsDto>('/api/calendar/GetCalendarEvents', { headers: { Cookie: cookieHeader } })
     })
 
     await queryClient.prefetchQuery({
-      queryKey: ['calendarEventTypes'],
+      queryKey: [QueryKeys.CalendarEventTypes],
       queryFn: async () => await doQueryGet<GetCalendarEventTypesDto>('/api/calendar/GetCalendarEventTypes', { headers: { Cookie: cookieHeader } })
     })
 

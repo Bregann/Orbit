@@ -11,7 +11,7 @@ if (process.env.NODE_ENV === 'development') {
 const ACCESS_TOKEN_COOKIE = 'accessToken'
 const REFRESH_TOKEN_COOKIE = 'refreshToken'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const cookies = request.cookies
   const accessToken = cookies.get(ACCESS_TOKEN_COOKIE)?.value

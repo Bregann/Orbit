@@ -19,6 +19,9 @@
         public required int CalendarEventTypeId { get; set; }
         public required string CalendarEventTypeName { get; set; }
         public required string CalendarEventTypeColour { get; set; }
+        public int? DocumentId { get; set; } = null;
+        public string? DocumentFileName { get; set; } = null;
+        public string? DocumentFileType { get; set; } = null;
     }
 
     public class EventExceptionEntry

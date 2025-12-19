@@ -13,9 +13,11 @@ import {
   Collapse,
   NumberInput,
   Checkbox,
-  MultiSelect,
   Button,
-  Text
+  Text,
+  FileInput,
+  SegmentedControl,
+  Paper
 } from '@mantine/core'
 import {
   IconMapPin,
@@ -23,19 +25,28 @@ import {
   IconPaperclip,
   IconRepeat,
   IconClock24,
-  IconSun
+  IconSun,
+  IconUpload,
+  IconX,
+  IconCheck
 } from '@tabler/icons-react'
 import { Frequency, RRule } from 'rrule'
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { doQueryGet } from '@/helpers/apiClient'
+import { useState, useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { doQueryGet, doPostFormData } from '@/helpers/apiClient'
 import { GetCalendarEventTypesDto } from '@/interfaces/api/calendar/GetCalendarEventTypesDto'
 import { AddCalendarEventRequest } from '@/interfaces/api/calendar/AddCalendarEventRequest'
 import { useMutationPost } from '@/helpers/mutations/useMutationPost'
+import type { GetAllDocumentsDto } from '@/interfaces/api/documents/GetAllDocumentsDto'
+import type { GetAllDocumentCategoriesDto } from '@/interfaces/api/documents/GetAllDocumentCategoriesDto'
+import notificationHelper from '@/helpers/notificationHelper'
+import { formatDateForInput } from '@/helpers/dateHelper'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface AddEventModalProps {
   opened: boolean
   onClose: () => void
+  initialDate?: Date | null
 }
 
 interface RuleOptionsType {
@@ -58,25 +69,31 @@ const daysOfWeekOptions = [
   { value: RRule.SU.weekday, label: 'Sunday' },
 ]
 
-const mockDocuments = [
-  { id: 1, name: 'Concert Tickets - Coldplay.pdf', category: 'Tickets' },
-  { id: 2, name: 'Flight Confirmation.pdf', category: 'Travel' },
-  { id: 3, name: 'Hotel Booking.pdf', category: 'Travel' },
-  { id: 4, name: 'Car Service Receipt.pdf', category: 'Vehicle' },
-  { id: 5, name: 'Doctor Appointment Letter.pdf', category: 'Medical' },
-]
-
-export default function AddEventModal({ opened, onClose }: AddEventModalProps) {
+export default function AddEventModal({ opened, onClose, initialDate }: AddEventModalProps) {
+  const queryClient = useQueryClient()
   const { data: eventTypesData } = useQuery({
-    queryKey: ['calendarEventTypes'],
+    queryKey: [QueryKeys.CalendarEventTypes],
     queryFn: async () => await doQueryGet<GetCalendarEventTypesDto>('/api/calendar/GetCalendarEventTypes')
+  })
+
+  const { data: documentsData } = useQuery({
+    queryKey: [QueryKeys.Documents],
+    queryFn: async () => await doQueryGet<GetAllDocumentsDto>('/api/documents/GetAllDocuments')
+  })
+
+  const { data: categoriesData } = useQuery({
+    queryKey: [QueryKeys.DocumentCategories],
+    queryFn: async () => await doQueryGet<GetAllDocumentCategoriesDto>('/api/documents/GetAllDocumentCategories')
   })
 
   const addEventMutation = useMutationPost<AddCalendarEventRequest, void>({
     url: '/api/calendar/AddCalendarEvent',
-    queryKey: ['calendarEvents'],
+    queryKey: [QueryKeys.CalendarEvents],
     invalidateQuery: true
   })
+
+  const documents = documentsData?.documents ?? []
+  const categories = categoriesData?.categories ?? []
 
   const eventTypes = eventTypesData?.eventTypes.map(type => ({
     id: type.id.toString(),
@@ -85,14 +102,21 @@ export default function AddEventModal({ opened, onClose }: AddEventModalProps) {
   })) || []
 
   const [newEventTitle, setNewEventTitle] = useState('')
-  const [newEventDate, setNewEventDate] = useState('')
+  const [newEventDate, setNewEventDate] = useState(formatDateForInput(initialDate || null))
   const [newEventStartTime, setNewEventStartTime] = useState('')
   const [newEventEndTime, setNewEventEndTime] = useState('')
   const [newEventIsAllDay, setNewEventIsAllDay] = useState(false)
   const [newEventLocation, setNewEventLocation] = useState('')
   const [newEventTypeId, setNewEventTypeId] = useState<string | null>(eventTypes[0]?.id || null)
   const [newEventDescription, setNewEventDescription] = useState('')
-  const [newEventAttachments, setNewEventAttachments] = useState<string[]>([])
+  const [newEventAttachment, setNewEventAttachment] = useState<string | null>(null)
+
+  // Document upload state
+  const [documentMode, setDocumentMode] = useState<'select' | 'upload'>('select')
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [uploadName, setUploadName] = useState('')
+  const [uploadCategory, setUploadCategory] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const [showRecurrence, setShowRecurrence] = useState(false)
   const [recurrenceFrequency, setRecurrenceFrequency] = useState<Frequency | null>(null)
@@ -103,16 +127,23 @@ export default function AddEventModal({ opened, onClose }: AddEventModalProps) {
   const [recurrenceEndDate, setRecurrenceEndDate] = useState('')
   const [recurrenceOccurrences, setRecurrenceOccurrences] = useState<number | undefined>(undefined)
 
+  // Update date when initialDate changes and modal opens
+  useEffect(() => {
+    if (opened && initialDate) {
+      setNewEventDate(formatDateForInput(initialDate))
+    }
+  }, [opened, initialDate])
+
   const resetForm = () => {
     setNewEventTitle('')
-    setNewEventDate('')
+    setNewEventDate(formatDateForInput(initialDate || null))
     setNewEventStartTime('')
     setNewEventEndTime('')
     setNewEventIsAllDay(false)
     setNewEventLocation('')
     setNewEventTypeId(eventTypes[0]?.id || null)
     setNewEventDescription('')
-    setNewEventAttachments([])
+    setNewEventAttachment(null)
     setShowRecurrence(false)
     setRecurrenceFrequency(null)
     setRecurrenceInterval(1)
@@ -121,6 +152,49 @@ export default function AddEventModal({ opened, onClose }: AddEventModalProps) {
     setUseEndDate(false)
     setRecurrenceEndDate('')
     setRecurrenceOccurrences(undefined)
+    setDocumentMode('select')
+    setUploadFile(null)
+    setUploadName('')
+    setUploadCategory(null)
+    setIsUploading(false)
+  }
+
+  const handleUploadDocument = async () => {
+    if (!uploadFile || !uploadCategory) {
+      notificationHelper.showErrorNotification('Error', 'Please select a file and category', 3000, <IconX />)
+      return
+    }
+
+    setIsUploading(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', uploadFile)
+      formData.append('request.DocumentName', uploadName.trim() || uploadFile.name)
+      formData.append('request.DocumentType', uploadFile.type || 'application/octet-stream')
+      formData.append('request.CategoryId', uploadCategory)
+
+      const response = await doPostFormData('/api/documents/UploadDocument', formData)
+
+      if (!response.ok) {
+        throw new Error(response.statusMessage ?? 'Failed to upload document')
+      }
+
+      // Invalidate queries to refresh documents list
+      await queryClient.invalidateQueries({ queryKey: [QueryKeys.Documents] })
+
+      notificationHelper.showSuccessNotification('Success', 'Document uploaded successfully', 3000, <IconCheck />)
+
+      // Reset upload form
+      setUploadFile(null)
+      setUploadName('')
+      setUploadCategory(null)
+      setDocumentMode('select')
+    } catch (error) {
+      notificationHelper.showErrorNotification('Error', error instanceof Error ? error.message : 'Failed to upload document', 3000, <IconX />)
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const handleClose = () => {
@@ -179,14 +253,15 @@ export default function AddEventModal({ opened, onClose }: AddEventModalProps) {
       endTime: endDateTime,
       isAllDay: newEventIsAllDay,
       calendarEventTypeId: parseInt(newEventTypeId || eventTypes[0]?.id || '1'),
-      recurrenceRule: rruleString
+      recurrenceRule: rruleString,
+      documentId: newEventAttachment ? parseInt(newEventAttachment) : null
     }
 
     await addEventMutation.mutateAsync(request)
     handleClose()
   }
 
-  const isFormValid = newEventTitle.trim() !== '' && newEventDate !== ''
+  const isFormValid = newEventTitle.trim() !== '' && newEventDate !== '' && !isUploading
 
   return (
     <Modal
@@ -198,7 +273,7 @@ export default function AddEventModal({ opened, onClose }: AddEventModalProps) {
       <Stack gap="md">
         <TextInput
           label="Event Title"
-          placeholder="e.g., Coldplay Concert"
+          placeholder="e.g., Comedy Night"
           value={newEventTitle}
           onChange={(e) => setNewEventTitle(e.currentTarget.value)}
           required
@@ -383,17 +458,69 @@ export default function AddEventModal({ opened, onClose }: AddEventModalProps) {
 
         <Divider />
 
-        <MultiSelect
-          label="Attach Documents"
-          placeholder="Link documents from your vault"
-          description="Select tickets, confirmations, or other related documents"
-          data={mockDocuments.map(d => ({ value: d.id.toString(), label: d.name }))}
-          value={newEventAttachments}
-          onChange={setNewEventAttachments}
-          leftSection={<IconPaperclip size="1rem" />}
-          searchable
-          clearable
-        />
+        <Stack gap="sm">
+          <Group justify="space-between">
+            <Group gap="xs">
+              <IconPaperclip size="1.2rem" />
+              <Text fw={500}>Documents</Text>
+            </Group>
+          </Group>
+
+          <SegmentedControl
+            value={documentMode}
+            onChange={(value) => setDocumentMode(value as 'select' | 'upload')}
+            data={[
+              { label: 'Select Existing', value: 'select' },
+              { label: 'Upload New', value: 'upload' }
+            ]}
+            fullWidth
+          />
+
+          {documentMode === 'select' ? (
+            <Select
+              placeholder="Link a document from your vault"
+              description="Select a ticket, confirmation, or other related document"
+              data={documents.map(d => ({ value: d.documentId.toString(), label: d.documentName }))}
+              value={newEventAttachment}
+              onChange={setNewEventAttachment}
+              searchable
+              clearable
+            />
+          ) : (
+            <Paper p="md" withBorder>
+              <Stack gap="sm">
+                <FileInput
+                  placeholder="Choose a file to upload"
+                  leftSection={<IconUpload size="1rem" />}
+                  value={uploadFile}
+                  onChange={setUploadFile}
+                  accept="application/pdf,image/*,.doc,.docx,.xls,.xlsx"
+                />
+                <TextInput
+                  placeholder="Document name (optional)"
+                  description="Leave empty to use the file name"
+                  value={uploadName}
+                  onChange={(e) => setUploadName(e.currentTarget.value)}
+                />
+                <Select
+                  placeholder="Select category"
+                  data={categories.map(c => ({ value: c.id.toString(), label: c.categoryName }))}
+                  value={uploadCategory}
+                  onChange={setUploadCategory}
+                />
+                <Button
+                  onClick={handleUploadDocument}
+                  leftSection={<IconUpload size="1rem" />}
+                  loading={isUploading}
+                  disabled={!uploadFile || !uploadCategory || isUploading}
+                  fullWidth
+                >
+                  Upload Document
+                </Button>
+              </Stack>
+            </Paper>
+          )}
+        </Stack>
 
         <Group justify="flex-end" mt="md">
           <Button variant="light" onClick={handleClose}>Cancel</Button>

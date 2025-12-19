@@ -6,6 +6,7 @@ import { GetAutomaticTransactionsDto } from '@/interfaces/api/transactions/GetAu
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export const metadata: Metadata = {
   title: 'Management'
@@ -22,17 +23,17 @@ export default async function Management() {
       .join('; ')
 
     await queryClient.prefetchQuery({
-      queryKey: ['managePotData'],
+      queryKey: [QueryKeys.GetManagePotData],
       queryFn: async () => await doQueryGet<GetManagePotDataDto>('/api/pots/GetManagePotData', { headers: { Cookie: cookieHeader } })
     })
 
     await queryClient.prefetchQuery({
-      queryKey: ['getSpendingPotDropdownOptions'],
+      queryKey: [QueryKeys.GetSpendingPotDropdownOptions],
       queryFn: async () => await doQueryGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions', { headers: { Cookie: cookieHeader } }),
     })
 
     await queryClient.prefetchQuery({
-      queryKey: ['getAutomaticTransactions'],
+      queryKey: [QueryKeys.GetAutomaticTransactions],
       queryFn: async () => await doQueryGet<GetAutomaticTransactionsDto>('/api/transactions/GetAutomaticTransactions', { headers: { Cookie: cookieHeader } })
     })
 

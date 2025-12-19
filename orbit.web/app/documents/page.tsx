@@ -5,6 +5,7 @@ import type { GetAllDocumentCategoriesDto } from '@/interfaces/api/documents/Get
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export const metadata: Metadata = {
   title: 'Documents'
@@ -21,12 +22,12 @@ export default async function DocumentsPage() {
       .join('; ')
 
     await queryClient.prefetchQuery({
-      queryKey: ['documents'],
+      queryKey: [QueryKeys.Documents],
       queryFn: async () => await doQueryGet<GetAllDocumentsDto>('/api/documents/GetAllDocuments', { headers: { Cookie: cookieHeader } })
     })
 
     await queryClient.prefetchQuery({
-      queryKey: ['documentCategories'],
+      queryKey: [QueryKeys.DocumentCategories],
       queryFn: async () => await doQueryGet<GetAllDocumentCategoriesDto>('/api/documents/GetAllDocumentCategories', { headers: { Cookie: cookieHeader } })
     })
   }

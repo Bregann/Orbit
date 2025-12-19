@@ -10,6 +10,8 @@ namespace Orbit.Domain.Services.Tasks
         public async Task<GetTasksResponse> GetTasks()
         {
             var tasks = await context.Tasks
+                .OrderBy(t => t.DueDate)
+                .ThenByDescending(t => t.Priority)
                 .Select(t => new TaskItem
                 {
                     Id = t.Id,

@@ -3,6 +3,7 @@
 import { doQueryGet } from '@/helpers/apiClient'
 import { useMutationPost } from '@/helpers/mutations/useMutationPost'
 import notificationHelper from '@/helpers/notificationHelper'
+import { QueryKeys } from '@/helpers/QueryKeys'
 import { GetManagePotDataDto, ManagePotData } from '@/interfaces/api/pots/GetManagePotDataDto'
 import {
   Card,
@@ -45,13 +46,13 @@ export default function PotsManagement({ onDeletePot }: PotsManagementProps) {
   const [addPotRollover, setAddPotRollover] = useState(false)
 
   const { data: managePotData } = useQuery({
-    queryKey: ['getManagePotData'],
+    queryKey: [QueryKeys.GetManagePotData],
     queryFn: async () => await doQueryGet<GetManagePotDataDto>('/api/pots/GetManagePotData')
   })
 
   const { mutateAsync: addPotMutation } = useMutationPost({
     url: '/api/pots/AddNewPot',
-    queryKey: ['getManagePotData'],
+    queryKey: [QueryKeys.GetManagePotData],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Pot added successfully', 3000, <IconCheck />)
@@ -76,7 +77,7 @@ export default function PotsManagement({ onDeletePot }: PotsManagementProps) {
   }
 
   const handlePotChange = (index: number, potName?: string, potAmount?: number, rollover?: boolean) => {
-    queryClient.setQueryData<GetManagePotDataDto>(['getManagePotData'], (oldData) => {
+    queryClient.setQueryData<GetManagePotDataDto>([QueryKeys.GetManagePotData], (oldData) => {
       if (oldData === undefined) {
         return oldData
       }

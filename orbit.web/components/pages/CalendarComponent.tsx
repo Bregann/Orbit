@@ -14,7 +14,7 @@ import {
   Menu
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import {
   IconPlus,
   IconCalendarEvent,
@@ -24,7 +24,7 @@ import {
   IconSettings
 } from '@tabler/icons-react'
 import { RRule } from 'rrule'
-import type { CalendarEvent, CalendarEventType } from '@/interfaces/calendar/CalendarEvent'
+import type { EventEntry } from '@/interfaces/api/calendar/GetCalendarEventsDto'
 import AddEventTypeModal from '@/components/calendars/AddEventTypeModal'
 import AddEventModal from '@/components/calendars/AddEventModal'
 import ViewEventModal from '@/components/calendars/ViewEventModal'
@@ -36,69 +36,35 @@ import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import { GetCalendarEventsDto } from '@/interfaces/api/calendar/GetCalendarEventsDto'
 import { GetCalendarEventTypesDto } from '@/interfaces/api/calendar/GetCalendarEventTypesDto'
+import { getEventTypeColour } from '@/helpers/dataHelper'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export default function CalendarComponent() {
-  const { data: calendarData } = useQuery({
-    queryKey: ['calendarEvents'],
+  const { data: calendarData, isLoading: isLoadingEvents } = useQuery({
+    queryKey: [QueryKeys.CalendarEvents],
     queryFn: async () => await doQueryGet<GetCalendarEventsDto>('/api/calendar/GetCalendarEvents')
   })
 
-  const { data: eventTypesData } = useQuery({
-    queryKey: ['calendarEventTypes'],
+  const { data: eventTypesData, isLoading: isLoadingEventTypes } = useQuery({
+    queryKey: [QueryKeys.CalendarEventTypes],
     queryFn: async () => await doQueryGet<GetCalendarEventTypesDto>('/api/calendar/GetCalendarEventTypes')
   })
 
-  const apiEvents: CalendarEvent[] = calendarData?.events.map(event => ({
-    id: event.id,
-    title: event.eventName,
-    date: new Date(event.startTime).toISOString().split('T')[0],
-    startTime: event.isAllDay ? undefined : new Date(event.startTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-    endTime: event.isAllDay ? undefined : new Date(event.endTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-    isAllDay: event.isAllDay,
-    location: event.eventLocation,
-    description: event.description || '',
-    typeId: event.calendarEventTypeId.toString(),
-    attachments: [],
-    completed: false,
-    rrule: event.recurrenceRule || undefined
-  })) || []
+  const events = calendarData?.events || []
+  const eventTypes = eventTypesData?.eventTypes || []
 
-  const apiEventTypes: CalendarEventType[] = eventTypesData?.eventTypes.map(type => ({
-    id: type.id.toString(),
-    label: type.eventTypeName,
-    color: type.hexColourCode
-  })) || []
-
-  const [events, setEvents] = useState<CalendarEvent[]>(apiEvents)
-  const [eventTypes, setEventTypes] = useState<CalendarEventType[]>(apiEventTypes)
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
-  const [eventExceptions, setEventExceptions] = useState<Set<string>>(new Set()) // Set of "eventId_date" keys
 
-  // Sync local state with API data when it changes
-  useEffect(() => {
-    if (calendarData?.events) {
-      setEvents(apiEvents)
-    }
-  }, [calendarData])
-
-  useEffect(() => {
-    if (eventTypesData?.eventTypes) {
-      setEventTypes(apiEventTypes)
-    }
-  }, [eventTypesData])
-
-  // Sync event exceptions
-  useEffect(() => {
-    if (calendarData?.eventExceptions) {
-      const exceptionsSet = new Set<string>()
-      calendarData.eventExceptions.forEach(exception => {
-        const exceptionDate = new Date(exception.exceptionDate).toISOString().split('T')[0]
-        const key = `${exception.calendarEventId}_${exceptionDate}`
-        exceptionsSet.add(key)
-      })
-      setEventExceptions(exceptionsSet)
-    }
-  }, [calendarData])
+  // Build event exceptions set from API data
+  const eventExceptions = useMemo(() => {
+    const exceptionsSet = new Set<string>()
+    calendarData?.eventExceptions?.forEach(exception => {
+      const exceptionDate = new Date(exception.exceptionDate).toISOString().split('T')[0]
+      const key = `${exception.calendarEventId}_${exceptionDate}`
+      exceptionsSet.add(key)
+    })
+    return exceptionsSet
+  }, [calendarData?.eventExceptions])
 
   const [activeTab, setActiveTab] = useState<string | null>('upcoming')
   const [addModalOpened, { open: openAddModal, close: closeAddModal }] = useDisclosure(false)
@@ -106,37 +72,36 @@ export default function CalendarComponent() {
   const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false)
   const [dayEventsModalOpened, { open: openDayEventsModal, close: closeDayEventsModal }] = useDisclosure(false)
   const [eventTypeModalOpened, { open: openEventTypeModal, close: closeEventTypeModal }] = useDisclosure(false)
-  const [viewingEvent, setViewingEvent] = useState<CalendarEvent | null>(null)
-  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null)
+  const [viewingEvent, setViewingEvent] = useState<EventEntry | null>(null)
+  const [editingEvent, setEditingEvent] = useState<EventEntry | null>(null)
 
   const [currentMonth, setCurrentMonth] = useState(new Date())
 
-  const getEventTypeColour = (typeId: string) => {
-    const eventType = eventTypes.find(t => t.id === typeId)
-    return eventType?.color || '#6b7280'
-  }
-
   const deleteEvent = (eventId: number) => {
-    setEvents(events.filter(event => event.id !== eventId))
+    // Event will be removed via query invalidation
     if (viewingEvent?.id === eventId) {
       closeViewModal()
     }
   }
 
-  const viewEvent = (event: CalendarEvent) => {
+  const viewEvent = (event: EventEntry) => {
     setViewingEvent(event)
     openViewModal()
   }
 
-  const handleEditEvent = (event: CalendarEvent) => {
+  const handleEditEvent = (event: EventEntry) => {
     setEditingEvent(event)
     closeViewModal()
     openEditModal()
   }
 
   const getEventsForDate = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0]
-    const matchingEvents: CalendarEvent[] = []
+    // Format date as YYYY-MM-DD without timezone conversion
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const dateStr = `${year}-${month}-${day}`
+    const matchingEvents: EventEntry[] = []
 
     events.forEach(event => {
       // Check if this occurrence is in the exceptions list
@@ -146,18 +111,21 @@ export default function CalendarComponent() {
         return // Skip this occurrence - it's been deleted
       }
 
+      // Get event start date from API format
+      const eventStartDate = event.startTime.split('T')[0]
+
       // Check if this is the event's base date
-      if (event.date === dateStr) {
+      if (eventStartDate === dateStr) {
         matchingEvents.push(event)
       }
       // Check if this event has a recurrence rule and if this date matches
-      else if (event.rrule) {
+      else if (event.recurrenceRule) {
         try {
           // Parse the event's start date and create proper DTSTART
-          const eventStartDate = new Date(event.date + 'T00:00:00Z')
+          const rruleStartDate = new Date(eventStartDate + 'T00:00:00')
 
           // Create RRule with proper DTSTART formatting
-          const rruleString = `DTSTART:${eventStartDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\nRRULE:${event.rrule}`
+          const rruleString = `DTSTART:${rruleStartDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\nRRULE:${event.recurrenceRule}`
           const rule = RRule.fromString(rruleString)
 
           // Check if this date is in the recurrence set
@@ -172,7 +140,7 @@ export default function CalendarComponent() {
             matchingEvents.push(event)
           }
         } catch (error) {
-          console.error('Error parsing RRule for event:', event.title, error)
+          console.error('Error parsing RRule for event:', event.eventName, error)
         }
       }
     })
@@ -185,11 +153,11 @@ export default function CalendarComponent() {
     return events
       .filter(e => {
         const eventDateTime = e.isAllDay
-          ? new Date(e.date + 'T23:59:59')
-          : new Date(e.date + 'T' + (e.endTime || '23:59') + ':00')
+          ? new Date(e.endTime.split('T')[0] + 'T23:59:59')
+          : new Date(e.endTime)
         return eventDateTime >= now
       })
-      .sort((a, b) => a.date.localeCompare(b.date))
+      .sort((a, b) => a.startTime.localeCompare(b.startTime))
   }
 
   const getPastEvents = () => {
@@ -197,17 +165,17 @@ export default function CalendarComponent() {
     return events
       .filter(e => {
         const eventDateTime = e.isAllDay
-          ? new Date(e.date + 'T23:59:59')
-          : new Date(e.date + 'T' + (e.endTime || '23:59') + ':00')
+          ? new Date(e.endTime.split('T')[0] + 'T23:59:59')
+          : new Date(e.endTime)
         return eventDateTime < now
       })
-      .sort((a, b) => b.date.localeCompare(a.date))
+      .sort((a, b) => b.startTime.localeCompare(a.startTime))
   }
 
   const getEventsThisMonth = () => {
     const now = new Date()
     return events.filter(e => {
-      const eventDate = new Date(e.date)
+      const eventDate = new Date(e.startTime)
       return eventDate.getMonth() === now.getMonth() && eventDate.getFullYear() === now.getFullYear()
     }).length
   }
@@ -227,6 +195,16 @@ export default function CalendarComponent() {
   const goToToday = () => {
     setCurrentMonth(new Date())
     setSelectedDate(new Date())
+  }
+
+  if (isLoadingEvents || isLoadingEventTypes) {
+    return (
+      <Container size="xl" px={{ base: 'xs', sm: 'md' }}>
+        <Stack gap="xl" align="center" justify="center" style={{ minHeight: '60vh' }}>
+          <Text>Loading calendar...</Text>
+        </Stack>
+      </Container>
+    )
   }
 
   return (
@@ -269,12 +247,12 @@ export default function CalendarComponent() {
                             width: 12,
                             height: 12,
                             borderRadius: '50%',
-                            backgroundColor: type.color,
+                            backgroundColor: type.hexColourCode,
                           }}
                         />
                       }
                     >
-                      {type.label}
+                      {type.eventTypeName}
                     </Menu.Item>
                   ))}
                 </ScrollArea.Autosize>
@@ -354,7 +332,7 @@ export default function CalendarComponent() {
                 openDayEventsModal()
               }}
               onViewEvent={viewEvent}
-              getEventTypeColour={getEventTypeColour}
+              getEventTypeColour={(typeId) => getEventTypeColour(typeId, eventTypes)}
               getEventsForDate={getEventsForDate}
             />
           </Grid.Col>
@@ -367,7 +345,7 @@ export default function CalendarComponent() {
               pastEvents={getPastEvents()}
               onTabChange={setActiveTab}
               onViewEvent={viewEvent}
-              getEventTypeColour={getEventTypeColour}
+              getEventTypeColour={(typeId) => getEventTypeColour(typeId, eventTypes)}
             />
           </Grid.Col>
         </Grid>
@@ -377,6 +355,7 @@ export default function CalendarComponent() {
       <AddEventModal
         opened={addModalOpened}
         onClose={closeAddModal}
+        initialDate={selectedDate}
       />
 
       {/* View Event Modal */}
@@ -409,7 +388,7 @@ export default function CalendarComponent() {
         events={selectedDate ? getEventsForDate(selectedDate) : []}
         onViewEvent={viewEvent}
         onAddEvent={openAddModal}
-        getEventTypeColour={getEventTypeColour}
+        getEventTypeColour={(typeId) => getEventTypeColour(typeId, eventTypes)}
       />
     </Container>
   )

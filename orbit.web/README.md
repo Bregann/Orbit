@@ -212,7 +212,7 @@ The frontend communicates with the Orbit.Core API using:
 Example API call pattern:
 ```typescript
 const { data } = useQuery({
-  queryKey: ['tasks'],
+  queryKey: QueryKeys.Tasks,
   queryFn: async () => await doQueryGet<GetTasksResponse>('/api/tasks/GetTasks')
 })
 ```
