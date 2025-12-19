@@ -21,25 +21,26 @@ import ThisMonthBudgetSection from '@/components/finance/this-month/ThisMonthBud
 import ThisMonthSavingsSection from '@/components/finance/this-month/ThisMonthSavingsSection'
 import ThisMonthSubscriptionsSection from '@/components/finance/this-month/ThisMonthSubscriptionsSection'
 import ThisMonthTransactionsSection from '@/components/finance/this-month/ThisMonthTransactionsSection'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export default function ThisMonthComponent() {
   const { data: potOptions, isLoading: isLoadingPotOptions } = useQuery({
-    queryKey: ['getSpendingPotDropdownOptions'],
+    queryKey: [QueryKeys.GetSpendingPotDropdownOptions],
     queryFn: async () => await doQueryGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions')
   })
 
   const { data: allPotData, isLoading: isLoadingAllPotData } = useQuery({
-    queryKey: ['potBreakdownData'],
+    queryKey: [QueryKeys.PotBreakdownData],
     queryFn: async () => await doQueryGet<GetAllPotDataDto>('/api/pots/GetAllPotData')
   })
 
   const { data: thisMonthTransactionsData, isLoading: isLoadingThisMonthTransactionsData } = useQuery({
-    queryKey: ['thisMonthTransactions'],
+    queryKey: [QueryKeys.ThisMonthTransactions],
     queryFn: async () => await doQueryGet<GetTransactionsForCurrentMonthDto>('/api/transactions/GetTransactionsForMonth')
   })
 
   const { data: subscriptionsData, isLoading: isLoadingSubscriptions } = useQuery({
-    queryKey: ['getSubscriptions'],
+    queryKey: [QueryKeys.GetSubscriptions],
     queryFn: async () => await doQueryGet<GetSubscriptionsDto>('/api/subscriptions/GetSubscriptions')
   })
 

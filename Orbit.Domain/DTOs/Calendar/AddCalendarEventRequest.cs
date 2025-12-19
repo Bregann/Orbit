@@ -10,5 +10,6 @@
         public required bool IsAllDay { get; set; }
         public required int CalendarEventTypeId { get; set; }
         public string? RecurrenceRule { get; set; }
+        public int? DocumentId { get; set; } = null;
     }
 }

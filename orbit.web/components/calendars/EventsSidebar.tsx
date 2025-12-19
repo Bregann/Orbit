@@ -13,15 +13,15 @@ import {
 import {
   IconRepeat
 } from '@tabler/icons-react'
-import type { CalendarEvent } from '@/interfaces/calendar/CalendarEvent'
+import type { EventEntry } from '@/interfaces/api/calendar/GetCalendarEventsDto'
 
 interface EventsSidebarProps {
   activeTab: string | null
-  upcomingEvents: CalendarEvent[]
-  pastEvents: CalendarEvent[]
+  upcomingEvents: EventEntry[]
+  pastEvents: EventEntry[]
   onTabChange: (_value: string | null) => void
-  onViewEvent: (_event: CalendarEvent) => void
-  getEventTypeColour: (_typeId: string) => string
+  onViewEvent: (_event: EventEntry) => void
+  getEventTypeColour: (_typeId: number) => string
 }
 
 export default function EventsSidebar({
@@ -60,10 +60,10 @@ export default function EventsSidebar({
                     radius="sm"
                     style={{ cursor: 'pointer' }}
                     onClick={() => {
-                      // Set instanceDate to the event's date
+                      // Set instanceDate to the event's start date
                       const eventWithInstance = {
                         ...event,
-                        instanceDate: event.date
+                        instanceDate: event.startTime.split('T')[0]
                       }
                       onViewEvent(eventWithInstance)
                     }}
@@ -74,18 +74,18 @@ export default function EventsSidebar({
                           width: 24,
                           height: 24,
                           borderRadius: '50%',
-                          backgroundColor: getEventTypeColour(event.typeId),
+                          backgroundColor: getEventTypeColour(event.calendarEventTypeId),
                           flexShrink: 0,
                         }}
                       />
                       <Stack gap={0} style={{ flex: 1 }}>
                         <Group gap={4}>
-                          <Text size="xs" fw={600} lineClamp={1}>{event.title}</Text>
-                          {event.rrule && <IconRepeat size="0.7rem" />}
+                          <Text size="xs" fw={600} lineClamp={1}>{event.eventName}</Text>
+                          {event.recurrenceRule && <IconRepeat size="0.7rem" />}
                         </Group>
                         <Text size="xs" c="dimmed">
-                          {new Date(event.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                          {!event.isAllDay && event.startTime && ` · ${event.startTime}`}
+                          {new Date(event.startTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                          {!event.isAllDay && event.startTime.split('T')[1] && ` · ${event.startTime.split('T')[1].substring(0, 5)}`}
                           {event.isAllDay && ' · All day'}
                         </Text>
                       </Stack>
@@ -111,10 +111,10 @@ export default function EventsSidebar({
                     radius="sm"
                     style={{ cursor: 'pointer', opacity: 0.8 }}
                     onClick={() => {
-                      // Set instanceDate to the event's date
+                      // Set instanceDate to the event's start date
                       const eventWithInstance = {
                         ...event,
-                        instanceDate: event.date
+                        instanceDate: event.startTime.split('T')[0]
                       }
                       onViewEvent(eventWithInstance)
                     }}
@@ -125,21 +125,21 @@ export default function EventsSidebar({
                           width: 24,
                           height: 24,
                           borderRadius: '50%',
-                          backgroundColor: getEventTypeColour(event.typeId),
+                          backgroundColor: getEventTypeColour(event.calendarEventTypeId),
                           flexShrink: 0,
                         }}
                       />
                       <Stack gap={0} style={{ flex: 1 }}>
                         <Group gap={4}>
-                          <Text size="xs" fw={600} lineClamp={1}>{event.title}</Text>
-                          {event.rrule && <IconRepeat size="0.7rem" />}
+                          <Text size="xs" fw={600} lineClamp={1}>{event.eventName}</Text>
+                          {event.recurrenceRule && <IconRepeat size="0.7rem" />}
                         </Group>
                         <Group gap={4}>
                           <Badge size="xs" variant="light" color="green">
                             Attended
                           </Badge>
                           <Text size="xs" c="dimmed">
-                            {new Date(event.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                            {new Date(event.startTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                           </Text>
                         </Group>
                       </Stack>

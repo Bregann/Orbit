@@ -30,12 +30,13 @@ import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import notificationHelper from '@/helpers/notificationHelper'
 import type { GetAllDocumentsDto } from '@/interfaces/api/documents/GetAllDocumentsDto'
 import type { GetAllDocumentCategoriesDto } from '@/interfaces/api/documents/GetAllDocumentCategoriesDto'
-import DocumentsStatsCard from '@/components/cards/DocumentsStatsCard'
-import DocumentsListCard from '@/components/cards/DocumentsListCard'
-import DocumentsSidebarCard from '@/components/cards/DocumentsSidebarCard'
 import UploadDocumentModal from '@/components/documents/UploadDocumentModal'
 import ManageDocumentCategoriesModal from '@/components/documents/ManageDocumentCategoriesModal'
-import DeleteConfirmationModal from '@/components/management/DeleteConfirmationModal'
+import DocumentsStatsCard from '../documents/DocumentsStatsCard'
+import DocumentsSidebarCard from '../documents/DocumentsSidebarCard'
+import DocumentsListCard from '../documents/DocumentsListCard'
+import DeleteConfirmationModal from '../common/DeleteConfirmationModal'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export default function DocumentsComponent() {
   const [selectedCategory, setSelectedCategory] = useState<number | 'All'>('All')
@@ -49,13 +50,13 @@ export default function DocumentsComponent() {
   const queryClient = useQueryClient()
 
   const { data: documentsData, isLoading: isLoadingDocuments } = useQuery({
-    queryKey: ['documents'],
+    queryKey: [QueryKeys.Documents],
     queryFn: async () => await doQueryGet<GetAllDocumentsDto>('/api/documents/GetAllDocuments')
   })
 
   // Fetch categories
   const { data: categoriesData, isLoading: isLoadingCategories } = useQuery({
-    queryKey: ['documentCategories'],
+    queryKey: [QueryKeys.DocumentCategories],
     queryFn: async () => await doQueryGet<GetAllDocumentCategoriesDto>('/api/documents/GetAllDocumentCategories')
   })
 
@@ -65,7 +66,7 @@ export default function DocumentsComponent() {
   // Delete document mutation
   const { mutate: deleteDocument, isPending: isDeletingDocument } = useMutationDelete<number, void>({
     url: (documentId) => `/api/documents/DeleteDocument?documentId=${documentId}`,
-    queryKey: ['documents'],
+    queryKey: [QueryKeys.Documents],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Document deleted successfully', 3000, <IconCheck />)
@@ -91,8 +92,8 @@ export default function DocumentsComponent() {
     }
 
     // Invalidate queries to refresh data
-    queryClient.invalidateQueries({ queryKey: ['documents'] })
-    queryClient.invalidateQueries({ queryKey: ['documentCategories'] })
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.Documents] })
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.DocumentCategories] })
 
     setIsUploading(false)
   }

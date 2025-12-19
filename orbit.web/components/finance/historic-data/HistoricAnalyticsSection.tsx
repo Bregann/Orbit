@@ -12,6 +12,7 @@ import TopSpendingLocations from './TopSpendingLocations'
 import LargestTransactions from './LargestTransactions'
 import DailySpending from './DailySpending'
 import YearlyTrends from './YearlyTrends'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface HistoricAnalyticsSectionProps {
   selectedMonthId: string
@@ -22,7 +23,7 @@ export default function HistoricAnalyticsSection({
 }: HistoricAnalyticsSectionProps) {
   // Fetch month data
   const { data: monthData } = useQuery({
-    queryKey: ['historicMonthData', selectedMonthId],
+    queryKey: [QueryKeys.HistoricMonthData, selectedMonthId],
     queryFn: async () =>
       await doQueryGet<GetHistoricMonthDataDto>(
         `/api/HistoricMonth/GetHistoricMonthData?monthId=${selectedMonthId}`
@@ -32,7 +33,7 @@ export default function HistoricAnalyticsSection({
 
   // Fetch yearly data
   const { data: yearlyData } = useQuery({
-    queryKey: ['yearlyHistoricData'],
+    queryKey: [QueryKeys.YearlyHistoricData],
     queryFn: async () => await doQueryGet<GetYearlyHistoricDataDto>('/api/HistoricMonth/GetYearlyHistoricData')
   })
 

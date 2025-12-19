@@ -3,7 +3,6 @@
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import notificationHelper from '@/helpers/notificationHelper'
 import { DeleteSubscriptionRequest } from '@/interfaces/api/subscriptions/DeleteSubscriptionRequest'
-import DeleteConfirmationModal from '@/components/management/DeleteConfirmationModal'
 import PotsManagement from '@/components/management/PotsManagement'
 import AutomaticTransactionsManagement from '@/components/management/AutomaticTransactionsManagement'
 import SubscriptionsManagement from '@/components/management/SubscriptionsManagement'
@@ -22,6 +21,8 @@ import {
   IconSettings
 } from '@tabler/icons-react'
 import { useState } from 'react'
+import { QueryKeys } from '@/helpers/QueryKeys'
+import DeleteConfirmationModal from '../common/DeleteConfirmationModal'
 
 export default function ManagementComponent() {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
@@ -30,7 +31,7 @@ export default function ManagementComponent() {
 
   const { mutateAsync: deleteSubscriptionMutation } = useMutationDelete<DeleteSubscriptionRequest, void>({
     url: (input) => `/api/subscriptions/DeleteSubscription?id=${input.id}`,
-    queryKey: ['getSubscriptions'],
+    queryKey: [QueryKeys.GetSubscriptions],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Subscription deleted successfully', 3000, <IconCheck />)

@@ -1,6 +1,5 @@
 'use client'
 
-import '@mantine/tiptap/styles.css'
 import { Modal, Stack, TextInput, Select, Group, Button, Text } from '@mantine/core'
 import { RichTextEditor, Link } from '@mantine/tiptap'
 import { useEditor } from '@tiptap/react'
@@ -14,6 +13,7 @@ import { IconCheck, IconX } from '@tabler/icons-react'
 import { moods } from './JournalEntriesList'
 import type { CreateJournalEntryRequest } from '@/interfaces/api/journal/CreateJournalEntryRequest'
 import { JournalMoodEnum } from '@/interfaces/api/journal/JournalMoodEnum'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface AddJournalEntryModalProps {
   opened: boolean
@@ -53,7 +53,7 @@ export default function AddJournalEntryModal({ opened, onClose, initialMood }: A
 
   const { mutateAsync: createEntry, isPending } = useMutationPost<CreateJournalEntryRequest, void>({
     url: '/api/journal/CreateJournalEntry',
-    queryKey: ['journalEntries'],
+    queryKey: [QueryKeys.JournalEntries],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Journal entry created', 3000, <IconCheck />)

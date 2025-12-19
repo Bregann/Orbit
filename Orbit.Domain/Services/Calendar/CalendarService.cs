@@ -24,7 +24,11 @@ namespace Orbit.Domain.Services.Calendar
                 CalendarEventTypeId = x.CalendarEventTypeId,
                 CalendarEventTypeName = x.CalendarEventType.EventTypeName,
                 CalendarEventTypeColour = x.CalendarEventType.HexColourCode,
-                RecurrenceRule = x.RecurrenceRule
+                RecurrenceRule = x.RecurrenceRule,
+                DocumentId = x.DocumentId,
+                DocumentFileName = x.Document != null ? x.Document.DocumentName : null,
+                DocumentFileType = x.Document != null ? x.Document.DocumentType : null
+
             }).ToArrayAsync();
 
             var eventExceptions = await context.CalendarEventExceptions.Select(x => new EventExceptionEntry
@@ -59,6 +63,9 @@ namespace Orbit.Domain.Services.Calendar
 
         public async Task AddCalendarEvent(AddCalendarEventRequest request)
         {
+            var documentExists = await context.Documents
+                .FirstOrDefaultAsync(x => x.Id == request.DocumentId) ?? throw new KeyNotFoundException($"Document with ID {request.DocumentId} not found.");
+
             var newEvent = new CalendarEvent
             {
                 StartTime = DateTime.SpecifyKind(request.StartTime, DateTimeKind.Utc),
@@ -68,7 +75,8 @@ namespace Orbit.Domain.Services.Calendar
                 Description = request.Description,
                 IsAllDay = request.IsAllDay,
                 CalendarEventTypeId = request.CalendarEventTypeId,
-                RecurrenceRule = request.RecurrenceRule
+                RecurrenceRule = request.RecurrenceRule,
+                DocumentId = request.DocumentId
             };
 
             await context.AddAsync(newEvent);

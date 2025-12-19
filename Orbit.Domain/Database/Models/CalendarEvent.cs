@@ -36,5 +36,10 @@ namespace Orbit.Domain.Database.Models
 
         [ForeignKey(nameof(CalendarEventTypeId))]
         public virtual CalendarEventType CalendarEventType { get; set; } = null!;
+
+        public int? DocumentId { get; set; }
+
+        [ForeignKey(nameof(DocumentId))]
+        public virtual Document? Document { get; set; }
     }
 }

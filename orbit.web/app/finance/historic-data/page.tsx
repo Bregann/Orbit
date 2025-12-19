@@ -6,6 +6,7 @@ import type { GetYearlyHistoricDataDto } from '@/interfaces/api/historicData/Get
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export const metadata: Metadata = {
   title: 'Historic Data'
@@ -23,7 +24,7 @@ export default async function HistoricDataPage() {
 
     // Prefetch historic months dropdown
     const monthsDropdown = await queryClient.fetchQuery({
-      queryKey: ['historicMonthsDropdown'],
+      queryKey: [QueryKeys.HistoricMonthsDropdownValues],
       queryFn: async () =>
         await doQueryGet<GetHistoricMonthsDropdownValuesDto>(
           '/api/HistoricMonth/GetHistoricMonthsDropdownValues',
@@ -36,7 +37,7 @@ export default async function HistoricDataPage() {
       const firstMonthId = monthsDropdown.months[0].id
 
       await queryClient.prefetchQuery({
-        queryKey: ['historicMonthData', firstMonthId.toString()],
+        queryKey: [QueryKeys.HistoricMonthData, firstMonthId.toString()],
         queryFn: async () =>
           await doQueryGet<GetHistoricMonthDataDto>(
             `/api/HistoricMonth/GetHistoricMonthData?monthId=${firstMonthId}`,
@@ -47,7 +48,7 @@ export default async function HistoricDataPage() {
 
     // Prefetch yearly data
     await queryClient.prefetchQuery({
-      queryKey: ['yearlyHistoricData'],
+      queryKey: [QueryKeys.YearlyHistoricData],
       queryFn: async () =>
         await doQueryGet<GetYearlyHistoricDataDto>(
           '/api/HistoricMonth/GetYearlyHistoricData',

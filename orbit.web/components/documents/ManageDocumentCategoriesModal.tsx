@@ -18,6 +18,7 @@ import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import notificationHelper from '@/helpers/notificationHelper'
 import type { DocumentCategoryItem } from '@/interfaces/api/documents/GetAllDocumentCategoriesDto'
 import type { DocumentItem } from '@/interfaces/api/documents/GetAllDocumentsDto'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface ManageDocumentCategoriesModalProps {
   opened: boolean
@@ -38,7 +39,7 @@ export default function ManageDocumentCategoriesModal({
 
   const { mutateAsync: addCategory, isPending: isAddingCategory } = useMutationPost<{ categoryName: string }, void>({
     url: `/api/documents/AddDocumentCategory?categoryName=${newCategoryName}`,
-    queryKey: ['documentCategories'],
+    queryKey: [QueryKeys.DocumentCategories],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Category added successfully', 3000, <IconCheck />)
@@ -51,7 +52,7 @@ export default function ManageDocumentCategoriesModal({
 
   const { mutateAsync: deleteCategory, isPending: isDeletingCategory } = useMutationDelete<number, void>({
     url: (categoryId) => `/api/documents/DeleteCategory?categoryId=${categoryId}`,
-    queryKey: ['documentCategories'],
+    queryKey: [QueryKeys.DocumentCategories],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Category deleted successfully', 3000, <IconCheck />)
@@ -66,11 +67,6 @@ export default function ManageDocumentCategoriesModal({
     if (!newCategoryName.trim()) return
 
     await addCategory({ categoryName: newCategoryName.trim() })
-  }
-
-  const handleDeleteCategory = async (categoryId: number) => {
-    // Note: The backend checks if documents are associated, so we just attempt deletion
-    await deleteCategory(categoryId)
   }
 
   return (
@@ -116,7 +112,7 @@ export default function ManageDocumentCategoriesModal({
                       variant="subtle"
                       color="red"
                       size="sm"
-                      onClick={() => handleDeleteCategory(category.id)}
+                      onClick={async () => await deleteCategory(category.id)}
                       disabled={isDeletingCategory}
                       title="Delete category"
                     >

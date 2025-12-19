@@ -17,16 +17,17 @@ import {
   IconMapPin,
   IconClock
 } from '@tabler/icons-react'
-import type { CalendarEvent } from '@/interfaces/calendar/CalendarEvent'
+import type { EventEntry } from '@/interfaces/api/calendar/GetCalendarEventsDto'
+import { isToday } from '@/helpers/dateHelper'
 
 interface DayEventsModalProps {
   opened: boolean
   onClose: () => void
   selectedDate: Date | null
-  events: CalendarEvent[]
-  onViewEvent: (_event: CalendarEvent) => void
+  events: EventEntry[]
+  onViewEvent: (_event: EventEntry) => void
   onAddEvent: () => void
-  getEventTypeColour: (_typeId: string) => string
+  getEventTypeColour: (_typeId: number) => string
 }
 
 export default function DayEventsModal({
@@ -39,6 +40,7 @@ export default function DayEventsModal({
   getEventTypeColour
 }: DayEventsModalProps) {
   if (!selectedDate) return null
+  if (!selectedDate) return null
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-GB', {
@@ -49,8 +51,6 @@ export default function DayEventsModal({
     })
   }
 
-  const isToday = selectedDate.toDateString() === new Date().toDateString()
-
   return (
     <Modal
       opened={opened}
@@ -58,7 +58,7 @@ export default function DayEventsModal({
       title={
         <Group gap="xs">
           <Text fw={600}>{formatDate(selectedDate)}</Text>
-          {isToday && <Badge size="sm" variant="light" color="blue">Today</Badge>}
+          {isToday(selectedDate) && <Badge size="sm" variant="light" color="blue">Today</Badge>}
         </Group>
       }
       size="md"
@@ -108,12 +108,12 @@ export default function DayEventsModal({
                           width: 12,
                           height: 12,
                           borderRadius: '50%',
-                          backgroundColor: getEventTypeColour(event.typeId),
+                          backgroundColor: getEventTypeColour(event.calendarEventTypeId),
                           flexShrink: 0
                         }}
                       />
-                      <Text fw={600} size="sm">{event.title}</Text>
-                      {event.rrule && <IconRepeat size="0.8rem" />}
+                      <Text fw={600} size="sm">{event.eventName}</Text>
+                      {event.recurrenceRule && <IconRepeat size="0.8rem" />}
                     </Group>
 
                     <Group gap="xs" c="dimmed">
@@ -126,15 +126,15 @@ export default function DayEventsModal({
                         <Group gap={4}>
                           <IconClock size="0.9rem" />
                           <Text size="xs">
-                            {event.startTime} - {event.endTime}
+                            {event.startTime.split('T')[1]?.substring(0, 5)} - {event.endTime.split('T')[1]?.substring(0, 5)}
                           </Text>
                         </Group>
                       )}
 
-                      {event.location && (
+                      {event.eventLocation && (
                         <Group gap={4}>
                           <IconMapPin size="0.9rem" />
-                          <Text size="xs">{event.location}</Text>
+                          <Text size="xs">{event.eventLocation}</Text>
                         </Group>
                       )}
                     </Group>

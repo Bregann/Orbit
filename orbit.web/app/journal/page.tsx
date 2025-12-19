@@ -4,6 +4,7 @@ import type { GetJournalEntriesResponse } from '@/interfaces/api/journal/GetJour
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export const metadata: Metadata = {
   title: 'Journal'
@@ -20,7 +21,7 @@ export default async function JournalPage() {
       .join('; ')
 
     await queryClient.prefetchQuery({
-      queryKey: ['journalEntries'],
+      queryKey: [QueryKeys.JournalEntries],
       queryFn: async () => await doQueryGet<GetJournalEntriesResponse>('/api/journal/GetJournalEntries', { headers: { Cookie: cookieHeader } })
     })
 

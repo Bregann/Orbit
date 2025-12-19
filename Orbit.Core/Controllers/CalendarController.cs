@@ -32,24 +32,17 @@ namespace Orbit.Core.Controllers
                 await calendarService.AddCalendarEvent(request);
                 return Ok();
             }
-            catch (ArgumentException ex)
+            catch (KeyNotFoundException ex)
             {
-                return BadRequest(ex.Message);
+                return NotFound(ex.Message);
             }
         }
 
         [HttpPost]
         public async Task<ActionResult> AddCalendarEventType([FromBody] AddCalendarEventTypeRequest request)
         {
-            try
-            {
-                await calendarService.AddCalendarEventType(request);
-                return Ok();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await calendarService.AddCalendarEventType(request);
+            return Ok();
         }
 
         [HttpDelete]

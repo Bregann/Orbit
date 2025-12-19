@@ -2,6 +2,7 @@
 
 import { doPost, doQueryGet } from '@/helpers/apiClient'
 import notificationHelper from '@/helpers/notificationHelper'
+import { QueryKeys } from '@/helpers/QueryKeys'
 import { GetAddMonthPotDataDto } from '@/interfaces/api/pots/GetAddMonthPotDataDto'
 import { GetSubscriptionsDto } from '@/interfaces/api/subscriptions/GetSubscriptionsDto'
 import { BillingFrequency, SubscriptionItem } from '@/interfaces/api/subscriptions/MonthlyPayment'
@@ -33,12 +34,12 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
   const queryClient = useQueryClient()
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['addMonthPotData'],
+    queryKey: [QueryKeys.AddMonthPotData],
     queryFn: async () => await doQueryGet<GetAddMonthPotDataDto>('/api/pots/GetAddMonthPotData')
   })
 
   const { data: subscriptionsData, isLoading: isLoadingSubscriptions } = useQuery({
-    queryKey: ['getSubscriptions'],
+    queryKey: [QueryKeys.GetSubscriptions],
     queryFn: async () => await doQueryGet<GetSubscriptionsDto>('/api/subscriptions/GetSubscriptions')
   })
 
@@ -59,7 +60,7 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
   }, [data])
 
   const updateSpendingPotAmountAllocatedAmount = (potId: number, amount: number) => {
-    queryClient.setQueryData<GetAddMonthPotDataDto>(['addMonthPotData'], (oldData) => {
+    queryClient.setQueryData<GetAddMonthPotDataDto>([QueryKeys.AddMonthPotData], (oldData) => {
       if (oldData === undefined) {
         return
       }
@@ -74,7 +75,7 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
   }
 
   const updateSavingsPotAmountAllocatedAmount = (potId: number, amount: number) => {
-    queryClient.setQueryData<GetAddMonthPotDataDto>(['addMonthPotData'], (oldData) => {
+    queryClient.setQueryData<GetAddMonthPotDataDto>([QueryKeys.AddMonthPotData], (oldData) => {
       if (oldData === undefined) {
         return
       }
@@ -115,12 +116,12 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
 
     if (res.ok) {
       props.hideModal()
-      queryClient.invalidateQueries({ queryKey: ['addMonthPotData'] })
-      queryClient.invalidateQueries({ queryKey: ['homepage-stats'] })
-      queryClient.invalidateQueries({ queryKey: ['potBreakdownData'] })
-      queryClient.invalidateQueries({ queryKey: ['thisMonthTransactions'] })
-      queryClient.invalidateQueries({ queryKey: ['unprocessedTransactions'] })
-      queryClient.invalidateQueries({ queryKey: ['monthlyPaymentsForMonth'] })
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.AddMonthPotData] })
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.HomepageStats] })
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.PotBreakdownData] })
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.ThisMonthTransactions] })
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.GetUnprocessedTransactions] })
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.MonthlyPaymentsForMonth] })
       setPotRollovers([])
       setIncomeForMonth('')
 
@@ -134,7 +135,7 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
   return (
     <Modal
       opened={props.displayModal}
-      onClose={() => { props.hideModal(); queryClient.invalidateQueries({ queryKey: ['addMonthPotData'] }); setPotRollovers([]) }}
+      onClose={() => { props.hideModal(); queryClient.invalidateQueries({ queryKey: [QueryKeys.AddMonthPotData] }); setPotRollovers([]) }}
       title="Add New Month"
       size="lg"
       centered
@@ -353,7 +354,7 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
             <Button
               color="red"
               variant="outline"
-              onClick={() => { props.hideModal(); queryClient.invalidateQueries({ queryKey: ['addMonthPotData'] }); setPotRollovers([]) } }
+              onClick={() => { props.hideModal(); queryClient.invalidateQueries({ queryKey: [QueryKeys.AddMonthPotData] }); setPotRollovers([]) } }
               size="md"
             >
             Cancel

@@ -39,16 +39,12 @@ export default function UploadDocumentModal({
     const documentName = uploadName.trim() || uploadFile.name
     const categoryId = parseInt(uploadCategory, 10)
 
-    try {
-      await onUpload(uploadFile, documentName, categoryId)
-      setUploadFile(null)
-      setUploadName('')
-      setUploadCategory(null)
-      onClose()
-      notificationHelper.showSuccessNotification('Success', 'Document uploaded successfully', 3000, <IconCheck />)
-    } catch (error) {
-      notificationHelper.showErrorNotification('Error', error instanceof Error ? error.message : 'Failed to upload document', 3000, <IconX />)
-    }
+    await onUpload(uploadFile, documentName, categoryId)
+    setUploadFile(null)
+    setUploadName('')
+    setUploadCategory(null)
+    onClose()
+    notificationHelper.showSuccessNotification('Success', 'Document uploaded successfully', 3000, <IconCheck />)
   }
 
   const handleClose = () => {

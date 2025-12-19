@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import type { GetDashboardOverviewDataDto } from '@/interfaces/api/dashboard/GetDashboardOverviewDataDto'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export const metadata: Metadata = {
   title: 'Dashboard'
@@ -18,7 +19,7 @@ export default async function Home() {
   const queryClient = new QueryClient()
 
   await queryClient.prefetchQuery({
-    queryKey: ['dashboardOverview'],
+    queryKey: [QueryKeys.DashboardOverview],
     queryFn: async () =>
       await doQueryGet<GetDashboardOverviewDataDto>('/api/Dashboard/GetDashboardOverviewData', {
         cookieHeader

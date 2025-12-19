@@ -6,6 +6,7 @@ import { GetTransactionsForCurrentMonthDto } from '@/interfaces/api/transactions
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export const metadata: Metadata = {
   title: 'This Month'
@@ -22,17 +23,17 @@ export default async function ThisMonthPage() {
       .join('; ')
 
     await queryClient.prefetchQuery({
-      queryKey: ['potBreakdownData'],
+      queryKey: [QueryKeys.GetAllPotData],
       queryFn: async () => await doQueryGet<GetAllPotDataDto>('/api/Pots/GetAllPotData', { headers: { Cookie: cookieHeader } })
     })
 
     await queryClient.prefetchQuery({
-      queryKey: ['getSpendingPotDropdownOptions'],
+      queryKey: [QueryKeys.GetSpendingPotDropdownOptions],
       queryFn: async () => await doQueryGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions', { headers: { Cookie: cookieHeader } }),
     })
 
     await queryClient.prefetchQuery({
-      queryKey: ['thisMonthTransactions'],
+      queryKey: [QueryKeys.ThisMonthTransactions],
       queryFn: async () => await doQueryGet<GetTransactionsForCurrentMonthDto>('/api/transactions/GetTransactionsForMonth', { headers: { Cookie: cookieHeader } }),
     })
 

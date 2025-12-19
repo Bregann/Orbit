@@ -6,20 +6,22 @@ export interface GetDashboardOverviewDataDto {
   tasksCompleted: number
   totalTasks: number
   eventsScheduled: number
-  todaysTasks: TodaysTasksData[]
+  upcomingTasks: UpcomingTasksData[]
   upcomingEvents: UpcomingEventsData[]
 }
 
-export interface TodaysTasksData {
+export interface UpcomingTasksData {
   taskId: number
   taskTitle: string
   priority: TaskPriorityType
   isCompleted: boolean
+  dueDate?: string
 }
 
 export interface UpcomingEventsData {
   eventId: number
   eventTitle: string
   eventDate: string
+  isAllDay: boolean
 }
 

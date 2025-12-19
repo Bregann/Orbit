@@ -1,0 +1,70 @@
+using Microsoft.EntityFrameworkCore;
+using Orbit.Domain.Database.Context;
+
+namespace Orbit.Tests.Infrastructure
+{
+    /// <summary>
+    /// Base class for integration tests that need a real database
+    /// Automatically creates and tears down the database for each test
+    /// </summary>
+    public abstract class DatabaseIntegrationTestBase
+    {
+        protected AppDbContext DbContext { get; private set; } = null!;
+
+        [SetUp]
+        public async Task SetUp()
+        {
+            var options = new DbContextOptionsBuilder<AppDbContext>()
+                .UseNpgsql(TestContainerSetup.ConnectionString)
+                .EnableSensitiveDataLogging()
+                .Options;
+
+            DbContext = new AppDbContext(options);
+
+            // Ensure database is created fresh for each test
+            await DbContext.Database.EnsureDeletedAsync();
+            await DbContext.Database.EnsureCreatedAsync();
+
+            // Custom setup for derived classes
+            await CustomSetUp();
+        }
+
+        [TearDown]
+        public async Task TearDown()
+        {
+            // Custom teardown for derived classes
+            await CustomTearDown();
+
+            await DbContext.DisposeAsync();
+        }
+
+        /// <summary>
+        /// Override this method to add custom setup logic
+        /// </summary>
+        protected virtual Task CustomSetUp()
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Override this method to add custom teardown logic
+        /// </summary>
+        protected virtual Task CustomTearDown()
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Helper method to create a new DbContext for scenarios where you need multiple contexts
+        /// </summary>
+        protected AppDbContext CreateNewContext()
+        {
+            var options = new DbContextOptionsBuilder<AppDbContext>()
+                .UseNpgsql(TestContainerSetup.ConnectionString)
+                .EnableSensitiveDataLogging()
+                .Options;
+
+            return new AppDbContext(options);
+        }
+    }
+}

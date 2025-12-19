@@ -17,6 +17,7 @@ import { useMutationPost } from '@/helpers/mutations/useMutationPost'
 import notificationHelper from '@/helpers/notificationHelper'
 import type { GetShoppingListQuickAddItemsResponse } from '@/interfaces/api/shopping/GetShoppingListQuickAddItemsResponse'
 import type { ShoppingListItem } from '@/interfaces/api/shopping/GetShoppingListItemsResponse'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface CommonItemsCardProps {
   onEditClick: () => void
@@ -25,7 +26,7 @@ interface CommonItemsCardProps {
 
 export default function CommonItemsCard({ onEditClick, currentItems }: CommonItemsCardProps) {
   const { data: quickAddData } = useQuery({
-    queryKey: ['shoppingListQuickAddItems'],
+    queryKey: [QueryKeys.ShoppingListQuickAddItems],
     queryFn: async () => await doQueryGet<GetShoppingListQuickAddItemsResponse>('/api/shopping/GetShoppingListQuickAddItems')
   })
 
@@ -40,7 +41,7 @@ export default function CommonItemsCard({ onEditClick, currentItems }: CommonIte
 
     const { mutateAsync } = useMutationPost<void, void>({
       url: `/api/shopping/AddShoppingListItem?name=${encodeURIComponent(itemName)}`,
-      queryKey: ['shoppingListItems'],
+      queryKey: [QueryKeys.ShoppingListItems],
       invalidateQuery: true,
       onSuccess: () => {
         notificationHelper.showSuccessNotification('Success', 'Item added to shopping list', 3000, <IconCheck />)

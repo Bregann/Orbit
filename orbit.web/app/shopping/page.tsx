@@ -5,6 +5,7 @@ import type { GetShoppingListQuickAddItemsResponse } from '@/interfaces/api/shop
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export const metadata: Metadata = {
   title: 'Shopping List'
@@ -21,12 +22,12 @@ export default async function ShoppingPage() {
       .join('; ')
 
     await queryClient.prefetchQuery({
-      queryKey: ['shoppingListItems'],
+      queryKey: [QueryKeys.ShoppingListItems],
       queryFn: async () => await doQueryGet<GetShoppingListItemsResponse>('/api/shopping/GetShoppingListItems', { headers: { Cookie: cookieHeader } })
     })
 
     await queryClient.prefetchQuery({
-      queryKey: ['shoppingListQuickAddItems'],
+      queryKey: [QueryKeys.ShoppingListQuickAddItems],
       queryFn: async () => await doQueryGet<GetShoppingListQuickAddItemsResponse>('/api/shopping/GetShoppingListQuickAddItems', { headers: { Cookie: cookieHeader } })
     })
 

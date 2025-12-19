@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orbit.Core", "Orbit.Core\Or
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orbit.Domain", "Orbit.Domain\Orbit.Domain.csproj", "{4680EED0-6FA4-34BE-A65A-77EEA7632296}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orbit.Tests", "Orbit.Tests\Orbit.Tests.csproj", "{224BEF9D-FD12-4169-86A2-5D691EC9B568}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{4680EED0-6FA4-34BE-A65A-77EEA7632296}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4680EED0-6FA4-34BE-A65A-77EEA7632296}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4680EED0-6FA4-34BE-A65A-77EEA7632296}.Release|Any CPU.Build.0 = Release|Any CPU
+		{224BEF9D-FD12-4169-86A2-5D691EC9B568}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{224BEF9D-FD12-4169-86A2-5D691EC9B568}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{224BEF9D-FD12-4169-86A2-5D691EC9B568}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{224BEF9D-FD12-4169-86A2-5D691EC9B568}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,6 +6,7 @@ import { GetUnprocessedTransactionsDto } from '@/interfaces/api/transactions/Get
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export const metadata: Metadata = {
   title: 'Finance Overview'
@@ -22,17 +23,17 @@ export default async function FinancePage() {
       .join('; ')
 
     await queryClient.prefetchQuery({
-      queryKey: ['homepage-stats'],
+      queryKey: [QueryKeys.HomepageStats],
       queryFn: async () => await doQueryGet<GetHomepageStatsDto>('/api/stats/GetHomepageStats', { headers: { Cookie: cookieHeader } }),
     })
 
     await queryClient.prefetchQuery({
-      queryKey: ['unprocessedTransactions'],
+      queryKey: [QueryKeys.GetUnprocessedTransactions],
       queryFn: async () => await doQueryGet<GetUnprocessedTransactionsDto>('/api/transactions/GetUnprocessedTransactions', { headers: { Cookie: cookieHeader } }),
     })
 
     await queryClient.prefetchQuery({
-      queryKey: ['getSpendingPotDropdownOptions'],
+      queryKey: [QueryKeys.GetSpendingPotDropdownOptions],
       queryFn: async () => await doQueryGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions', { headers: { Cookie: cookieHeader } }),
     })
 

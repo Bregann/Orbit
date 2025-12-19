@@ -3,6 +3,7 @@
 import { doQueryGet } from '@/helpers/apiClient'
 import { useMutationPost } from '@/helpers/mutations/useMutationPost'
 import notificationHelper from '@/helpers/notificationHelper'
+import { QueryKeys } from '@/helpers/QueryKeys'
 import { GetSpendingPotDropdownOptionsDto } from '@/interfaces/api/pots/GetSpendingPotDropdownOptionsDto'
 import { AutomaticTransaction, GetAutomaticTransactionsDto } from '@/interfaces/api/transactions/GetAutomaticTransactionsDto'
 import {
@@ -45,18 +46,18 @@ export default function AutomaticTransactionsManagement({
   const [addMerchantPotId, setAddMerchantPotId] = useState<string | null>(null)
 
   const { data: potOptions } = useQuery({
-    queryKey: ['getSpendingPotDropdownOptions'],
+    queryKey: [QueryKeys.GetSpendingPotDropdownOptions],
     queryFn: async () => await doQueryGet<GetSpendingPotDropdownOptionsDto>('/api/pots/GetSpendingPotDropdownOptions')
   })
 
   const { data: automaticTransactionData } = useQuery({
-    queryKey: ['getAutomaticTransactions'],
+    queryKey: [QueryKeys.GetAutomaticTransactions],
     queryFn: async () => await doQueryGet<GetAutomaticTransactionsDto>('/api/transactions/GetAutomaticTransactions')
   })
 
   const { mutateAsync: addAutomaticTransactionMutation } = useMutationPost({
     url: '/api/transactions/AddAutomaticTransaction',
-    queryKey: ['getAutomaticTransactions'],
+    queryKey: [QueryKeys.GetAutomaticTransactions],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Automatic transaction added successfully', 3000, <IconCheck />)

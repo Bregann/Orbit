@@ -21,12 +21,13 @@ import { useMutationPut } from '@/helpers/mutations/useMutationPut'
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import notificationHelper from '@/helpers/notificationHelper'
 import type { GetShoppingListItemsResponse, ShoppingListItem } from '@/interfaces/api/shopping/GetShoppingListItemsResponse'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export default function ShoppingListCard() {
   const [showChecked, setShowChecked] = useState(true)
 
   const { data: itemsData } = useQuery({
-    queryKey: ['shoppingListItems'],
+    queryKey: [QueryKeys.ShoppingListItems],
     queryFn: async () => await doQueryGet<GetShoppingListItemsResponse>('/api/shopping/GetShoppingListItems')
   })
 
@@ -34,7 +35,7 @@ export default function ShoppingListCard() {
 
   const { mutate: deleteItem } = useMutationDelete<number, void>({
     url: (itemId) => `/api/shopping/RemoveShoppingListItem?itemId=${itemId}`,
-    queryKey: ['shoppingListItems'],
+    queryKey: [QueryKeys.ShoppingListItems],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Item removed', 3000, <IconCheck />)
@@ -46,7 +47,7 @@ export default function ShoppingListCard() {
 
   const { mutate: clearPurchased, isPending: isClearingPurchased } = useMutationDelete<void, void>({
     url: '/api/shopping/ClearPurchasedShoppingListItems',
-    queryKey: ['shoppingListItems'],
+    queryKey: [QueryKeys.ShoppingListItems],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Purchased items cleared', 3000, <IconCheck />)
@@ -58,7 +59,7 @@ export default function ShoppingListCard() {
 
   const { mutate: markAsPurchased } = useMutationPut<number, void>({
     url: (itemId) => `/api/shopping/MarkShoppingListItemAsPurchased?itemId=${itemId}`,
-    queryKey: ['shoppingListItems'],
+    queryKey: [QueryKeys.ShoppingListItems],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Item marked as purchased', 3000, <IconCheck />)
@@ -159,7 +160,7 @@ export default function ShoppingListCard() {
 
 export function useShoppingListItems() {
   const { data: itemsData } = useQuery({
-    queryKey: ['shoppingListItems'],
+    queryKey: [QueryKeys.ShoppingListItems],
     queryFn: async () => await doQueryGet<GetShoppingListItemsResponse>('/api/shopping/GetShoppingListItems')
   })
 

@@ -4,6 +4,7 @@ import { Modal, Stack, TextInput, Button, Group, ColorPicker, Text } from '@mant
 import { useState } from 'react'
 import { AddCalendarEventTypeRequest } from '@/interfaces/api/calendar/AddCalendarEventTypeRequest'
 import { useMutationPost } from '@/helpers/mutations/useMutationPost'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface AddEventTypeModalProps {
   opened: boolean
@@ -31,7 +32,7 @@ export default function AddEventTypeModal({ opened, onClose }: AddEventTypeModal
 
   const addEventTypeMutation = useMutationPost<AddCalendarEventTypeRequest, void>({
     url: '/api/calendar/AddCalendarEventType',
-    queryKey: ['calendarEventTypes'],
+    queryKey: [QueryKeys.CalendarEventTypes],
     invalidateQuery: true
   })
 

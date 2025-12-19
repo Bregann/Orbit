@@ -16,6 +16,7 @@ import { useMutationPost } from '@/helpers/mutations/useMutationPost'
 import notificationHelper from '@/helpers/notificationHelper'
 import type { AddTaskRequest } from '@/interfaces/api/tasks/AddTaskRequest'
 import { TaskPriorityType } from '@/interfaces/api/tasks/TaskPriorityType'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 const priorities = [
   { value: TaskPriorityType.Low.toString(), label: 'Low' },
@@ -62,7 +63,7 @@ export default function AddTaskModal({ opened, onClose, categories }: AddTaskMod
 
   const { mutateAsync: addTask, isPending } = useMutationPost<AddTaskRequest, number>({
     url: '/api/tasks/AddNewTask',
-    queryKey: ['tasks'],
+    queryKey: [QueryKeys.Tasks],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Task added successfully', 3000, <IconCheck />)

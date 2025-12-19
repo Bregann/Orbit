@@ -18,18 +18,19 @@ import {
   IconRepeat,
   IconSun
 } from '@tabler/icons-react'
-import type { CalendarEvent } from '@/interfaces/calendar/CalendarEvent'
+import type { EventEntry } from '@/interfaces/api/calendar/GetCalendarEventsDto'
+import { isToday, isPastDate, toDateString } from '@/helpers/dateHelper'
 
 interface CalendarGridProps {
   currentMonth: Date
   selectedDate: Date | null
-  events: CalendarEvent[]
+  events: EventEntry[]
   onNavigateMonth: (_direction: 'prev' | 'next') => void
   onGoToToday: () => void
   onSelectDate: (_date: Date) => void
-  onViewEvent: (_event: CalendarEvent) => void
-  getEventTypeColour: (_typeId: string) => string
-  getEventsForDate: (_date: Date) => CalendarEvent[]
+  onViewEvent: (_event: EventEntry) => void
+  getEventTypeColour: (_typeId: number) => string
+  getEventsForDate: (_date: Date) => EventEntry[]
 }
 
 export default function CalendarGrid({
@@ -75,11 +76,6 @@ export default function CalendarGrid({
     return days
   }
 
-  const isToday = (date: Date) => {
-    const today = new Date()
-    return date.toDateString() === today.toDateString()
-  }
-
   const getMonthYearString = () => {
     return currentMonth.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
   }
@@ -119,6 +115,7 @@ export default function CalendarGrid({
           const dayEvents = date ? getEventsForDate(date) : []
           const isSelected = date && selectedDate?.toDateString() === date.toDateString()
           const isTodayDate = date && isToday(date)
+          const isPast = date && isPastDate(date)
 
           return (
             <Box
@@ -130,7 +127,7 @@ export default function CalendarGrid({
                 borderBottom: index < 35 ? '1px solid var(--mantine-color-dark-5)' : 'none',
                 backgroundColor: isSelected ? 'var(--mantine-color-dark-6)' : 'transparent',
                 cursor: date ? 'pointer' : 'default',
-                opacity: date ? 1 : 0.3,
+                opacity: date ? (isPast ? 0.4 : 1) : 0.3,
               }}
               onClick={() => date && onSelectDate(date)}
             >
@@ -140,6 +137,7 @@ export default function CalendarGrid({
                     <Text
                       size="sm"
                       fw={isTodayDate ? 700 : 500}
+                      c={isPast && !isTodayDate ? 'dimmed' : undefined}
                       style={{
                         width: 28,
                         height: 28,
@@ -162,7 +160,8 @@ export default function CalendarGrid({
                         py={2}
                         radius="sm"
                         style={{
-                          backgroundColor: `var(--mantine-color-${getEventTypeColour(event.typeId)}-9)`,
+                          backgroundColor: `var(--mantine-color-${getEventTypeColour(event.calendarEventTypeId)}-9)`,
+                          color: 'white',
                           cursor: 'pointer',
                         }}
                         onClick={(e) => {
@@ -170,20 +169,20 @@ export default function CalendarGrid({
                           // Set instanceDate to the clicked date for recurring events
                           const eventWithInstance = {
                             ...event,
-                            instanceDate: date.toISOString().split('T')[0]
+                            instanceDate: toDateString(date)
                           }
                           onViewEvent(eventWithInstance)
                         }}
                       >
                         <Group gap={4} wrap="nowrap">
-                          {event.rrule && (
+                          {event.recurrenceRule && (
                             <IconRepeat size="0.7rem" style={{ flexShrink: 0 }} />
                           )}
                           {event.isAllDay && (
                             <IconSun size="0.7rem" style={{ flexShrink: 0 }} />
                           )}
-                          <Text size="xs" lineClamp={1} c={getEventTypeColour(event.typeId)}>
-                            {!event.isAllDay && event.startTime && `${event.startTime} `}{event.title}
+                          <Text size="xs" lineClamp={1} c={getEventTypeColour(event.calendarEventTypeId)}>
+                            {!event.isAllDay && event.startTime.split('T')[1] && `${event.startTime.split('T')[1].substring(0, 5)} `}{event.eventName}
                           </Text>
                         </Group>
                       </Paper>

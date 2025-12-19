@@ -23,14 +23,16 @@ namespace Orbit.Domain.Services.Dashboard
                 TasksCompleted = tasksCompleted,
                 TotalTasks = totalTasks,
                 EventsScheduled = eventsScheduled,
-                TodaysTasks = await context.Tasks
-                    .Where(t => t.DueDate.HasValue && t.DueDate.Value.Date == DateTime.UtcNow.Date)
-                    .Select(t => new TodaysTasksData
+                UpcomingTasks = await context.Tasks
+                    .OrderBy(t => t.DueDate)
+                    .ThenBy(t => t.Priority)
+                    .Select(t => new UpcomingTasksData
                     {
                         TaskId = t.Id,
                         TaskTitle = t.Name,
                         Priority = t.Priority,
-                        IsCompleted = t.CompletedAt != null
+                        IsCompleted = t.CompletedAt != null,
+                        DueDate = t.DueDate
                     })
                     .Take(5)
                     .ToArrayAsync(),
@@ -41,7 +43,8 @@ namespace Orbit.Domain.Services.Dashboard
                     {
                         EventId = ce.Id,
                         EventTitle = ce.EventName,
-                        EventDate = ce.StartTime
+                        EventDate = ce.StartTime,
+                        IsAllDay = ce.IsAllDay
                     })
                     .Take(5)
                     .ToArrayAsync()

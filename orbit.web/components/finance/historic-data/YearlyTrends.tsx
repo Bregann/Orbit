@@ -27,7 +27,7 @@ export default function YearlyTrends({ yearlyData }: YearlyTrendsProps) {
       acc.push({ month: item.month, [item.potName]: item.totalAmountSaved })
     }
     return acc
-  }, [] as any[])
+  }, [] as Array<Record<string, number | string>>)
 
   // Get unique pot names for series
   const savingsPotNames = [...new Set(yearlyData.amountSavedPerPot.map((x) => x.potName))]

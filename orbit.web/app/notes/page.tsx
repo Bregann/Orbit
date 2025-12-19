@@ -3,6 +3,7 @@ import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query
 import { doQueryGet } from '@/helpers/apiClient'
 import type { GetNotePagesAndFoldersResponse } from '@/interfaces/api/notes/GetNotePagesAndFoldersResponse'
 import { cookies } from 'next/headers'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export const metadata = {
   title: 'Notes | Orbit',
@@ -20,7 +21,7 @@ export default async function NotesPage() {
       .join('; ')
 
     await queryClient.prefetchQuery({
-      queryKey: ['notePages'],
+      queryKey: [QueryKeys.GetNotePagesAndFolders],
       queryFn: async () => await doQueryGet<GetNotePagesAndFoldersResponse>('/api/notes/GetNotePagesAndFolders', { headers: { Cookie: cookieHeader } })
     })
   }

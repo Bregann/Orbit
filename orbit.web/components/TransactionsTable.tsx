@@ -2,6 +2,7 @@
 
 import { doPatch } from '@/helpers/apiClient'
 import notificationHelper from '@/helpers/notificationHelper'
+import { QueryKeys } from '@/helpers/QueryKeys'
 import { PotDropdownValue } from '@/interfaces/api/pots/PotDropdownValue'
 import { TransactionsTableRow } from '@/interfaces/api/transactions/TransactionsTableRow'
 import {
@@ -33,9 +34,9 @@ export default function TransactionsTableComponent(props: TransactionsTableProps
       await doPatch('/api/Transactions/UpdateTransaction', { body: { transactionId: data.transactionId, potId: data.potId } })
     },
     onSuccess: () =>{
-      queryClient.invalidateQueries({ queryKey: ['unprocessedTransactions'] })
-      queryClient.invalidateQueries({ queryKey: ['homepage-stats'] })
-      queryClient.invalidateQueries({ queryKey: ['thisMonthTransactions'] })
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.GetUnprocessedTransactions] })
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.HomepageStats] })
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.ThisMonthTransactions] })
       notificationHelper.showSuccessNotification('Success', 'Transaction updated successfully', 3000, <IconCheck />)
     },
     onError: () =>{

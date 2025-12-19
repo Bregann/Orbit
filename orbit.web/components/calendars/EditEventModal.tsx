@@ -29,14 +29,15 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import { GetCalendarEventTypesDto } from '@/interfaces/api/calendar/GetCalendarEventTypesDto'
-import type { CalendarEvent } from '@/interfaces/calendar/CalendarEvent'
+import type { EventEntry } from '@/interfaces/api/calendar/GetCalendarEventsDto'
 import { useMutationPut } from '@/helpers/mutations/useMutationPut'
 import type { EditCalendarEventRequest } from '@/interfaces/api/calendar/EditCalendarEventRequest'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 interface EditEventModalProps {
   opened: boolean
   onClose: () => void
-  event: CalendarEvent | null
+  event: EventEntry | null
 }
 
 const daysOfWeekOptions = [
@@ -60,14 +61,14 @@ const mockDocuments = [
 export default function EditEventModal({ opened, onClose, event }: EditEventModalProps) {
   // Fetch event types
   const { data: eventTypesData } = useQuery({
-    queryKey: ['calendarEventTypes'],
+    queryKey: [QueryKeys.CalendarEventTypes],
     queryFn: async () => await doQueryGet<GetCalendarEventTypesDto>('/api/calendar/GetCalendarEventTypes')
   })
 
   // Mutation for updating calendar event
   const updateEventMutation = useMutationPut<EditCalendarEventRequest, void>({
     url: '/api/calendar/EditCalendarEvent',
-    queryKey: ['calendarEvents'],
+    queryKey: [QueryKeys.CalendarEvents],
     invalidateQuery: true
   })
 
@@ -98,22 +99,22 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
 
   useEffect(() => {
     if (event && opened) {
-      setEventTitle(event.title)
-      setEventDate(event.date)
-      setEventStartTime(event.startTime || '')
-      setEventEndTime(event.endTime || '')
+      setEventTitle(event.eventName)
+      setEventDate(event.startTime.split('T')[0])
+      setEventStartTime(event.startTime.split('T')[1]?.substring(0, 5) || '')
+      setEventEndTime(event.endTime.split('T')[1]?.substring(0, 5) || '')
       setEventIsAllDay(event.isAllDay)
-      setEventLocation(event.location || '')
-      setEventTypeId(event.typeId)
+      setEventLocation(event.eventLocation || '')
+      setEventTypeId(event.calendarEventTypeId.toString())
       setEventDescription(event.description || '')
-      setEventAttachments(event.attachments.map(String))
+      setEventAttachments(event.documentId ? [event.documentId.toString()] : [])
 
       // Parse RRule if exists
-      if (event.rrule) {
+      if (event.recurrenceRule) {
         setShowRecurrence(true)
         try {
-          const eventStartDate = new Date(event.date + 'T00:00:00')
-          const rruleString = `DTSTART:${eventStartDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\nRRULE:${event.rrule}`
+          const eventStartDate = new Date(event.startTime.split('T')[0] + 'T00:00:00')
+          const rruleString = `DTSTART:${eventStartDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\nRRULE:${event.recurrenceRule}`
           const rule = RRule.fromString(rruleString)
 
           setRecurrenceFrequency(rule.options.freq)
@@ -216,7 +217,7 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
       size="lg"
     >
       <Stack gap="md">
-        {event?.rrule && (
+        {event?.recurrenceRule && (
           <Alert icon={<IconAlertCircle size="1rem" />} title="Note" color="blue">
             Editing this recurring event will update ALL occurrences in the series.
           </Alert>

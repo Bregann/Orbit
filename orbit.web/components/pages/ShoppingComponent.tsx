@@ -21,6 +21,7 @@ import QuickAddCard from '@/components/shopping/QuickAddCard'
 import CommonItemsCard from '@/components/shopping/CommonItemsCard'
 import ShoppingListCard, { useShoppingListItems } from '@/components/shopping/ShoppingListCard'
 import ManageCommonItemsModal from '@/components/shopping/ManageCommonItemsModal'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
 export default function ShoppingComponent() {
   const [newListModalOpened, { open: openNewListModal, close: closeNewListModal }] = useDisclosure(false)
@@ -31,7 +32,7 @@ export default function ShoppingComponent() {
 
   const { mutate: clearAllItems, isPending: isClearingAll } = useMutationDelete<void, void>({
     url: '/api/shopping/ClearAllShoppingListItems',
-    queryKey: ['shoppingListItems'],
+    queryKey: [QueryKeys.ShoppingListItems],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Shopping list cleared', 3000, <IconCheck />)
@@ -44,7 +45,7 @@ export default function ShoppingComponent() {
 
   const { mutate: clearPurchasedItems, isPending: isClearingPurchased } = useMutationDelete<void, void>({
     url: '/api/shopping/ClearPurchasedShoppingListItems',
-    queryKey: ['shoppingListItems'],
+    queryKey: [QueryKeys.ShoppingListItems],
     invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Purchased items cleared', 3000, <IconCheck />)
