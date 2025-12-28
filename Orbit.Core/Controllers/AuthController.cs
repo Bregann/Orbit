@@ -39,6 +39,11 @@ namespace Orbit.Core.Controllers
             {
                 var loginData = await authService.LoginUser(request);
 
+                if(request.IsMobile)
+                {
+                    return Ok(loginData);
+                }
+
                 Response.Cookies.Append("accessToken", loginData.AccessToken, new CookieOptions
                 {
                     HttpOnly = true,
