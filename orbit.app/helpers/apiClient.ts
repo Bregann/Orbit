@@ -1,14 +1,16 @@
+import { RefreshTokenRequest } from '@/interfaces/api/login/RefreshTokenRequest'
+import { RefreshTokenResponse } from '@/interfaces/api/login/RefreshTokenResponse'
 import axios from 'axios'
-import { keychainHelper } from './keychainHelper'
 import Constants from 'expo-constants'
+import { keychainHelper } from './keychainHelper'
 
 const authApiClient = axios.create({
-  baseURL: __DEV__ ? 'http://192.168.1.1:5053' : Constants.expoConfig?.extra?.ApiUrl || '',
+  baseURL: __DEV__ ? 'http://192.168.1.248:5053' : Constants.expoConfig?.extra?.ApiUrl || '',
   validateStatus: (status) => status < 500 && status !== 401,
 })
 
 const noAuthApiClient = axios.create({
-  baseURL: __DEV__ ? 'http://192.168.1.1:5053' : Constants.expoConfig?.extra?.ApiUrl || '',
+  baseURL: __DEV__ ? 'http://192.168.1.248:5053' : Constants.expoConfig?.extra?.ApiUrl || '',
   validateStatus (status) {
     return status < 500
   },
@@ -42,17 +44,19 @@ authApiClient.interceptors.response.use(
       }
 
       try {
-        const { data } = await authApiClient.post('/api/auth/RefreshToken', {
-          refreshToken
-        })
+        const request: RefreshTokenRequest = { refreshToken }
+        const { data } = await authApiClient.post<RefreshTokenResponse>('/api/Auth/RefreshToken', request)
 
-        keychainHelper.setAccessToken(data.accessToken)
-        keychainHelper.setRefreshToken(data.refreshToken)
+        await keychainHelper.setAccessToken(data.accessToken)
+        await keychainHelper.setRefreshToken(data.refreshToken)
 
         error.config.headers['Authorization'] = `Bearer ${data.accessToken}`
 
         return authApiClient.request(error.config)
-      } catch (error) {
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError)
+        // Clear tokens on refresh failure
+        await keychainHelper.deleteTokens()
         return Promise.reject(error)
       }
     }
@@ -62,3 +66,4 @@ authApiClient.interceptors.response.use(
 )
 
 export { authApiClient, noAuthApiClient }
+

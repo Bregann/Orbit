@@ -1,4 +1,3 @@
-using Orbit.Domain.Database.Context;
 using Testcontainers.PostgreSql;
 
 namespace Orbit.Tests.Infrastructure

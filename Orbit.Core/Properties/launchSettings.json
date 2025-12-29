@@ -1,18 +1,30 @@
 {
   "profiles": {
-    "FinanceManagerApi": {
+    "OrbitApi": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "JwtValidIssuer": "https://192.168.1.1:7248",
+        "JwtValidIssuer": "https://localhost:7248",
         "JwtValidAudience": "twitchbot",
-        "JwtKey": "tilly123123123123123123123123123123123123123123123123123123123123123123123123123213123",
-        "ApiSecret": "supersecret"
+        "JwtKey": "tilly123123123123123123123123123123123123123123123123123123123123123123123123123213123"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7248;http://localhost:5053"
+    },
+    "OrbitMobileApi": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "JwtValidIssuer": "https://192.168.1.248:7248",
+        "JwtValidAudience": "twitchbot",
+        "JwtKey": "tilly123123123123123123123123123123123123123123123123123123123123123123123123123213123"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://192.168.1.248:5053"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",

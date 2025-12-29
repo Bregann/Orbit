@@ -2,17 +2,20 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/context/authContext';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { attemptLogin } = useAuth();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const router = useRouter();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -31,6 +34,12 @@ export default function LoginScreen() {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleKeyPress = (nativeEvent: any) => {
+    if (nativeEvent.key === 'Enter') {
+      handleLogin();
     }
   };
 
@@ -63,31 +72,47 @@ export default function LoginScreen() {
             autoCapitalize="none"
           />
 
-          <TextInput
-            style={[
-              styles.input,
-              {
-                backgroundColor: colorScheme === 'dark' ? '#2a2a2a' : '#f0f0f0',
-                color: colorScheme === 'dark' ? '#fff' : '#000',
-                borderColor: colors.tint,
-              },
-            ]}
-            placeholder="Password"
-            placeholderTextColor={colorScheme === 'dark' ? '#999' : '#666'}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            editable={!loading}
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={[
+                styles.input,
+                styles.passwordInput,
+                {
+                  backgroundColor: colorScheme === 'dark' ? '#2a2a2a' : '#f0f0f0',
+                  color: colorScheme === 'dark' ? '#fff' : '#000',
+                  borderColor: colors.tint,
+                },
+              ]}
+              placeholder="Password"
+              placeholderTextColor={colorScheme === 'dark' ? '#999' : '#666'}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              editable={!loading}
+              autoCapitalize="none"
+              onSubmitEditing={handleLogin}
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)}
+              disabled={loading}
+            >
+              <Ionicons
+                name={showPassword ? 'eye' : 'eye-off'}
+                size={24}
+                color={colors.tint}
+              />
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: colors.tint }]}
+            style={[styles.button, { backgroundColor: colorScheme === 'dark' ? '#0a7ea4' : colors.tint }]}
             onPress={handleLogin}
             disabled={loading}
           >
-            <ThemedText style={styles.buttonText}>
+            <Text style={styles.buttonText}>
               {loading ? 'Logging in...' : 'Login'}
-            </ThemedText>
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -122,6 +147,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     fontSize: 16,
   },
+  passwordContainer: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  passwordInput: {
+    paddingRight: 50,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    height: 50,
+    justifyContent: 'center',
+  },
   button: {
     height: 50,
     borderRadius: 8,
@@ -133,5 +171,18 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  debugButton: {
+    height: 50,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+    borderWidth: 1,
+    backgroundColor: 'transparent',
+  },
+  debugButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

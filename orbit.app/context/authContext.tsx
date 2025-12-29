@@ -1,5 +1,7 @@
 import { noAuthApiClient } from '@/helpers/apiClient'
 import { keychainHelper } from '@/helpers/keychainHelper'
+import { LoginUserRequest } from '@/interfaces/api/login/LoginUserRequest'
+import { LoginUserResponse } from '@/interfaces/api/login/LoginUserResponse'
 import { useRouter } from 'expo-router'
 import { createContext, useContext, useEffect, useState } from 'react'
 
@@ -38,25 +40,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const attemptLogin = async (username: string, password: string): Promise<boolean> => {
-    const response = await noAuthApiClient.post('/api/auth/LoginUser', {
-      username,
-      password
-    })
+    try {
+      const request: LoginUserRequest = {
+        email: username,
+        password,
+        isMobile: true,
+      }
 
-    if (response.status === 401) {
+      const response = await noAuthApiClient.post<LoginUserResponse>('/api/Auth/LoginUser', request)
+      console.log('Login response status:', response.status)
+      if (response.status === 401) {
+        return false
+      }
+
+      if (response.status === 200 && response.data) {
+        await keychainHelper.setAccessToken(response.data.accessToken)
+        await keychainHelper.setRefreshToken(response.data.refreshToken)
+        setIsAuthenticated(true)
+        router.replace('/(tabs)')
+        return true
+      }
+
       return false
-    } else {
-      setIsAuthenticated(true)
-      console.log(response.data.accessToken)
-      console.log(response.data.refreshToken)
-      keychainHelper.setAccessToken(response.data.accessToken)
-      keychainHelper.setRefreshToken(response.data.refreshToken)
-      router.replace('/home')
-      console.log('hitting')
-      console.log(isAuthenticated)
+    } catch (error) {
+      console.error('Login error:', error)
+      return false
     }
-
-    return true
   }
 
   useEffect(() => {

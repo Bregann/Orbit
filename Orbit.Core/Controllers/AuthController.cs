@@ -39,7 +39,7 @@ namespace Orbit.Core.Controllers
             {
                 var loginData = await authService.LoginUser(request);
 
-                if(request.IsMobile)
+                if (request.IsMobile)
                 {
                     return Ok(loginData);
                 }

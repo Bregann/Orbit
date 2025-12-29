@@ -35,6 +35,8 @@ import { formatRelativeDate, formatDateWithTime } from '@/helpers/dateHelper'
 import { GetCalendarEventsDto, type EventEntry } from '@/interfaces/api/calendar/GetCalendarEventsDto'
 import ViewEventModal from '@/components/calendars/ViewEventModal'
 import { QueryKeys } from '@/helpers/QueryKeys'
+import MoodSelector from '@/components/mood/MoodSelector'
+import type { GetTodaysMoodResponse } from '@/interfaces/api/mood/GetTodaysMoodResponse'
 
 export default function DashboardComponent() {
   const router = useRouter()
@@ -49,6 +51,11 @@ export default function DashboardComponent() {
   const { data: calendarData } = useQuery({
     queryKey: [QueryKeys.CalendarEvents],
     queryFn: async () => await doQueryGet<GetCalendarEventsDto>('/api/calendar/GetCalendarEvents')
+  })
+
+  const { data: moodData } = useQuery({
+    queryKey: [QueryKeys.TodaysMood],
+    queryFn: async () => await doQueryGet<GetTodaysMoodResponse>('/api/Mood/GetTodaysMood')
   })
 
   const handleEventClick = (eventId: number) => {
@@ -200,6 +207,14 @@ export default function DashboardComponent() {
             </Card>
           </Grid.Col>
         </Grid>
+      </Stack>
+
+      {/* Mood Selector */}
+      <Stack gap="lg" mb="xl">
+        <MoodSelector
+          currentMood={moodData?.mood ?? null}
+          hasMoodToday={moodData?.hasMoodToday ?? false}
+        />
       </Stack>
 
       {/* Today's Tasks & Upcoming Events */}

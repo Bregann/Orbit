@@ -27,6 +27,8 @@ using Orbit.Domain.Interfaces.Api.Notes;
 using Orbit.Domain.Services.Notes;
 using Orbit.Domain.Interfaces.Api.Dashboard;
 using Orbit.Domain.Services.Dashboard;
+using Orbit.Domain.Interfaces.Api.MoodTracker;
+using Orbit.Domain.Services.MoodTracker;
 
 #if DEBUG
 using Hangfire.MemoryStorage;
@@ -76,6 +78,7 @@ builder.Services.AddScoped<IDocumentsService, DocumentsService>();
 builder.Services.AddScoped<IShoppingService, ShoppingService>();
 builder.Services.AddScoped<IJournalService, JournalService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IMoodTrackerService, MoodTrackerService>();
 builder.Services.AddScoped<INoteService, NotesService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddHttpClient<ICommsSenderClient, CommsSenderClient>();
@@ -100,10 +103,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontendLocalhost", builder =>
     {
         builder
-            .WithOrigins("http://localhost:3000", "https://orbit.bregan.me")
-            .AllowCredentials()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+                .AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
@@ -188,7 +190,7 @@ await environmentalSettingHelper.LoadEnvironmentalSettings();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -215,6 +217,6 @@ app.MapHangfireDashboard("/hangfire", new DashboardOptions
     Authorization = auth
 }, JobStorage.Current);
 
-HangfireJobSetup.SetupRecurringJobs();
+//HangfireJobSetup.SetupRecurringJobs();
 
 app.Run();

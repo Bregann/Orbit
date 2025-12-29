@@ -1,11 +1,12 @@
+import { AuthProvider, useAuth } from '@/context/authContext';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, useColorScheme, View } from 'react-native';
 import 'react-native-reanimated';
 
-import { AuthProvider, useAuth } from '@/context/authContext';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+const queryClient = new QueryClient();
 
 function RootLayoutContent() {
   const colorScheme = useColorScheme();
@@ -35,8 +36,10 @@ function RootLayoutContent() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <RootLayoutContent />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RootLayoutContent />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
