@@ -29,6 +29,8 @@ using Orbit.Domain.Interfaces.Api.Dashboard;
 using Orbit.Domain.Services.Dashboard;
 using Orbit.Domain.Interfaces.Api.MoodTracker;
 using Orbit.Domain.Services.MoodTracker;
+using Orbit.Domain.Interfaces.Api.Fitbit;
+using Orbit.Domain.Services.Fitbit;
 
 #if DEBUG
 using Hangfire.MemoryStorage;
@@ -60,6 +62,7 @@ builder.Services.AddHttpContextAccessor();
 // Add in our own services
 builder.Services.AddSingleton<IEnvironmentalSettingHelper, EnvironmentalSettingHelper>();
 builder.Services.AddScoped<IBankApiHelper, BankApiHelper>();
+builder.Services.AddHttpClient<IFitbitApiHelper, FitbitApiHelper>();
 
 // Add in the auth
 builder.Services.AddAuthorization();
@@ -81,6 +84,7 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IMoodTrackerService, MoodTrackerService>();
 builder.Services.AddScoped<INoteService, NotesService>();
 builder.Services.AddScoped<IBankService, BankService>();
+builder.Services.AddScoped<IFitbitService, FitbitService>();
 builder.Services.AddHttpClient<ICommsSenderClient, CommsSenderClient>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

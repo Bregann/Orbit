@@ -65,6 +65,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
     { label: 'Journal', icon: IconMoodSmile, href: '/journal' },
     { label: 'Calendar', icon: IconCalendarEvent, href: '/calendar' },
     { label: 'Notes', icon: IconNote, href: '/notes' },
+    { label: 'Settings', icon: IconSettings, href: '/settings' },
   ]
 
   const allNavItems = [

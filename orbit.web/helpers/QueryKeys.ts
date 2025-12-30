@@ -27,5 +27,8 @@ export enum QueryKeys {
   MonthlyPaymentsForMonth = 'monthlyPaymentsForMonth',
   GetAllPotData = 'getAllPotData',
   GetNotePagesAndFolders = 'getNotePagesAndFolders',
-  TodaysMood = 'todaysMood'
+  TodaysMood = 'todaysMood',
+  FitbitConnectionStatus = 'fitbitConnectionStatus',
+  FitbitProfile = 'fitbitProfile',
+  FitbitDailyActivity = 'fitbitDailyActivity'
 }
