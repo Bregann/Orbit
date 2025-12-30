@@ -104,12 +104,12 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins(
-                "http://localhost:3000",          // Next.js dev
-                "https://orbit.bregan.me"           // Next.js prod
+                "http://localhost:3000",
+                "https://orbit.bregan.me"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // only if using cookies
+            .AllowCredentials();
     });
 });
 

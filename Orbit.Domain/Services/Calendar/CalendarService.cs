@@ -63,8 +63,12 @@ namespace Orbit.Domain.Services.Calendar
 
         public async Task AddCalendarEvent(AddCalendarEventRequest request)
         {
-            var documentExists = await context.Documents
-                .FirstOrDefaultAsync(x => x.Id == request.DocumentId) ?? throw new KeyNotFoundException($"Document with ID {request.DocumentId} not found.");
+            if(request.DocumentId != null)
+            {
+                var documentExists = await context.Documents
+                    .FirstOrDefaultAsync(x => x.Id == request.DocumentId) ?? throw new KeyNotFoundException($"Document with ID {request.DocumentId} not found.");
+                return;
+            }
 
             var newEvent = new CalendarEvent
             {
