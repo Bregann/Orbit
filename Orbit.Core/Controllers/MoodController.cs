@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Orbit.Domain.DTOs.MoodTracker;
-using Orbit.Domain.Enums;
 using Orbit.Domain.Interfaces.Api.MoodTracker;
 
 namespace Orbit.Core.Controllers
