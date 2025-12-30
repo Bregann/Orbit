@@ -328,6 +328,25 @@ namespace Orbit.Domain.Database.Migrations
                     b.ToTable("JournalEntries");
                 });
 
+            modelBuilder.Entity("Orbit.Domain.Database.Models.MoodTrackerEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateRecorded")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MoodType")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MoodTrackerEntries");
+                });
+
             modelBuilder.Entity("Orbit.Domain.Database.Models.NoteFolder", b =>
                 {
                     b.Property<int>("Id")

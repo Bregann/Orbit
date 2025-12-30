@@ -35,5 +35,7 @@ namespace Orbit.Domain.Database.Context
 
         public DbSet<NoteFolder> NoteFolders { get; set; } = null!;
         public DbSet<NotePage> NotePages { get; set; } = null!;
+
+        public DbSet<MoodTrackerEntry> MoodTrackerEntries { get; set; } = null!;
     }
 }

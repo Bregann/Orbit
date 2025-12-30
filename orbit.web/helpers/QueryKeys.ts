@@ -26,5 +26,6 @@ export enum QueryKeys {
   AddMonthPotData = 'addMonthPotData',
   MonthlyPaymentsForMonth = 'monthlyPaymentsForMonth',
   GetAllPotData = 'getAllPotData',
-  GetNotePagesAndFolders = 'getNotePagesAndFolders'
+  GetNotePagesAndFolders = 'getNotePagesAndFolders',
+  TodaysMood = 'todaysMood'
 }

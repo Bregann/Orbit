@@ -27,6 +27,8 @@ using Orbit.Domain.Interfaces.Api.Notes;
 using Orbit.Domain.Services.Notes;
 using Orbit.Domain.Interfaces.Api.Dashboard;
 using Orbit.Domain.Services.Dashboard;
+using Orbit.Domain.Interfaces.Api.MoodTracker;
+using Orbit.Domain.Services.MoodTracker;
 
 #if DEBUG
 using Hangfire.MemoryStorage;
@@ -76,6 +78,7 @@ builder.Services.AddScoped<IDocumentsService, DocumentsService>();
 builder.Services.AddScoped<IShoppingService, ShoppingService>();
 builder.Services.AddScoped<IJournalService, JournalService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IMoodTrackerService, MoodTrackerService>();
 builder.Services.AddScoped<INoteService, NotesService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddHttpClient<ICommsSenderClient, CommsSenderClient>();
@@ -97,13 +100,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontendLocalhost", builder =>
+    options.AddPolicy("WebClients", policy =>
     {
-        builder
-            .WithOrigins("http://localhost:3000", "https://orbit.bregan.me")
-            .AllowCredentials()
+        policy
+            .WithOrigins(
+                "http://localhost:3000",          // Next.js dev
+                "https://orbit.bregan.me"           // Next.js prod
+            )
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials(); // only if using cookies
     });
 });
 
@@ -115,7 +121,7 @@ var postgresContainer = new PostgreSqlBuilder()
     .WithDatabase("financemanagercontainer")
     .WithUsername("testuser")
     .WithPassword("testpass")
-    .WithPortBinding(5432, true)
+    .WithPortBinding(5432, false)
     .Build();
 
 await postgresContainer.StartAsync();
@@ -153,7 +159,7 @@ builder.Services.AddHangfireServer(options => options.SchedulePollingInterval = 
 
 var app = builder.Build();
 
-app.UseCors("AllowFrontendLocalhost");
+app.UseCors("WebClients");
 
 #if DEBUG
 // Seed the database
