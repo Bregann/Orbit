@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store'
 const getAccessToken = async (): Promise<string | null> => {
   try {
     const accessToken = await SecureStore.getItemAsync('accessToken')
-    return accessToken || null
+    return accessToken && accessToken.trim() !== '' ? accessToken : null
   } catch (error) {
     console.log('error', error)
     return null
@@ -13,7 +13,7 @@ const getAccessToken = async (): Promise<string | null> => {
 const getRefreshToken = async (): Promise<string | null> => {
   try {
     const refreshToken = await SecureStore.getItemAsync('refreshToken')
-    return refreshToken || null
+    return refreshToken && refreshToken.trim() !== '' ? refreshToken : null
   } catch (error) {
     console.log('error', error)
     return null

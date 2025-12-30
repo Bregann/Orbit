@@ -29,8 +29,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkAuthStatus = async (): Promise<void> => {
     const accessToken = await keychainHelper.getAccessToken()
-    console.log(accessToken ?? 'is null')
-    const isLoggedIn = accessToken !== null
+    console.log('Access token:', accessToken)
+    const isLoggedIn = accessToken !== null && accessToken !== ''
+    console.log('Is logged in:', isLoggedIn)
     setIsAuthenticated(isLoggedIn)
   }
 
