@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export enum MoodType {
   Excellent = 1,
   Good = 2,

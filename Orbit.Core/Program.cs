@@ -194,7 +194,7 @@ await environmentalSettingHelper.LoadEnvironmentalSettings();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -221,6 +221,6 @@ app.MapHangfireDashboard("/hangfire", new DashboardOptions
     Authorization = auth
 }, JobStorage.Current);
 
-//HangfireJobSetup.SetupRecurringJobs();
+HangfireJobSetup.SetupRecurringJobs();
 
 app.Run();
