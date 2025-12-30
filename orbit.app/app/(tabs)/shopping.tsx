@@ -3,12 +3,16 @@ import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { authApiClient } from '@/helpers/apiClient';
+import { useMutationDelete } from '@/helpers/mutations/useMutationDelete';
+import { useMutationPost } from '@/helpers/mutations/useMutationPost';
+import { useMutationPut } from '@/helpers/mutations/useMutationPut';
 import { GetShoppingListItemsResponse } from '@/interfaces/api/shopping/GetShoppingListItemsResponse';
 import { GetShoppingListQuickAddItemsResponse } from '@/interfaces/api/shopping/GetShoppingListQuickAddItemsResponse';
 import { createCommonStyles } from '@/styles/commonStyles';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { shoppingStyles as styles } from '@/styles/shoppingStyles';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ShoppingScreen() {
@@ -16,7 +20,6 @@ export default function ShoppingScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const commonStyles = createCommonStyles(colorScheme ?? 'light');
   const isDark = colorScheme === 'dark';
-  const queryClient = useQueryClient();
 
   const [quickAddText, setQuickAddText] = useState('');
   const [showChecked, setShowChecked] = useState(true);
@@ -40,48 +43,35 @@ export default function ShoppingScreen() {
   });
 
   // Add item mutation
-  const addItemMutation = useMutation({
-    mutationFn: async (name: string) => {
-      const response = await authApiClient.post(`/api/Shopping/AddShoppingListItem?name=${encodeURIComponent(name)}`);
-      return response.data;
-    },
+  const addItemMutation = useMutationPost<string, void>({
+    url: (name: string) => `/api/Shopping/AddShoppingListItem?name=${encodeURIComponent(name)}`,
+    queryKey: ['shopping-items'],
+    invalidateQuery: true,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shopping-items'] });
       setQuickAddText('');
     },
-    onError: (error) => {
+    onError: () => {
       Alert.alert('Error', 'Failed to add item');
-      console.error('Add item error:', error);
     },
   });
 
   // Mark as purchased mutation
-  const markAsPurchasedMutation = useMutation({
-    mutationFn: async (itemId: number) => {
-      const response = await authApiClient.put(`/api/Shopping/MarkShoppingListItemAsPurchased?itemId=${itemId}`);
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shopping-items'] });
-    },
-    onError: (error) => {
+  const markAsPurchasedMutation = useMutationPut<number, void>({
+    url: (itemId: number) => `/api/Shopping/MarkShoppingListItemAsPurchased?itemId=${itemId}`,
+    queryKey: ['shopping-items'],
+    invalidateQuery: true,
+    onError: () => {
       Alert.alert('Error', 'Failed to update item');
-      console.error('Mark as purchased error:', error);
     },
   });
 
   // Remove item mutation
-  const removeItemMutation = useMutation({
-    mutationFn: async (itemId: number) => {
-      const response = await authApiClient.delete(`/api/Shopping/RemoveShoppingListItem?itemId=${itemId}`);
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shopping-items'] });
-    },
-    onError: (error) => {
+  const removeItemMutation = useMutationDelete<number, void>({
+    url: (itemId: number) => `/api/Shopping/RemoveShoppingListItem?itemId=${itemId}`,
+    queryKey: ['shopping-items'],
+    invalidateQuery: true,
+    onError: () => {
       Alert.alert('Error', 'Failed to remove item');
-      console.error('Remove item error:', error);
     },
   });
 
@@ -302,144 +292,3 @@ export default function ShoppingScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  quickAddContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 16,
-  },
-  quickAddInputWrapper: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  quickAddInput: {
-    flex: 1,
-    fontSize: 15,
-    padding: 0,
-  },
-  addButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  addButtonText: {
-    color: '#000000',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  section: {
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 16,
-    overflow: 'hidden',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(100, 116, 139, 0.2)',
-  },
-  quickAddItems: {
-    padding: 16,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  quickAddItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1.5,
-  },
-  quickAddItemText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  listControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  showCheckedToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  showCheckedText: {
-    fontSize: 13,
-  },
-  itemCount: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  itemsList: {
-    padding: 12,
-    gap: 8,
-  },
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  itemCheckbox: {
-    padding: 4,
-  },
-  itemName: {
-    flex: 1,
-    fontSize: 15,
-  },
-  itemNameChecked: {
-    textDecorationLine: 'line-through',
-    opacity: 0.5,
-  },
-  deleteButton: {
-    padding: 4,
-  },
-  emptyState: {
-    padding: 32,
-    alignItems: 'center',
-  },
-  emptyStateText: {
-    fontSize: 14,
-    opacity: 0.6,
-    textAlign: 'center',
-  },
-});

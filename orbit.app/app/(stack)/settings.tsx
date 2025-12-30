@@ -20,31 +20,6 @@ export default function SettingsScreen() {
           <ThemedText style={styles.subtitle}>Manage your preferences</ThemedText>
         </View>
 
-        {/* Account Section */}
-        <View style={styles.sectionContainer}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            Account
-          </ThemedText>
-
-          <TouchableOpacity style={[styles.listItem, { marginTop: 12 }]}>
-            <View style={{ flex: 1 }}>
-              <ThemedText style={{ fontSize: 14, fontWeight: '500' }}>Profile</ThemedText>
-              <ThemedText style={{ fontSize: 12, opacity: 0.6, marginTop: 2 }}>
-                Manage your profile information
-              </ThemedText>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.listItem, { marginTop: 8 }]}>
-            <View style={{ flex: 1 }}>
-              <ThemedText style={{ fontSize: 14, fontWeight: '500' }}>Preferences</ThemedText>
-              <ThemedText style={{ fontSize: 12, opacity: 0.6, marginTop: 2 }}>
-                Customize your app experience
-              </ThemedText>
-            </View>
-          </TouchableOpacity>
-        </View>
-
         {/* App Section */}
         <View style={styles.sectionContainer}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>

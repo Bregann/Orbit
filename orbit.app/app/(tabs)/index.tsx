@@ -1,27 +1,31 @@
+import { EventItem } from '@/components/dashboard/EventItem';
+import { MoodButton } from '@/components/dashboard/MoodButton';
+import { QuickActionButton } from '@/components/dashboard/QuickActionButton';
+import { TaskItem } from '@/components/dashboard/TaskItem';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { authApiClient } from '@/helpers/apiClient';
+import { useMutationPost } from '@/helpers/mutations/useMutationPost';
 import { GetDashboardOverviewDataDto } from '@/interfaces/api/dashboard/GetDashboardOverviewDataDto';
 import { GetTodaysMoodResponse } from '@/interfaces/api/mood/GetTodaysMoodResponse';
 import { MoodType } from '@/interfaces/api/mood/MoodType';
 import { RecordMoodRequest } from '@/interfaces/api/mood/RecordMoodRequest';
-import { TaskPriorityType } from '@/interfaces/api/tasks/TaskPriorityType';
 import { createCommonStyles } from '@/styles/commonStyles';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createIndexStyles } from '@/styles/indexStyles';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import moment from 'moment';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function DashboardScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const styles = createCommonStyles(colorScheme ?? 'light');
-  const customStyles = createCustomStyles(colorScheme ?? 'light');
+  const customStyles = createIndexStyles(colorScheme ?? 'light');
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard'],
@@ -39,18 +43,12 @@ export default function DashboardScreen() {
     },
   });
 
-  const recordMoodMutation = useMutation({
-    mutationFn: async (mood: MoodType) => {
-      const request: RecordMoodRequest = { mood };
-      const response = await authApiClient.post('/api/Mood/RecordMood', request);
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['todays-mood'] });
-    },
-    onError: (error) => {
+  const recordMoodMutation = useMutationPost<RecordMoodRequest, void>({
+    url: '/api/Mood/RecordMood',
+    queryKey: ['todays-mood'],
+    invalidateQuery: true,
+    onError: () => {
       Alert.alert('Error', 'Failed to record mood');
-      console.error('Record mood error:', error);
     },
   });
 
@@ -72,7 +70,7 @@ export default function DashboardScreen() {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Confirm',
-          onPress: () => recordMoodMutation.mutate(mood),
+          onPress: () => recordMoodMutation.mutate({ mood }),
         },
       ]
     );
@@ -174,7 +172,7 @@ export default function DashboardScreen() {
               mood={MoodType.Excellent}
               label="Excellent"
               emoji="😊"
-              color="#10B981"
+              colour="#10B981"
               isSelected={moodData?.mood === MoodType.Excellent}
               onPress={() => handleMoodPress(MoodType.Excellent, 'Excellent')}
               disabled={recordMoodMutation.isPending || moodData?.hasMoodToday || false}
@@ -183,7 +181,7 @@ export default function DashboardScreen() {
               mood={MoodType.Good}
               label="Good"
               emoji="🙂"
-              color="#3B82F6"
+              colour="#3B82F6"
               isSelected={moodData?.mood === MoodType.Good}
               onPress={() => handleMoodPress(MoodType.Good, 'Good')}
               disabled={recordMoodMutation.isPending || moodData?.hasMoodToday || false}
@@ -192,7 +190,7 @@ export default function DashboardScreen() {
               mood={MoodType.Neutral}
               label="Neutral"
               emoji="😐"
-              color="#F59E0B"
+              colour="#F59E0B"
               isSelected={moodData?.mood === MoodType.Neutral}
               onPress={() => handleMoodPress(MoodType.Neutral, 'Neutral')}
               disabled={recordMoodMutation.isPending || moodData?.hasMoodToday || false}
@@ -201,7 +199,7 @@ export default function DashboardScreen() {
               mood={MoodType.Low}
               label="Low"
               emoji="😔"
-              color="#F97316"
+              colour="#F97316"
               isSelected={moodData?.mood === MoodType.Low}
               onPress={() => handleMoodPress(MoodType.Low, 'Low')}
               disabled={recordMoodMutation.isPending || moodData?.hasMoodToday || false}
@@ -210,7 +208,7 @@ export default function DashboardScreen() {
               mood={MoodType.Difficult}
               label="Difficult"
               emoji="😞"
-              color="#EF4444"
+              colour="#EF4444"
               isSelected={moodData?.mood === MoodType.Difficult}
               onPress={() => handleMoodPress(MoodType.Difficult, 'Difficult')}
               disabled={recordMoodMutation.isPending || moodData?.hasMoodToday || false}
@@ -308,168 +306,4 @@ export default function DashboardScreen() {
     </ThemedView>
     </SafeAreaView>
   );
-}
-
-function QuickActionButton({
-  icon,
-  label,
-  onPress,
-}: {
-  icon: string;
-  label: string;
-  onPress: () => void;
-}) {
-  const colorScheme = useColorScheme();
-  const styles = createCommonStyles(colorScheme ?? 'light');
-  const colors = Colors[colorScheme ?? 'light'];
-
-  return (
-    <TouchableOpacity
-      style={[styles.listItem, { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 }]}
-      onPress={onPress}
-    >
-      <IconSymbol name={icon as any} size={28} color={colors.tint} />
-      <ThemedText style={{ fontSize: 12, fontWeight: '500', textAlign: 'center' }}>
-        {label}
-      </ThemedText>
-    </TouchableOpacity>
-  );
-}
-
-function TaskItem({
-  title,
-  date,
-  priority,
-}: {
-  title: string;
-  date: string;
-  priority: TaskPriorityType;
-}) {
-  const styles = createCommonStyles(useColorScheme() ?? 'light');
-  
-  const getPriorityColor = (priority: TaskPriorityType) => {
-    switch (priority) {
-      case TaskPriorityType.Critical: return '#DC2626';
-      case TaskPriorityType.High: return '#EF4444';
-      case TaskPriorityType.Medium: return '#F59E0B';
-      case TaskPriorityType.Low: return '#10B981';
-      default: return '#95E1D3';
-    }
-  };
-
-  const priorityColor = getPriorityColor(priority);
-
-  return (
-    <View style={[styles.listItem, styles.taskItem]}>
-      <View style={[styles.priorityDot, { backgroundColor: priorityColor }]} />
-      <View style={styles.taskContent}>
-        <ThemedText style={styles.taskTitle}>{title}</ThemedText>
-      </View>
-      <View style={styles.taskDate}>
-        <ThemedText style={[styles.taskDateText, { color: priorityColor }]}>
-          {date}
-        </ThemedText>
-      </View>
-    </View>
-  );
-}
-
-function EventItem({ title, dateTime }: { title: string; dateTime: string }) {
-  const styles = createCommonStyles(useColorScheme() ?? 'light');
-
-  return (
-    <View style={[styles.listItem, styles.eventItem]}>
-      <View style={[styles.eventDot, { backgroundColor: '#4ECDC4' }]} />
-      <View style={styles.eventContent}>
-        <ThemedText style={styles.eventTitle}>{title}</ThemedText>
-        <ThemedText style={styles.eventDateTime}>{dateTime}</ThemedText>
-      </View>
-    </View>
-  );
-}
-
-function MoodButton({
-  mood,
-  label,
-  emoji,
-  color,
-  isSelected,
-  onPress,
-  disabled,
-}: {
-  mood: MoodType;
-  label: string;
-  emoji: string;
-  color: string;
-  isSelected: boolean;
-  onPress: () => void;
-  disabled: boolean;
-}) {
-  const colorScheme = useColorScheme();
-  const styles = createCustomStyles(colorScheme ?? 'light');
-
-  return (
-    <TouchableOpacity
-      style={[
-        styles.moodButton,
-        isSelected && { backgroundColor: color + '20', borderColor: color, borderWidth: 2 },
-        {
-          backgroundColor: isSelected ? color + '20' : (colorScheme === 'dark' ? '#1E293B' : '#F8FAFC'),
-          borderColor: isSelected ? color : (colorScheme === 'dark' ? '#334155' : '#E2E8F0'),
-        }
-      ]}
-      onPress={onPress}
-      disabled={disabled}
-    >
-      <ThemedText style={styles.moodEmoji}>{emoji}</ThemedText>
-      <ThemedText style={[styles.moodLabel, isSelected && { color, fontWeight: '700' }]}>
-        {label}
-      </ThemedText>
-    </TouchableOpacity>
-  );
-}
-
-function createCustomStyles(colorScheme: 'light' | 'dark') {
-  return StyleSheet.create({
-    warningBanner: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-      padding: 12,
-      borderRadius: 10,
-      borderWidth: 1,
-      marginBottom: 16,
-    },
-    warningText: {
-      flex: 1,
-      fontSize: 14,
-      fontWeight: '600',
-    },
-    moodsContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      gap: 8,
-      marginTop: 12,
-    },
-    moodButton: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 14,
-      paddingHorizontal: 4,
-      borderRadius: 12,
-      borderWidth: 1,
-      gap: 6,
-      overflow: 'visible',
-    },
-    moodEmoji: {
-      fontSize: 28,
-      lineHeight: 32,
-    },
-    moodLabel: {
-      fontSize: 11,
-      fontWeight: '500',
-      textAlign: 'center',
-    },
-  });
 }

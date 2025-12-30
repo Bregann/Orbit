@@ -2,10 +2,10 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/context/authContext';
+import { loginStyles as styles } from '@/styles/loginStyles';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { Alert, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -15,7 +15,6 @@ export default function LoginScreen() {
   const { attemptLogin } = useAuth();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-  const router = useRouter();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -34,12 +33,6 @@ export default function LoginScreen() {
       console.error(error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleKeyPress = (nativeEvent: any) => {
-    if (nativeEvent.key === 'Enter') {
-      handleLogin();
     }
   };
 
@@ -120,69 +113,4 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  content: {
-    gap: 24,
-  },
-  title: {
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    textAlign: 'center',
-    opacity: 0.7,
-  },
-  form: {
-    gap: 16,
-  },
-  input: {
-    height: 50,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    fontSize: 16,
-  },
-  passwordContainer: {
-    position: 'relative',
-    justifyContent: 'center',
-  },
-  passwordInput: {
-    paddingRight: 50,
-  },
-  eyeIcon: {
-    position: 'absolute',
-    right: 16,
-    height: 50,
-    justifyContent: 'center',
-  },
-  button: {
-    height: 50,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  debugButton: {
-    height: 50,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-    borderWidth: 1,
-    backgroundColor: 'transparent',
-  },
-  debugButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-});
+

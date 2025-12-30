@@ -8,7 +8,7 @@ interface EventListItemProps {
   startTime: string;
   endTime: string;
   isAllDay: boolean;
-  color: string;
+  colour: string;
   onPress?: () => void;
 }
 
@@ -17,7 +17,7 @@ export function EventListItem({
   startTime,
   endTime,
   isAllDay,
-  color,
+  colour,
   onPress,
 }: EventListItemProps) {
   const colorScheme = useColorScheme();
@@ -44,7 +44,7 @@ export function EventListItem({
           },
         ]}
       >
-        <View style={[styles.colorIndicator, { backgroundColor: color }]} />
+        <View style={[styles.colorIndicator, { backgroundColor: colour }]} />
         <View style={styles.content}>
           <ThemedText style={styles.eventName} numberOfLines={1}>
             {eventName}

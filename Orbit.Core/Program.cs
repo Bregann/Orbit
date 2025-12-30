@@ -100,12 +100,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontendLocalhost", builder =>
+    options.AddPolicy("WebClients", policy =>
     {
-        builder
-                .AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy
+            .WithOrigins(
+                "http://localhost:3000",          // Next.js dev
+                "https://orbit.bregan.me"           // Next.js prod
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // only if using cookies
     });
 });
 
@@ -117,7 +121,7 @@ var postgresContainer = new PostgreSqlBuilder()
     .WithDatabase("financemanagercontainer")
     .WithUsername("testuser")
     .WithPassword("testpass")
-    .WithPortBinding(5432, true)
+    .WithPortBinding(5432, false)
     .Build();
 
 await postgresContainer.StartAsync();
@@ -155,7 +159,7 @@ builder.Services.AddHangfireServer(options => options.SchedulePollingInterval = 
 
 var app = builder.Build();
 
-app.UseCors("AllowFrontendLocalhost");
+app.UseCors("WebClients");
 
 #if DEBUG
 // Seed the database

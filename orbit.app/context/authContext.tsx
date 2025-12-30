@@ -30,13 +30,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const checkAuthStatus = async (): Promise<void> => {
     const accessToken = await keychainHelper.getAccessToken()
     console.log(accessToken ?? 'is null')
-    setIsAuthenticated(accessToken !== null)
+    const isLoggedIn = accessToken !== null
+    setIsAuthenticated(isLoggedIn)
   }
 
   const logOut = async (): Promise<void> => {
     await keychainHelper.deleteTokens()
     setIsAuthenticated(false)
-    router.push('/')
+    router.replace('/(auth)/login')
   }
 
   const attemptLogin = async (username: string, password: string): Promise<boolean> => {

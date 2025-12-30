@@ -3,13 +3,13 @@ import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { authApiClient } from '@/helpers/apiClient';
 import { EventEntry, GetCalendarEventsDto } from '@/interfaces/api/calendar/GetCalendarEventsDto';
-import { GetCalendarEventTypesDto } from '@/interfaces/api/calendar/GetCalendarEventTypesDto';
+import { calendarStyles as styles } from '@/styles/calendarStyles';
 import { createCommonStyles } from '@/styles/commonStyles';
 import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import moment from 'moment';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, ScrollView, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RRule } from 'rrule';
@@ -17,141 +17,6 @@ import { RRule } from 'rrule';
 interface ProcessedEvent extends EventEntry {
   displayDate: string; // The actual date this event occurs on (for recurring events)
 }
-
-// Mock data for demonstration
-const mockCalendarData: GetCalendarEventsDto = {
-  events: [
-    {
-      id: 1,
-      eventName: 'Work Christmas cover',
-      eventLocation: 'Office',
-      description: 'Christmas shift coverage',
-      startTime: '2025-12-29T10:00:00Z',
-      endTime: '2025-12-29T18:00:00Z',
-      isAllDay: false,
-      recurrenceRule: null,
-      calendarEventTypeId: 1,
-      calendarEventTypeName: 'Work',
-      calendarEventTypeColour: '#EF4444',
-      documentId: null,
-      documentFileName: null,
-      documentFileType: null,
-    },
-    {
-      id: 2,
-      eventName: 'Mark Simmons',
-      eventLocation: 'Coffee Shop',
-      description: 'Catch up meeting',
-      startTime: '2026-02-07T19:30:00Z',
-      endTime: '2026-02-07T21:00:00Z',
-      isAllDay: false,
-      recurrenceRule: null,
-      calendarEventTypeId: 2,
-      calendarEventTypeName: 'Personal',
-      calendarEventTypeColour: '#3B82F6',
-      documentId: null,
-      documentFileName: null,
-      documentFileType: null,
-    },
-    {
-      id: 3,
-      eventName: 'An Evening with Elly Griffiths',
-      eventLocation: 'Waterstones',
-      description: 'Book signing event',
-      startTime: '2026-02-12T19:00:00Z',
-      endTime: '2026-02-12T21:00:00Z',
-      isAllDay: false,
-      recurrenceRule: null,
-      calendarEventTypeId: 2,
-      calendarEventTypeName: 'Personal',
-      calendarEventTypeColour: '#3B82F6',
-      documentId: null,
-      documentFileName: null,
-      documentFileType: null,
-    },
-    {
-      id: 4,
-      eventName: 'MC Hammersmith',
-      eventLocation: 'Hammersmith Apollo',
-      description: 'Concert',
-      startTime: '2026-05-06T18:30:00Z',
-      endTime: '2026-05-06T23:00:00Z',
-      isAllDay: false,
-      recurrenceRule: null,
-      calendarEventTypeId: 2,
-      calendarEventTypeName: 'Personal',
-      calendarEventTypeColour: '#3B82F6',
-      documentId: null,
-      documentFileName: null,
-      documentFileType: null,
-    },
-    {
-      id: 5,
-      eventName: 'Daliso Chaponda',
-      eventLocation: 'Comedy Club',
-      description: 'Stand-up comedy',
-      startTime: '2026-07-29T18:30:00Z',
-      endTime: '2026-07-29T22:00:00Z',
-      isAllDay: false,
-      recurrenceRule: null,
-      calendarEventTypeId: 2,
-      calendarEventTypeName: 'Personal',
-      calendarEventTypeColour: '#3B82F6',
-      documentId: null,
-      documentFileName: null,
-      documentFileType: null,
-    },
-    {
-      id: 6,
-      eventName: 'Flo & Joan',
-      eventLocation: 'Theater',
-      description: 'Comedy show',
-      startTime: '2025-10-24T19:30:00Z',
-      endTime: '2025-10-24T22:00:00Z',
-      isAllDay: false,
-      recurrenceRule: null,
-      calendarEventTypeId: 2,
-      calendarEventTypeName: 'Personal',
-      calendarEventTypeColour: '#3B82F6',
-      documentId: null,
-      documentFileName: null,
-      documentFileType: null,
-    },
-    {
-      id: 7,
-      eventName: 'Weekly Team Standup',
-      eventLocation: 'Zoom',
-      description: 'Regular team sync',
-      startTime: '2025-12-01T09:00:00Z',
-      endTime: '2025-12-01T09:30:00Z',
-      isAllDay: false,
-      recurrenceRule: 'FREQ=WEEKLY;BYDAY=MO,WE,FR;UNTIL=20260331T090000Z',
-      calendarEventTypeId: 1,
-      calendarEventTypeName: 'Work',
-      calendarEventTypeColour: '#EF4444',
-      documentId: null,
-      documentFileName: null,
-      documentFileType: null,
-    },
-    {
-      id: 8,
-      eventName: 'Gym Session',
-      eventLocation: 'Local Gym',
-      description: 'Workout',
-      startTime: '2025-12-01T07:00:00Z',
-      endTime: '2025-12-01T08:00:00Z',
-      isAllDay: false,
-      recurrenceRule: 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;UNTIL=20260630T080000Z',
-      calendarEventTypeId: 3,
-      calendarEventTypeName: 'Health',
-      calendarEventTypeColour: '#10B981',
-      documentId: null,
-      documentFileName: null,
-      documentFileType: null,
-    },
-  ],
-  eventExceptions: [],
-};
 
 export default function CalendarScreen() {
   const colorScheme = useColorScheme();
@@ -161,7 +26,7 @@ export default function CalendarScreen() {
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
 
   // Fetch calendar events
-  const { data: calendarData, isLoading: isLoadingEvents } = useQuery({
+  const { data: calendarData, isLoading } = useQuery({
     queryKey: ['calendar-events'],
     queryFn: async () => {
       const response = await authApiClient.get<GetCalendarEventsDto>('/api/Calendar/GetCalendarEvents');
@@ -169,23 +34,11 @@ export default function CalendarScreen() {
     },
   });
 
-  // Fetch event types
-  const { data: eventTypesData, isLoading: isLoadingTypes } = useQuery({
-    queryKey: ['calendar-event-types'],
-    queryFn: async () => {
-      const response = await authApiClient.get<GetCalendarEventTypesDto>('/api/Calendar/GetCalendarEventTypes');
-      return response.data;
-    },
-  });
-
-  const isLoading = isLoadingEvents || isLoadingTypes;
-
   // Process events including recurring events with RRule
   const processedEvents = useMemo(() => {
     if (!calendarData?.events) return [];
 
     const processed: ProcessedEvent[] = [];
-    const now = moment();
     const startDate = moment().subtract(1, 'year');
     const endDate = moment().add(2, 'years');
 
@@ -489,86 +342,3 @@ export default function CalendarScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  calendarContainer: {
-    borderRadius: 16,
-    borderWidth: 1,
-    marginBottom: 24,
-    overflow: 'hidden',
-  },
-  eventsContainer: {
-    marginBottom: 24,
-  },
-  eventsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  eventsHeaderTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  eventsCount: {
-    fontSize: 14,
-    opacity: 0.6,
-  },
-  eventsList: {
-    gap: 12,
-  },
-  eventItem: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-  },
-  eventColorBar: {
-    width: 4,
-    borderRadius: 2,
-    marginRight: 12,
-  },
-  eventItemContent: {
-    flex: 1,
-    gap: 8,
-  },
-  eventItemTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  eventItemDetails: {
-    gap: 4,
-  },
-  eventItemTime: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  eventItemLocation: {
-    fontSize: 13,
-    opacity: 0.6,
-  },
-  eventTypeBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  eventTypeText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  emptyState: {
-    padding: 32,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  emptyStateText: {
-    fontSize: 15,
-    opacity: 0.6,
-  },
-});

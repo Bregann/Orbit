@@ -3,15 +3,18 @@ import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { authApiClient } from '@/helpers/apiClient';
+import { useMutationPatch } from '@/helpers/mutations/useMutationPatch';
+import { useMutationPost } from '@/helpers/mutations/useMutationPost';
 import { AddTaskRequest } from '@/interfaces/api/tasks/AddTaskRequest';
 import { GetTaskCategoriesResponse } from '@/interfaces/api/tasks/GetTaskCategoriesResponse';
 import { GetTasksResponse } from '@/interfaces/api/tasks/GetTasksResponse';
 import { TaskPriorityType } from '@/interfaces/api/tasks/TaskPriorityType';
 import { createCommonStyles } from '@/styles/commonStyles';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { tasksStyles as styles } from '@/styles/tasksStyles';
+import { useQuery } from '@tanstack/react-query';
 import moment from 'moment';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, ScrollView, StyleSheet, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, ScrollView, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function TasksScreen() {
@@ -19,7 +22,6 @@ export default function TasksScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const commonStyles = createCommonStyles(colorScheme ?? 'light');
   const isDark = colorScheme === 'dark';
-  const queryClient = useQueryClient();
 
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
@@ -49,13 +51,11 @@ export default function TasksScreen() {
   });
 
   // Add task mutation
-  const addTaskMutation = useMutation({
-    mutationFn: async (request: AddTaskRequest) => {
-      const response = await authApiClient.post('/api/Tasks/AddNewTask', request);
-      return response.data;
-    },
+  const addTaskMutation = useMutationPost<AddTaskRequest, void>({
+    url: '/api/Tasks/AddNewTask',
+    queryKey: ['tasks'],
+    invalidateQuery: true,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
       setShowAddModal(false);
       setNewTaskTitle('');
       setNewTaskDescription('');
@@ -63,30 +63,25 @@ export default function TasksScreen() {
       setNewTaskPriority(TaskPriorityType.Medium);
       setNewTaskDueDate('');
     },
-    onError: (error) => {
+    onError: () => {
       Alert.alert('Error', 'Failed to add task');
-      console.error('Add task error:', error);
     },
   });
 
   // Complete task mutation
-  const completeTaskMutation = useMutation({
-    mutationFn: async (taskId: number) => {
-      const response = await authApiClient.patch(`/api/Tasks/CompleteTask?taskId=${taskId}`);
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-    },
-    onError: (error) => {
+  const completeTaskMutation = useMutationPatch<number, void>({
+    url: (taskId: number) => `/api/Tasks/CompleteTask?taskId=${taskId}`,
+    queryKey: ['tasks'],
+    invalidateQuery: true,
+    onError: () => {
       Alert.alert('Error', 'Failed to update task');
-      console.error('Complete task error:', error);
     },
   });
 
   const isLoading = isLoadingTasks || isLoadingCategories;
-  const tasks = tasksData?.tasks || [];
-  const categories = categoriesData?.categories || [];
+  
+  const tasks = useMemo(() => tasksData?.tasks || [], [tasksData]);
+  const categories = useMemo(() => categoriesData?.categories || [], [categoriesData]);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -182,7 +177,7 @@ export default function TasksScreen() {
     addTaskMutation.mutate(request);
   };
 
-  const getPriorityColor = (priority: TaskPriorityType) => {
+  const getPriorityColour = (priority: TaskPriorityType) => {
     switch (priority) {
       case TaskPriorityType.Critical: return '#DC2626';
       case TaskPriorityType.High: return '#EF4444';
@@ -262,14 +257,14 @@ export default function TasksScreen() {
             <View style={commonStyles.statsGrid}>
               <View style={[commonStyles.statCard, { borderLeftColor: '#F59E0B' }]}>
                 <ThemedText style={commonStyles.statLabel}>Due Today</ThemedText>
-                <ThemedText type="title" style={[commonStyles.statValue, { color: stats.dueToday > 0 ? '#F59E0B' : undefined }]}>
+                <ThemedText type="title" style={[commonStyles.statValue, stats.dueToday > 0 && { color: '#F59E0B' }]}>
                   {stats.dueToday}
                 </ThemedText>
               </View>
 
               <View style={[commonStyles.statCard, { borderLeftColor: '#EF4444' }]}>
                 <ThemedText style={commonStyles.statLabel}>Overdue</ThemedText>
-                <ThemedText type="title" style={[commonStyles.statValue, { color: stats.overdue > 0 ? '#EF4444' : undefined }]}>
+                <ThemedText type="title" style={[commonStyles.statValue, stats.overdue > 0 && { color: '#EF4444' }]}>
                   {stats.overdue}
                 </ThemedText>
               </View>
@@ -370,8 +365,8 @@ export default function TasksScreen() {
                         </ThemedText>
                       )}
                       <View style={styles.taskMeta}>
-                        <View style={[styles.priorityBadge, { backgroundColor: getPriorityColor(task.priority) + '20' }]}>
-                          <ThemedText style={[styles.badgeText, { color: getPriorityColor(task.priority) }]}>
+                        <View style={[styles.priorityBadge, { backgroundColor: getPriorityColour(task.priority) + '20' }]}>
+                          <ThemedText style={[styles.badgeText, { color: getPriorityColour(task.priority) }]}>
                             {getPriorityLabel(task.priority).toUpperCase()}
                           </ThemedText>
                         </View>
@@ -424,7 +419,7 @@ export default function TasksScreen() {
               <View style={styles.upcomingList}>
                 {upcomingTasks.map(task => (
                   <View key={task.id} style={[commonStyles.listItem, styles.upcomingItem]}>
-                    <IconSymbol name="circle" size={8} color={getPriorityColor(task.priority)} />
+                    <IconSymbol name="circle" size={8} color={getPriorityColour(task.priority)} />
                     <ThemedText style={styles.upcomingTitle}>{task.title}</ThemedText>
                     <ThemedText style={styles.upcomingDate}>
                       {moment(task.dueDate).format('D MMM')}
@@ -570,7 +565,7 @@ export default function TasksScreen() {
                         style={[
                           styles.buttonGroupItem,
                           {
-                            backgroundColor: newTaskPriority === value ? getPriorityColor(value) : (isDark ? '#0F172A' : '#F8FAFC'),
+                            backgroundColor: newTaskPriority === value ? getPriorityColour(value) : (isDark ? '#0F172A' : '#F8FAFC'),
                             borderColor: isDark ? '#334155' : '#E2E8F0',
                           }
                         ]}
@@ -601,273 +596,3 @@ export default function TasksScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  headerWithButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  addButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  progressBar: {
-    marginTop: 4,
-  },
-  progressBarBg: {
-    height: 6,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  filtersContainer: {
-    marginBottom: 24,
-  },
-  categoryFilters: {
-    marginBottom: 12,
-  },
-  filterTab: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginRight: 8,
-    backgroundColor: 'rgba(100, 116, 139, 0.1)',
-  },
-  filterTabText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  showCompletedToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  showCompletedText: {
-    fontSize: 14,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  taskCount: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  tasksList: {
-    gap: 6,
-  },
-  taskItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    gap: 12,
-  },
-  taskCheckbox: {
-    paddingTop: 2,
-  },
-  taskContent: {
-    flex: 1,
-    gap: 6,
-  },
-  taskTitle: {
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  taskTitleCompleted: {
-    textDecorationLine: 'line-through',
-    opacity: 0.5,
-  },
-  taskDescription: {
-    fontSize: 13,
-    opacity: 0.6,
-  },
-  taskMeta: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  priorityBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  categoryBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  badgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  dueDateContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  dueDate: {
-    fontSize: 11,
-    opacity: 0.6,
-  },
-  deleteButton: {
-    padding: 4,
-  },
-  emptyState: {
-    padding: 32,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  emptyStateText: {
-    fontSize: 14,
-    opacity: 0.6,
-  },
-  upcomingList: {
-    gap: 6,
-  },
-  upcomingItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    gap: 12,
-  },
-  upcomingTitle: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  upcomingDate: {
-    fontSize: 12,
-    opacity: 0.6,
-  },
-  categoriesList: {
-    gap: 6,
-  },
-  categoryItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
-  categoryName: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  categoryCount: {
-    fontSize: 13,
-    opacity: 0.6,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: 8,
-    paddingBottom: 32,
-    maxHeight: '80%',
-  },
-  modalHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: 'rgba(100, 116, 139, 0.3)',
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 16,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(100, 116, 139, 0.2)',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  modalScroll: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  formField: {
-    marginBottom: 20,
-  },
-  formLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  buttonGroup: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  buttonGroupItem: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  buttonGroupText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  submitButton: {
-    paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-});

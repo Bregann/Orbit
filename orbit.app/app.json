@@ -50,7 +50,8 @@
       "router": {},
       "eas": {
         "projectId": "9cab7cea-8493-4396-b596-9306856faf77"
-      }
+      },
+      "ApiUrl": "https://orbitapi.bregan.me"
     },
     "owner": "bregan"
   }
