@@ -43,7 +43,15 @@ namespace Orbit.Domain.Interfaces.Api.Fitbit
         /// Gets the user's activity summary for a specific date
         /// </summary>
         Task<FitbitActivityResponse?> GetDailyActivity(string userId, DateTime date);
+
+        /// <summary>
+        /// Refreshes Fitbit tokens for connected users.
+        /// </summary>
         Task RefreshFitbitTokens();
+
+        /// <summary>
+        /// Records the user's daily Fitbit data.
+        /// </summary>
         Task RecordDailyFitbitData();
     }
 }
