@@ -30,8 +30,8 @@ namespace Orbit.Core.Controllers
                     Expires = DateTimeOffset.UtcNow.AddMinutes(10)
                 });
 
-                return Ok(new FitbitAuthUrlResponse 
-                { 
+                return Ok(new FitbitAuthUrlResponse
+                {
                     AuthorizationUrl = authUrl,
                     CodeVerifier = codeVerifier
                 });
@@ -65,8 +65,8 @@ namespace Orbit.Core.Controllers
                     return BadRequest("Code verifier not found");
                 }
 
-                var tokens = await fitbitService.ExchangeCodeForTokensAsync(request.Code, codeVerifier);
-                await fitbitService.SaveFitbitTokensAsync(userId, tokens);
+                var tokens = await fitbitService.ExchangeCodeForTokens(request.Code, codeVerifier);
+                await fitbitService.SaveFitbitTokens(userId, tokens);
 
                 Response.Cookies.Delete("fitbit_code_verifier");
 
@@ -94,7 +94,7 @@ namespace Orbit.Core.Controllers
             {
                 var userId = userContextHelper.GetUserId();
 
-                var status = await fitbitService.GetConnectionStatusAsync(userId);
+                var status = await fitbitService.GetConnectionStatus(userId);
                 return Ok(status);
             }
             catch (KeyNotFoundException)
@@ -118,7 +118,7 @@ namespace Orbit.Core.Controllers
             {
                 var userId = userContextHelper.GetUserId();
 
-                await fitbitService.DisconnectFitbitAsync(userId);
+                await fitbitService.DisconnectFitbit(userId);
                 return Ok();
             }
             catch (KeyNotFoundException)
@@ -142,7 +142,7 @@ namespace Orbit.Core.Controllers
             {
                 var userId = userContextHelper.GetUserId();
 
-                var profile = await fitbitService.GetProfileAsync(userId);
+                var profile = await fitbitService.GetProfile(userId);
 
                 if (profile == null)
                 {
@@ -173,7 +173,7 @@ namespace Orbit.Core.Controllers
                 var userId = userContextHelper.GetUserId();
 
                 var targetDate = date ?? DateTime.Today;
-                var activity = await fitbitService.GetDailyActivityAsync(userId, targetDate);
+                var activity = await fitbitService.GetDailyActivity(userId, targetDate);
 
                 if (activity == null)
                 {

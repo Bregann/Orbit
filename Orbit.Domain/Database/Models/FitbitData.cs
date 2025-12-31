@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace Orbit.Domain.Database.Models
 {
@@ -15,7 +12,7 @@ namespace Orbit.Domain.Database.Models
         public required int StepsWalked { get; set; }
 
         [Required]
-        public required decimal DistanceWalkedMiles { get; set; }
+        public required double DistanceWalkedMiles { get; set; }
 
         [Required]
         public required DateTime DateRecorded { get; set; }

@@ -12,36 +12,38 @@ namespace Orbit.Domain.Interfaces.Api.Fitbit
         /// <summary>
         /// Exchanges the authorization code for access and refresh tokens
         /// </summary>
-        Task<FitbitTokenResponse> ExchangeCodeForTokensAsync(string code, string codeVerifier);
+        Task<FitbitTokenResponse> ExchangeCodeForTokens(string code, string codeVerifier);
 
         /// <summary>
         /// Saves the Fitbit tokens to the user's profile
         /// </summary>
-        Task SaveFitbitTokensAsync(string userId, FitbitTokenResponse tokens);
+        Task SaveFitbitTokens(string userId, FitbitTokenResponse tokens);
 
         /// <summary>
         /// Gets the connection status for the current user
         /// </summary>
-        Task<FitbitConnectionStatus> GetConnectionStatusAsync(string userId);
+        Task<FitbitConnectionStatus> GetConnectionStatus(string userId);
 
         /// <summary>
         /// Disconnects Fitbit from the user's account
         /// </summary>
-        Task DisconnectFitbitAsync(string userId);
+        Task DisconnectFitbit(string userId);
 
         /// <summary>
         /// Refreshes the Fitbit access token using the refresh token
         /// </summary>
-        Task<FitbitTokenResponse> RefreshAccessTokenAsync(string userId);
+        Task<FitbitTokenResponse> RefreshAccessToken(string userId);
 
         /// <summary>
         /// Gets the user's Fitbit profile
         /// </summary>
-        Task<FitbitProfileResponse?> GetProfileAsync(string userId);
+        Task<FitbitProfileResponse?> GetProfile(string userId);
 
         /// <summary>
         /// Gets the user's activity summary for a specific date
         /// </summary>
-        Task<FitbitActivityResponse?> GetDailyActivityAsync(string userId, DateTime date);
+        Task<FitbitActivityResponse?> GetDailyActivity(string userId, DateTime date);
+        Task RefreshFitbitTokens();
+        Task RecordDailyFitbitData();
     }
 }

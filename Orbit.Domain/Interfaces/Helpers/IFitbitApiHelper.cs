@@ -12,26 +12,26 @@ namespace Orbit.Domain.Interfaces.Helpers
         /// <summary>
         /// Exchanges the authorization code for access and refresh tokens
         /// </summary>
-        Task<FitbitTokenResponse> ExchangeCodeForTokensAsync(string code, string codeVerifier);
+        Task<FitbitTokenResponse> ExchangeCodeForTokens(string code, string codeVerifier);
 
         /// <summary>
         /// Refreshes the Fitbit access token using the refresh token
         /// </summary>
-        Task<FitbitTokenResponse> RefreshAccessTokenAsync(string refreshToken);
+        Task<FitbitTokenResponse> RefreshAccessToken(string refreshToken);
 
         /// <summary>
         /// Revokes a Fitbit access token
         /// </summary>
-        Task RevokeTokenAsync(string accessToken);
+        Task RevokeToken(string accessToken);
 
         /// <summary>
         /// Gets the user's Fitbit profile
         /// </summary>
-        Task<FitbitProfileResponse?> GetProfileAsync(string accessToken);
+        Task<FitbitProfileResponse?> GetProfile(string accessToken);
 
         /// <summary>
         /// Gets the user's activity summary for a specific date
         /// </summary>
-        Task<FitbitActivityResponse?> GetDailyActivityAsync(string accessToken, DateTime date);
+        Task<FitbitActivityResponse?> GetDailyActivity(string accessToken, DateTime date);
     }
 }

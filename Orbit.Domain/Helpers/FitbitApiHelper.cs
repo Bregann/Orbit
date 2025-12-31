@@ -38,7 +38,7 @@ namespace Orbit.Domain.Helpers
                 { "redirect_uri", RedirectUri }
             };
 
-            var queryString = string.Join("&", queryParams.Select(kvp => 
+            var queryString = string.Join("&", queryParams.Select(kvp =>
                 $"{Uri.EscapeDataString(kvp.Key)}={Uri.EscapeDataString(kvp.Value)}"));
 
             var authUrl = $"{FitbitAuthUrl}?{queryString}";
@@ -48,7 +48,7 @@ namespace Orbit.Domain.Helpers
             return (authUrl, codeVerifier);
         }
 
-        public async Task<FitbitTokenResponse> ExchangeCodeForTokensAsync(string code, string codeVerifier)
+        public async Task<FitbitTokenResponse> ExchangeCodeForTokens(string code, string codeVerifier)
         {
             Log.Information("Exchanging authorization code for Fitbit tokens");
 
@@ -85,7 +85,7 @@ namespace Orbit.Domain.Helpers
             return tokens;
         }
 
-        public async Task<FitbitTokenResponse> RefreshAccessTokenAsync(string refreshToken)
+        public async Task<FitbitTokenResponse> RefreshAccessToken(string refreshToken)
         {
             Log.Information("Refreshing Fitbit access token");
 
@@ -119,7 +119,7 @@ namespace Orbit.Domain.Helpers
             return tokens;
         }
 
-        public async Task RevokeTokenAsync(string accessToken)
+        public async Task RevokeToken(string accessToken)
         {
             Log.Information("Revoking Fitbit access token");
 
@@ -137,7 +137,7 @@ namespace Orbit.Domain.Helpers
             await httpClient.SendAsync(request);
         }
 
-        public async Task<FitbitProfileResponse?> GetProfileAsync(string accessToken)
+        public async Task<FitbitProfileResponse?> GetProfile(string accessToken)
         {
             Log.Information("Getting Fitbit profile");
 
@@ -156,13 +156,13 @@ namespace Orbit.Domain.Helpers
             return JsonSerializer.Deserialize<FitbitProfileResponse>(content);
         }
 
-        public async Task<FitbitActivityResponse?> GetDailyActivityAsync(string accessToken, DateTime date)
+        public async Task<FitbitActivityResponse?> GetDailyActivity(string accessToken, DateTime date)
         {
             Log.Information($"Getting Fitbit daily activity for {date}");
 
             var dateString = date.ToString("yyyy-MM-dd");
 
-            var request = new HttpRequestMessage(HttpMethod.Get, 
+            var request = new HttpRequestMessage(HttpMethod.Get,
                 $"{FitbitApiBaseUrl}/1/user/-/activities/date/{dateString}.json");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
