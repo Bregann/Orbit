@@ -11,6 +11,9 @@ namespace Orbit.Domain.Services.Fitbit
 {
     public class FitbitService(AppDbContext context, IFitbitApiHelper fitbitApiHelper) : IFitbitService
     {
+        // Conversion factor from kilometers to miles
+        private const double KM_TO_MILES = 0.621371;
+
         public (string authUrl, string codeVerifier) GenerateAuthorizationUrl()
         {
             return fitbitApiHelper.GenerateAuthorizationUrl();
@@ -173,7 +176,7 @@ namespace Orbit.Domain.Services.Fitbit
                         var fitbitData = new FitbitData
                         {
                             StepsWalked = activity.Summary!.Steps,
-                            DistanceWalkedMiles = (activity.Summary.Distances!.FirstOrDefault(d => d.Activity == "total")?.Distance ?? 0) * 0.621371,
+                            DistanceWalkedMiles = (activity.Summary.Distances!.FirstOrDefault(d => d.Activity == "total")?.Distance ?? 0) * KM_TO_MILES,
                             DateRecorded = yesterday
                         };
 
