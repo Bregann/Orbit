@@ -3,6 +3,6 @@ namespace Orbit.Domain.DTOs.Fitbit
     public class FitbitCallbackRequest
     {
         public required string Code { get; set; }
-        public required string CodeVerifier { get; set; }
+        public string? CodeVerifier { get; set; }
     }
 }
