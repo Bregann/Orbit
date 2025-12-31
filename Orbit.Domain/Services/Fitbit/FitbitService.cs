@@ -11,8 +11,8 @@ namespace Orbit.Domain.Services.Fitbit
 {
     public class FitbitService(AppDbContext context, IFitbitApiHelper fitbitApiHelper) : IFitbitService
     {
-        // Conversion factor from kilometers to miles
-        private const double KM_TO_MILES = 0.621371;
+        // Conversion factor from kilometers to miles (1 km = 1/1.609344 miles)
+        private const double KM_TO_MILES = 1.0 / 1.609344;
 
         public (string authUrl, string codeVerifier) GenerateAuthorizationUrl()
         {
