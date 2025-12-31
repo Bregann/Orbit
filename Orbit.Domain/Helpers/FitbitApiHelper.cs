@@ -158,7 +158,7 @@ namespace Orbit.Domain.Helpers
 
         public async Task<FitbitActivityResponse?> GetDailyActivityAsync(string accessToken, DateTime date)
         {
-            Log.Information("Getting Fitbit daily activity for {Date}", date);
+            Log.Information($"Getting Fitbit daily activity for {date}");
 
             var dateString = date.ToString("yyyy-MM-dd");
 

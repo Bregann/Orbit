@@ -36,24 +36,6 @@ namespace Orbit.Domain.Helpers
                 Value = "password"
             });
 
-            await context.EnvironmentalSettings.AddAsync(new EnvironmentalSetting
-            {
-                Key = Enums.EnvironmentalSettingEnum.FitbitClientId.ToString(),
-                Value = "23TN9V"
-            });
-
-            await context.EnvironmentalSettings.AddAsync(new EnvironmentalSetting
-            {
-                Key = Enums.EnvironmentalSettingEnum.FitbitClientSecret.ToString(),
-                Value = "30f8f50518fb867da5b78bc60dc00cd3"
-            });
-
-            await context.EnvironmentalSettings.AddAsync(new EnvironmentalSetting
-            {
-                Key = Enums.EnvironmentalSettingEnum.FitbitRedirectUri.ToString(),
-                Value = "http://localhost:3000/fitbit-success"
-            });
-
             await context.SaveChangesAsync();
 
             //            // Create spending and savings pots FIRST before historic data
