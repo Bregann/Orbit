@@ -25,5 +25,14 @@ namespace Orbit.Domain.Database.Models
 
         [Required]
         public string MonzoRefreshToken { get; set; } = "";
+
+        // Fitbit OAuth tokens
+        public string FitbitAccessToken { get; set; } = "";
+
+        public string FitbitRefreshToken { get; set; } = "";
+
+        public string FitbitUserId { get; set; } = "";
+
+        public DateTime? FitbitTokenExpiresAt { get; set; }
     }
 }

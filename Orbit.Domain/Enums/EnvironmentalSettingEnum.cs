@@ -13,6 +13,9 @@
         BankAccountDataSecretKey,
         CreditCardAccountId,
         MainBankAccountId,
-        CommsSenderApiKey
+        CommsSenderApiKey,
+        FitbitClientId,
+        FitbitClientSecret,
+        FitbitRedirectUri
     }
 }
