@@ -173,7 +173,7 @@ namespace Orbit.Domain.Services.Fitbit
                         var fitbitData = new FitbitData
                         {
                             StepsWalked = activity.Summary!.Steps,
-                            DistanceWalkedMiles = (activity.Summary.Distances!.FirstOrDefault(d => d.Activity == "total")?.Distance ?? 0) * 0.621371,
+                            DistanceWalkedMiles = (activity.Summary.Distances?.FirstOrDefault(d => d.Activity == "total")?.Distance ?? 0) * 0.621371,
                             DateRecorded = yesterday
                         };
 
