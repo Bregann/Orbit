@@ -1,50 +1,35 @@
-'use client'
+import SettingsComponent from '@/components/pages/SettingsComponent'
+import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
+import { doQueryGet } from '@/helpers/apiClient'
+import type { FitbitConnectionStatus } from '@/interfaces/api/fitbit/FitbitTypes'
+import { QueryKeys } from '@/helpers/QueryKeys'
 
-import FitbitIntegration from '@/components/fitbit/FitbitIntegration'
-import {
-  Container,
-  Title,
-  Text,
-  Stack,
-  Tabs
-} from '@mantine/core'
-import {
-  IconSettings,
-  IconPlugConnected
-} from '@tabler/icons-react'
+export const metadata: Metadata = {
+  title: 'Settings'
+}
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const cookieStore = await cookies()
+  const accessToken = cookieStore.get('accessToken')?.value
+  const refreshToken = cookieStore.get('refreshToken')?.value
+  const cookieHeader = `accessToken=${accessToken}; refreshToken=${refreshToken}`
+
+  const queryClient = new QueryClient()
+
+  // Prefetch Fitbit connection status
+  await queryClient.prefetchQuery({
+    queryKey: [QueryKeys.FitbitConnectionStatus],
+    queryFn: async () =>
+      await doQueryGet<FitbitConnectionStatus>('/api/fitbit/GetConnectionStatus', {
+        cookieHeader
+      })
+  })
+
   return (
-    <Container size="xl" py="xl">
-      <Stack gap="lg">
-        <div>
-          <Title order={1}>Settings</Title>
-          <Text c="dimmed" size="sm">
-            Manage your account settings and integrations
-          </Text>
-        </div>
-
-        <Tabs defaultValue="integrations">
-          <Tabs.List>
-            <Tabs.Tab value="integrations" leftSection={<IconPlugConnected size={16} />}>
-              Integrations
-            </Tabs.Tab>
-            <Tabs.Tab value="account" leftSection={<IconSettings size={16} />}>
-              Account
-            </Tabs.Tab>
-          </Tabs.List>
-
-          <Tabs.Panel value="integrations" pt="md">
-            <Stack gap="lg">
-              <FitbitIntegration />
-            </Stack>
-          </Tabs.Panel>
-
-          <Tabs.Panel value="account" pt="md">
-            <Text c="dimmed">Account settings coming soon...</Text>
-          </Tabs.Panel>
-        </Tabs>
-      </Stack>
-    </Container>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <SettingsComponent />
+    </HydrationBoundary>
   )
 }

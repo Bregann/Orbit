@@ -21,13 +21,13 @@ namespace Orbit.Domain.Services.Fitbit
 
         public async Task SaveFitbitTokensAsync(string userId, FitbitTokenResponse tokens)
         {
-            Log.Information("Saving Fitbit tokens for user {UserId}", userId);
+            Log.Information($"Saving Fitbit tokens for user {userId}");
 
             var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
             {
-                Log.Error("User not found: {UserId}", userId);
+                Log.Error($"User not found: {userId}");
                 throw new KeyNotFoundException("User not found");
             }
 
@@ -38,12 +38,12 @@ namespace Orbit.Domain.Services.Fitbit
 
             await context.SaveChangesAsync();
 
-            Log.Information("Saved Fitbit tokens for user {UserId}", userId);
+            Log.Information($"Saved Fitbit tokens for user {userId}");
         }
 
         public async Task<FitbitConnectionStatus> GetConnectionStatusAsync(string userId)
         {
-            Log.Information("Getting Fitbit connection status for user {UserId}", userId);
+            Log.Information($"Getting Fitbit connection status for user {userId}");
 
             var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
@@ -62,14 +62,9 @@ namespace Orbit.Domain.Services.Fitbit
 
         public async Task DisconnectFitbitAsync(string userId)
         {
-            Log.Information("Disconnecting Fitbit for user {UserId}", userId);
+            Log.Information($"Disconnecting Fitbit for user {userId}");
 
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null)
-            {
-                throw new KeyNotFoundException("User not found");
-            }
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new KeyNotFoundException("User not found");
 
             if (!string.IsNullOrEmpty(user.FitbitAccessToken))
             {
@@ -90,19 +85,14 @@ namespace Orbit.Domain.Services.Fitbit
 
             await context.SaveChangesAsync();
 
-            Log.Information("Disconnected Fitbit for user {UserId}", userId);
+            Log.Information($"Disconnected Fitbit for user {userId}");
         }
 
         public async Task<FitbitTokenResponse> RefreshAccessTokenAsync(string userId)
         {
-            Log.Information("Refreshing Fitbit access token for user {UserId}", userId);
+            Log.Information($"Refreshing Fitbit access token for user {userId}");
 
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null)
-            {
-                throw new KeyNotFoundException("User not found");
-            }
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new KeyNotFoundException("User not found");
 
             if (string.IsNullOrEmpty(user.FitbitRefreshToken))
             {
@@ -113,14 +103,14 @@ namespace Orbit.Domain.Services.Fitbit
 
             await SaveFitbitTokensAsync(userId, tokens);
 
-            Log.Information("Successfully refreshed Fitbit access token for user {UserId}", userId);
+            Log.Information($"Successfully refreshed Fitbit access token for user {userId}");
 
             return tokens;
         }
 
         public async Task<FitbitProfileResponse?> GetProfileAsync(string userId)
         {
-            Log.Information("Getting Fitbit profile for user {UserId}", userId);
+            Log.Information($"Getting Fitbit profile for user {userId}");
 
             var accessToken = await GetValidAccessTokenAsync(userId);
 
@@ -129,7 +119,7 @@ namespace Orbit.Domain.Services.Fitbit
 
         public async Task<FitbitActivityResponse?> GetDailyActivityAsync(string userId, DateTime date)
         {
-            Log.Information("Getting Fitbit daily activity for user {UserId} on {Date}", userId, date);
+            Log.Information($"Getting Fitbit daily activity for user {userId} on {date}");
 
             var accessToken = await GetValidAccessTokenAsync(userId);
 
@@ -138,12 +128,7 @@ namespace Orbit.Domain.Services.Fitbit
 
         private async Task<string> GetValidAccessTokenAsync(string userId)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null)
-            {
-                throw new KeyNotFoundException("User not found");
-            }
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new KeyNotFoundException("User not found");
 
             if (string.IsNullOrEmpty(user.FitbitAccessToken))
             {

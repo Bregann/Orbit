@@ -2,15 +2,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Orbit.Domain.DTOs.Fitbit;
 using Orbit.Domain.Interfaces.Api.Fitbit;
+using Orbit.Domain.Interfaces.Helpers;
 using Serilog;
-using System.Security.Claims;
 
 namespace Orbit.Core.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
     [Authorize]
-    public class FitbitController(IFitbitService fitbitService) : ControllerBase
+    public class FitbitController(IFitbitService fitbitService, IUserContextHelper userContextHelper) : ControllerBase
     {
         /// <summary>
         /// Generates the Fitbit OAuth authorization URL with PKCE
@@ -22,7 +22,6 @@ namespace Orbit.Core.Controllers
             {
                 var (authUrl, codeVerifier) = fitbitService.GenerateAuthorizationUrl();
 
-                // Store the code verifier in a cookie as backup
                 Response.Cookies.Append("fitbit_code_verifier", codeVerifier, new CookieOptions
                 {
                     HttpOnly = true,
@@ -31,7 +30,6 @@ namespace Orbit.Core.Controllers
                     Expires = DateTimeOffset.UtcNow.AddMinutes(10)
                 });
 
-                // Also return it in the response so the client can store it
                 return Ok(new FitbitAuthUrlResponse 
                 { 
                     AuthorizationUrl = authUrl,
@@ -53,15 +51,10 @@ namespace Orbit.Core.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userId = userContextHelper.GetUserId();
 
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User not authenticated");
-                }
-
-                // Get the code verifier from cookie if not provided in request
                 var codeVerifier = request.CodeVerifier;
+
                 if (string.IsNullOrEmpty(codeVerifier))
                 {
                     codeVerifier = Request.Cookies["fitbit_code_verifier"];
@@ -75,7 +68,6 @@ namespace Orbit.Core.Controllers
                 var tokens = await fitbitService.ExchangeCodeForTokensAsync(request.Code, codeVerifier);
                 await fitbitService.SaveFitbitTokensAsync(userId, tokens);
 
-                // Clear the code verifier cookie
                 Response.Cookies.Delete("fitbit_code_verifier");
 
                 return Ok();
@@ -100,12 +92,7 @@ namespace Orbit.Core.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User not authenticated");
-                }
+                var userId = userContextHelper.GetUserId();
 
                 var status = await fitbitService.GetConnectionStatusAsync(userId);
                 return Ok(status);
@@ -129,12 +116,7 @@ namespace Orbit.Core.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User not authenticated");
-                }
+                var userId = userContextHelper.GetUserId();
 
                 await fitbitService.DisconnectFitbitAsync(userId);
                 return Ok();
@@ -158,12 +140,7 @@ namespace Orbit.Core.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User not authenticated");
-                }
+                var userId = userContextHelper.GetUserId();
 
                 var profile = await fitbitService.GetProfileAsync(userId);
 
@@ -193,12 +170,7 @@ namespace Orbit.Core.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User not authenticated");
-                }
+                var userId = userContextHelper.GetUserId();
 
                 var targetDate = date ?? DateTime.Today;
                 var activity = await fitbitService.GetDailyActivityAsync(userId, targetDate);

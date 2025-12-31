@@ -90,7 +90,9 @@ export default function FitbitIntegration() {
         5000,
         <IconX />
       )
+
       setIsConnecting(false)
+
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname)
       return
@@ -117,6 +119,7 @@ export default function FitbitIntegration() {
         5000,
         <IconCheck />
       )
+
       queryClient.invalidateQueries({ queryKey: [QueryKeys.FitbitConnectionStatus] })
       queryClient.invalidateQueries({ queryKey: [QueryKeys.FitbitProfile] })
       queryClient.invalidateQueries({ queryKey: [QueryKeys.FitbitDailyActivity] })
@@ -152,6 +155,7 @@ export default function FitbitIntegration() {
         5000,
         <IconX />
       )
+
       setIsConnecting(false)
     }
   }
@@ -168,6 +172,7 @@ export default function FitbitIntegration() {
         5000,
         <IconCheck />
       )
+
       queryClient.invalidateQueries({ queryKey: [QueryKeys.FitbitConnectionStatus] })
       queryClient.setQueryData([QueryKeys.FitbitProfile], null)
       queryClient.setQueryData([QueryKeys.FitbitDailyActivity], null)
@@ -225,7 +230,7 @@ export default function FitbitIntegration() {
 
         {/* Connection Button or Profile */}
         {!isConnected ? (
-          <Paper withBorder p="xl" radius="md" bg="gray.0">
+          <Paper withBorder p="xl" radius="md" bg="gray.9">
             <Stack align="center" gap="md">
               <ThemeIcon size={60} radius="xl" variant="light" color="gray">
                 <IconLinkOff size={30} />

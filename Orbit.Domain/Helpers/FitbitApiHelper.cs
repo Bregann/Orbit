@@ -74,16 +74,11 @@ namespace Orbit.Domain.Helpers
 
             if (!response.IsSuccessStatusCode)
             {
-                Log.Error("Failed to exchange code for tokens: {StatusCode} - {Content}", response.StatusCode, content);
+                Log.Error($"Failed to exchange code for tokens: {response.StatusCode} - {content}");
                 throw new HttpRequestException($"Failed to exchange code for tokens: {response.StatusCode}");
             }
 
-            var tokens = JsonSerializer.Deserialize<FitbitTokenResponse>(content);
-
-            if (tokens == null)
-            {
-                throw new InvalidOperationException("Failed to deserialize Fitbit token response");
-            }
+            var tokens = JsonSerializer.Deserialize<FitbitTokenResponse>(content) ?? throw new InvalidOperationException("Failed to deserialize Fitbit token response");
 
             Log.Information("Successfully exchanged code for Fitbit tokens");
 
@@ -113,16 +108,11 @@ namespace Orbit.Domain.Helpers
 
             if (!response.IsSuccessStatusCode)
             {
-                Log.Error("Failed to refresh Fitbit token: {StatusCode} - {Content}", response.StatusCode, content);
+                Log.Error($"Failed to refresh Fitbit token: {response.StatusCode} - {content}");
                 throw new HttpRequestException($"Failed to refresh Fitbit token: {response.StatusCode}");
             }
 
-            var tokens = JsonSerializer.Deserialize<FitbitTokenResponse>(content);
-
-            if (tokens == null)
-            {
-                throw new InvalidOperationException("Failed to deserialize Fitbit token response");
-            }
+            var tokens = JsonSerializer.Deserialize<FitbitTokenResponse>(content) ?? throw new InvalidOperationException("Failed to deserialize Fitbit token response");
 
             Log.Information("Successfully refreshed Fitbit access token");
 
@@ -159,7 +149,7 @@ namespace Orbit.Domain.Helpers
 
             if (!response.IsSuccessStatusCode)
             {
-                Log.Error("Failed to get Fitbit profile: {StatusCode} - {Content}", response.StatusCode, content);
+                Log.Error($"Failed to get Fitbit profile: {response.StatusCode} - {content}");
                 return null;
             }
 
@@ -181,7 +171,7 @@ namespace Orbit.Domain.Helpers
 
             if (!response.IsSuccessStatusCode)
             {
-                Log.Error("Failed to get Fitbit daily activity: {StatusCode} - {Content}", response.StatusCode, content);
+                Log.Error($"Failed to get Fitbit daily activity: {response.StatusCode} - {content}");
                 return null;
             }
 

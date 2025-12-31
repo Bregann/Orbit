@@ -61,6 +61,7 @@ builder.Services.AddHttpContextAccessor();
 
 // Add in our own services
 builder.Services.AddSingleton<IEnvironmentalSettingHelper, EnvironmentalSettingHelper>();
+builder.Services.AddScoped<IUserContextHelper, UserContextHelper>();
 builder.Services.AddScoped<IBankApiHelper, BankApiHelper>();
 builder.Services.AddHttpClient<IFitbitApiHelper, FitbitApiHelper>();
 
