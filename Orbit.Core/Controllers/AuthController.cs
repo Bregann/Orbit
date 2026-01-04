@@ -119,10 +119,10 @@ namespace Orbit.Core.Controllers
                 var response = await authService.RefreshToken(request.RefreshToken);
                 return Ok(response);
             }
-            catch (KeyNotFoundException ex)
+            catch (Exception ex) when (ex is UnauthorizedAccessException || ex is KeyNotFoundException)
             {
-                Log.Warning(ex, "Error attempting to refresh token");
-                return NotFound(ex.Message);
+                Log.Warning(ex, "Authentication error attempting to refresh token");
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
