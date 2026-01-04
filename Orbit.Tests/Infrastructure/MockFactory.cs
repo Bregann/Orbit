@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Http;
 using Moq;
 using Moq.Protected;
+using Orbit.Domain.DTOs.Finance.Banking;
+using Orbit.Domain.DTOs.Fitbit;
+using Orbit.Domain.Helpers;
 using Orbit.Domain.Interfaces.Helpers;
 using System.Security.Claims;
 
@@ -71,7 +74,108 @@ namespace Orbit.Tests.Infrastructure
         {
             var mock = new Mock<IBankApiHelper>();
 
-            // Add default setups as needed
+            mock.Setup(x => x.GetGoCardlessBankingDataAccessToken())
+                .ReturnsAsync("test_access_token");
+
+            mock.Setup(x => x.GetGoCardlessBankingDataTransactions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new GoCardlessTransactionsResponse
+                {
+                    Transactions = new Transactions
+                    {
+                        Booked = []
+                    }
+                });
+
+            mock.Setup(x => x.GetMonzoTransactions())
+                .ReturnsAsync(new List<Transaction>());
+
+            mock.Setup(x => x.RefreshMonzoToken())
+                .Returns(Task.CompletedTask);
+
+            return mock;
+        }
+
+        /// <summary>
+        /// Creates a mock IFitbitApiHelper
+        /// </summary>
+        public static Mock<IFitbitApiHelper> CreateFitbitApiHelper()
+        {
+            var mock = new Mock<IFitbitApiHelper>();
+
+            mock.Setup(x => x.GenerateAuthorizationUrl())
+                .Returns(("https://fitbit.com/auth?test=true", "test_code_verifier"));
+
+            mock.Setup(x => x.ExchangeCodeForTokens(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new FitbitTokenResponse
+                {
+                    AccessToken = "test_access_token",
+                    RefreshToken = "test_refresh_token",
+                    UserId = "test_fitbit_user",
+                    ExpiresIn = 3600,
+                    TokenType = "Bearer",
+                    Scope = "activity heartrate profile"
+                });
+
+            mock.Setup(x => x.RefreshAccessToken(It.IsAny<string>()))
+                .ReturnsAsync(new FitbitTokenResponse
+                {
+                    AccessToken = "new_access_token",
+                    RefreshToken = "new_refresh_token",
+                    UserId = "test_fitbit_user",
+                    ExpiresIn = 3600,
+                    TokenType = "Bearer",
+                    Scope = "activity heartrate profile"
+                });
+
+            mock.Setup(x => x.RevokeToken(It.IsAny<string>()))
+                .Returns(Task.CompletedTask);
+
+            mock.Setup(x => x.GetProfile(It.IsAny<string>()))
+                .ReturnsAsync(new FitbitProfileResponse
+                {
+                    User = new FitbitUser
+                    {
+                        EncodedId = "test_id",
+                        DisplayName = "Test User",
+                        Avatar = "https://avatar.url",
+                        AverageDailySteps = 8000,
+                        MemberSince = "2020-01-01"
+                    }
+                });
+
+            mock.Setup(x => x.GetDailyActivity(It.IsAny<string>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(new FitbitActivityResponse
+                {
+                    Summary = new FitbitActivitySummary
+                    {
+                        Steps = 10000,
+                        CaloriesOut = 2500,
+                        ActiveMinutes = 60,
+                        Distances = new List<FitbitDistance>
+                        {
+                            new FitbitDistance { Activity = "total", Distance = 5.0 }
+                        }
+                    }
+                });
+
+            return mock;
+        }
+
+        /// <summary>
+        /// Creates a mock ICommsSenderClient
+        /// </summary>
+        public static Mock<ICommsSenderClient> CreateCommsSenderClient()
+        {
+            var mock = new Mock<ICommsSenderClient>();
+
+            mock.Setup(x => x.SendPushNotification(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+
+            mock.Setup(x => x.SendTelegramMessage(It.IsAny<long>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+
+            mock.Setup(x => x.RegisterPushToken(It.IsAny<string>()))
+                .ReturnsAsync(true);
 
             return mock;
         }

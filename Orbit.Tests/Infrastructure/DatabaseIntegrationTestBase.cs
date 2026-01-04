@@ -53,18 +53,5 @@ namespace Orbit.Tests.Infrastructure
         {
             return Task.CompletedTask;
         }
-
-        /// <summary>
-        /// Helper method to create a new DbContext for scenarios where you need multiple contexts
-        /// </summary>
-        protected AppDbContext CreateNewContext()
-        {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseNpgsql(TestContainerSetup.ConnectionString)
-                .EnableSensitiveDataLogging()
-                .Options;
-
-            return new AppDbContext(options);
-        }
     }
 }

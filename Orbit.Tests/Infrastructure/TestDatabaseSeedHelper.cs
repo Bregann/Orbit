@@ -177,6 +177,90 @@ namespace Orbit.Tests.Infrastructure
             await context.SaveChangesAsync();
         }
 
+        public static async Task SeedTestDocuments(AppDbContext context)
+        {
+            await context.DocumentCategories.AddRangeAsync(new List<DocumentCategory>
+            {
+                new DocumentCategory { CategoryName = "Test Category 1" },
+                new DocumentCategory { CategoryName = "Test Category 2" }
+            });
+
+            await context.SaveChangesAsync();
+
+            await context.Documents.AddRangeAsync(new List<Document>
+            {
+                new Document
+                {
+                    DocumentName = "Test Document 1",
+                    DocumentPath = "test/path/document1.pdf",
+                    DocumentType = "application/pdf",
+                    DocumentCategoryId = 1,
+                    UploadedAt = DateTime.UtcNow.AddDays(-5)
+                },
+                new Document
+                {
+                    DocumentName = "Test Document 2",
+                    DocumentPath = "test/path/document2.pdf",
+                    DocumentType = "application/pdf",
+                    DocumentCategoryId = 2,
+                    UploadedAt = DateTime.UtcNow.AddDays(-3)
+                }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedTestHistoricData(AppDbContext context)
+        {
+            var historicMonth = new HistoricMonthlyData
+            {
+                StartDate = DateTime.UtcNow.AddMonths(-1),
+                EndDate = DateTime.UtcNow.AddDays(-1),
+                MonthlyIncome = 300000, // £3000
+                AmountSpent = 150000, // £1500
+                AmountSaved = 50000, // £500
+                AmountLeftOver = 100000, // £1000
+                SubscriptionCostAmount = 5000 // £50
+            };
+
+            await context.HistoricData.AddAsync(historicMonth);
+            await context.SaveChangesAsync();
+
+            // Add current month (no end date)
+            var currentMonth = new HistoricMonthlyData
+            {
+                StartDate = DateTime.UtcNow.Date.AddDays(-DateTime.UtcNow.Day + 1),
+                EndDate = null,
+                MonthlyIncome = 300000,
+                AmountSpent = 0,
+                AmountSaved = 50000,
+                AmountLeftOver = 0,
+                SubscriptionCostAmount = 5000
+            };
+
+            await context.HistoricData.AddAsync(currentMonth);
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedTestAutomaticTransactions(AppDbContext context)
+        {
+            await context.AutomaticTransactions.AddRangeAsync(new List<AutomaticTransaction>
+            {
+                new AutomaticTransaction
+                {
+                    MerchantName = "Netflix",
+                    PotId = 1
+                },
+                new AutomaticTransaction
+                {
+                    MerchantName = "Spotify",
+                    PotId = 1
+                }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
         public static async Task SeedMinimalData(AppDbContext context)
         {
             await SeedTestUser(context);
