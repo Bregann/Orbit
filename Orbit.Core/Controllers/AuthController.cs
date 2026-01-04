@@ -110,5 +110,25 @@ namespace Orbit.Core.Controllers
                 return Unauthorized(ex.Message);
             }
         }
+
+        [HttpPost]
+        public async Task<ActionResult<LoginUserResponse>> RefreshAppToken([FromBody] RefreshTokenRequest request)
+        {
+            try
+            {
+                var response = await authService.RefreshToken(request.RefreshToken);
+                return Ok(response);
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException || ex is KeyNotFoundException)
+            {
+                Log.Warning(ex, "Authentication error attempting to refresh token");
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Unknown error attempting to refresh token");
+                return BadRequest("Unknown error attempting to refresh token");
+            }
+        }
     }
 }

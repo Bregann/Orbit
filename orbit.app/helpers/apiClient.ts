@@ -91,13 +91,14 @@ authApiClient.interceptors.response.use(
       try {
         console.log('🔑 Refreshing token...')
         const request: RefreshTokenRequest = { refreshToken }
-        const { data } = await authApiClient.post<RefreshTokenResponse>('/api/Auth/RefreshToken', request)
+        const { data } = await noAuthApiClient.post<RefreshTokenResponse>('/api/Auth/RefreshAppToken', request)
 
         console.log('✅ Token refreshed successfully')
         await keychainHelper.setAccessToken(data.accessToken)
         await keychainHelper.setRefreshToken(data.refreshToken)
 
         isRefreshing = false
+        hasLoggedOut = false
         error.config.headers['Authorization'] = `Bearer ${data.accessToken}`
 
         return authApiClient.request(error.config)
