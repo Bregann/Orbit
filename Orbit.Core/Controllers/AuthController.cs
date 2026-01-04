@@ -127,7 +127,7 @@ namespace Orbit.Core.Controllers
             catch (Exception ex)
             {
                 Log.Fatal(ex, "Unknown error attempting to refresh token");
-                return BadRequest();
+                return BadRequest("Unknown error attempting to refresh token");
             }
         }
     }
