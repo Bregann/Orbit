@@ -1,6 +1,6 @@
 using Testcontainers.PostgreSql;
 
-namespace Orbit.Tests.Infrastructure
+namespace Orbit.Tests
 {
     /// <summary>
     /// Manages the lifecycle of the PostgreSQL test container across all tests

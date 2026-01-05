@@ -15,7 +15,7 @@ namespace Orbit.Tests.Infrastructure
         public async Task SetUp()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseNpgsql(TestContainerSetup.ConnectionString)
+                .UseNpgsql(Orbit.Tests.TestContainerSetup.ConnectionString)
                 .EnableSensitiveDataLogging()
                 .Options;
 

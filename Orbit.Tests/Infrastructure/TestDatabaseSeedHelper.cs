@@ -261,6 +261,149 @@ namespace Orbit.Tests.Infrastructure
             await context.SaveChangesAsync();
         }
 
+        public static async Task SeedTestJournalEntries(AppDbContext context)
+        {
+            await context.JournalEntries.AddRangeAsync(new List<JournalEntry>
+            {
+                new JournalEntry
+                {
+                    Title = "Test Entry 1",
+                    Content = "This is a test journal entry content",
+                    CreatedAt = DateTime.UtcNow.AddDays(-5),
+                    Mood = Orbit.Domain.Enums.JournalMoodEnum.Good
+                },
+                new JournalEntry
+                {
+                    Title = "Test Entry 2",
+                    Content = "Another test journal entry",
+                    CreatedAt = DateTime.UtcNow.AddDays(-3),
+                    Mood = Orbit.Domain.Enums.JournalMoodEnum.Great
+                },
+                new JournalEntry
+                {
+                    Title = "Test Entry 3",
+                    Content = "A neutral mood entry",
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    Mood = Orbit.Domain.Enums.JournalMoodEnum.Neutral
+                }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedTestMoodTrackerEntries(AppDbContext context)
+        {
+            await context.MoodTrackerEntries.AddRangeAsync(new List<MoodTrackerEntry>
+            {
+                new MoodTrackerEntry
+                {
+                    MoodType = Orbit.Domain.Enums.MoodTrackerEnum.Good,
+                    DateRecorded = DateTime.UtcNow.AddDays(-5)
+                },
+                new MoodTrackerEntry
+                {
+                    MoodType = Orbit.Domain.Enums.MoodTrackerEnum.Excellent,
+                    DateRecorded = DateTime.UtcNow.AddDays(-4)
+                },
+                new MoodTrackerEntry
+                {
+                    MoodType = Orbit.Domain.Enums.MoodTrackerEnum.Neutral,
+                    DateRecorded = DateTime.UtcNow.AddDays(-3)
+                }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedTestNotes(AppDbContext context)
+        {
+            await context.NoteFolders.AddRangeAsync(new List<NoteFolder>
+            {
+                new NoteFolder
+                {
+                    FolderName = "Test Work",
+                    FolderIcon = "??"
+                },
+                new NoteFolder
+                {
+                    FolderName = "Test Personal",
+                    FolderIcon = "??"
+                }
+            });
+
+            await context.SaveChangesAsync();
+
+            await context.NotePages.AddRangeAsync(new List<NotePage>
+            {
+                new NotePage
+                {
+                    Title = "Test Note 1",
+                    Content = "<p>This is test note 1 content</p>",
+                    CreatedAt = DateTime.UtcNow.AddDays(-5),
+                    IsFavourite = true,
+                    FolderId = 1
+                },
+                new NotePage
+                {
+                    Title = "Test Note 2",
+                    Content = "<p>This is test note 2 content</p>",
+                    CreatedAt = DateTime.UtcNow.AddDays(-3),
+                    IsFavourite = false,
+                    FolderId = 1
+                },
+                new NotePage
+                {
+                    Title = "Test Note 3",
+                    Content = "<p>This is test note 3 content</p>",
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    IsFavourite = false,
+                    FolderId = null
+                }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedTestShoppingData(AppDbContext context)
+        {
+            await context.ShoppingListItems.AddRangeAsync(new List<ShoppingListItem>
+            {
+                new ShoppingListItem
+                {
+                    Name = "Milk",
+                    AddedAt = DateTime.UtcNow.AddDays(-2),
+                    IsPurchased = false
+                },
+                new ShoppingListItem
+                {
+                    Name = "Bread",
+                    AddedAt = DateTime.UtcNow.AddDays(-1),
+                    IsPurchased = false
+                },
+                new ShoppingListItem
+                {
+                    Name = "Eggs",
+                    AddedAt = DateTime.UtcNow.AddHours(-6),
+                    IsPurchased = true
+                },
+                new ShoppingListItem
+                {
+                    Name = "Butter",
+                    AddedAt = DateTime.UtcNow.AddHours(-3),
+                    IsPurchased = true
+                }
+            });
+
+            await context.ShoppingListQuickAddItems.AddRangeAsync(new List<ShoppingListQuickAddItem>
+            {
+                new ShoppingListQuickAddItem { Name = "Milk" },
+                new ShoppingListQuickAddItem { Name = "Bread" },
+                new ShoppingListQuickAddItem { Name = "Eggs" }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
         public static async Task SeedMinimalData(AppDbContext context)
         {
             await SeedTestUser(context);
