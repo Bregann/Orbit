@@ -1,6 +1,6 @@
 using Testcontainers.PostgreSql;
 
-namespace Orbit.Tests.Infrastructure
+namespace Orbit.Tests
 {
     /// <summary>
     /// Manages the lifecycle of the PostgreSQL test container across all tests
@@ -26,8 +26,12 @@ namespace Orbit.Tests.Infrastructure
         [OneTimeSetUp]
         public async Task OneTimeSetUp()
         {
-            _postgresContainer = new PostgreSqlBuilder()
-                .WithImage("postgres:16")
+            await InitializeContainerAsync();
+        }
+
+        private static async Task InitializeContainerAsync()
+        {
+            _postgresContainer = new PostgreSqlBuilder("postgres:16")
                 .WithDatabase("orbit_test_db")
                 .WithUsername("test_user")
                 .WithPassword("test_password")

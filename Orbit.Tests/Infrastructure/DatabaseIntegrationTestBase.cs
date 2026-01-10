@@ -16,6 +16,7 @@ namespace Orbit.Tests.Infrastructure
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseNpgsql(TestContainerSetup.ConnectionString)
+                .UseLazyLoadingProxies()
                 .EnableSensitiveDataLogging()
                 .Options;
 
@@ -23,7 +24,9 @@ namespace Orbit.Tests.Infrastructure
 
             // Ensure database is created fresh for each test
             await DbContext.Database.EnsureDeletedAsync();
-            await DbContext.Database.EnsureCreatedAsync();
+
+            // Use MigrateAsync instead of EnsureCreatedAsync to properly configure lazy loading proxies
+            await DbContext.Database.MigrateAsync();
 
             // Custom setup for derived classes
             await CustomSetUp();
@@ -52,19 +55,6 @@ namespace Orbit.Tests.Infrastructure
         protected virtual Task CustomTearDown()
         {
             return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Helper method to create a new DbContext for scenarios where you need multiple contexts
-        /// </summary>
-        protected AppDbContext CreateNewContext()
-        {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseNpgsql(TestContainerSetup.ConnectionString)
-                .EnableSensitiveDataLogging()
-                .Options;
-
-            return new AppDbContext(options);
         }
     }
 }

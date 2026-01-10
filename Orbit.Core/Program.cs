@@ -121,8 +121,7 @@ builder.Services.AddCors(options =>
 #if DEBUG
 GlobalConfiguration.Configuration.UseMemoryStorage();
 
-var postgresContainer = new PostgreSqlBuilder()
-    .WithImage("postgres:16")
+var postgresContainer = new PostgreSqlBuilder("postgres:16")
     .WithDatabase("financemanagercontainer")
     .WithUsername("testuser")
     .WithPassword("testpass")

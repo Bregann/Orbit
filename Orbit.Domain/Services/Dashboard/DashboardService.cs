@@ -25,7 +25,7 @@ namespace Orbit.Domain.Services.Dashboard
                 EventsScheduled = eventsScheduled,
                 UpcomingTasks = await context.Tasks
                     .OrderBy(t => t.DueDate)
-                    .ThenBy(t => t.Priority)
+                    .ThenByDescending(t => t.Priority)
                     .Select(t => new UpcomingTasksData
                     {
                         TaskId = t.Id,

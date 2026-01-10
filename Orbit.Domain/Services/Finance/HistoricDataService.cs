@@ -126,13 +126,13 @@ namespace Orbit.Domain.Services.Finance
                     Month = hd.StartDate.ToString("MMMM"),
                     AmountSaved = hd.AmountSaved
                 }).ToArray(),
-                AmountSpentPerPot = last12Data.SelectMany(hd => hd.HistoricPotData.Select(pd => new AmountSpentPerPotData
+                AmountSpentPerPot = last12Data.SelectMany(hd => (hd.HistoricPotData ?? []).Select(pd => new AmountSpentPerPotData
                 {
                     Month = hd.StartDate.ToString("MMMM"),
                     PotName = pd.Pot.PotName,
                     TotalAmountSpent = pd.PotAmountSpent
                 })).ToArray(),
-                AmountSavedPerPot = last12Data.SelectMany(hd => hd.HistoricSavingsPotData.Select(pd => new AmountSavedPerPotData
+                AmountSavedPerPot = last12Data.SelectMany(hd => (hd.HistoricSavingsPotData ?? []).Select(pd => new AmountSavedPerPotData
                 {
                     Month = hd.StartDate.ToString("MMMM"),
                     PotName = pd.Pot.PotName,

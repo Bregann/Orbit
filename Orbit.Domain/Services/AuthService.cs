@@ -89,6 +89,12 @@ namespace Orbit.Domain.Services
                 throw new KeyNotFoundException("Token not found");
             }
 
+            if (refreshToken.IsRevoked)
+            {
+                Log.Information($"Token has been revoked for user {refreshToken.UserId}");
+                throw new UnauthorizedAccessException("Refresh token has been revoked");
+            }
+
             if (refreshToken.ExpiresAt < DateTime.UtcNow)
             {
                 Log.Information($"Token expired for user {refreshToken.UserId}");

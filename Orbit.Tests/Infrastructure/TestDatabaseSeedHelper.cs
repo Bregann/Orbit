@@ -177,6 +177,256 @@ namespace Orbit.Tests.Infrastructure
             await context.SaveChangesAsync();
         }
 
+        public static async Task SeedTestDocuments(AppDbContext context)
+        {
+            await context.DocumentCategories.AddRangeAsync(new List<DocumentCategory>
+            {
+                new DocumentCategory { CategoryName = "Test Category 1" },
+                new DocumentCategory { CategoryName = "Test Category 2" }
+            });
+
+            await context.SaveChangesAsync();
+
+            await context.Documents.AddRangeAsync(new List<Document>
+            {
+                new Document
+                {
+                    DocumentName = "Test Document 1",
+                    DocumentPath = "test/path/document1.pdf",
+                    DocumentType = "application/pdf",
+                    DocumentCategoryId = 1,
+                    UploadedAt = DateTime.UtcNow.AddDays(-5)
+                },
+                new Document
+                {
+                    DocumentName = "Test Document 2",
+                    DocumentPath = "test/path/document2.pdf",
+                    DocumentType = "application/pdf",
+                    DocumentCategoryId = 2,
+                    UploadedAt = DateTime.UtcNow.AddDays(-3)
+                }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedTestHistoricData(AppDbContext context)
+        {
+            var historicMonth = new HistoricMonthlyData
+            {
+                StartDate = DateTime.UtcNow.AddMonths(-1),
+                EndDate = DateTime.UtcNow.AddDays(-1),
+                MonthlyIncome = 300000, // £3000
+                AmountSpent = 150000, // £1500
+                AmountSaved = 50000, // £500
+                AmountLeftOver = 100000, // £1000
+                SubscriptionCostAmount = 5000 // £50
+            };
+
+            await context.HistoricData.AddAsync(historicMonth);
+            await context.SaveChangesAsync();
+
+            // Add historic spending pot data for the completed month
+            await context.HistoricSpendingPotData.AddRangeAsync(new List<HistoricSpendingPotData>
+            {
+                new HistoricSpendingPotData
+                {
+                    PotId = 1,
+                    HistoricMonthlyDataId = historicMonth.Id,
+                    PotAmount = 100m,
+                    PotAmountSpent = 50m,
+                    PotAmountLeft = 50m
+                },
+                new HistoricSpendingPotData
+                {
+                    PotId = 2,
+                    HistoricMonthlyDataId = historicMonth.Id,
+                    PotAmount = 200m,
+                    PotAmountSpent = 100m,
+                    PotAmountLeft = 100m
+                }
+            });
+
+            await context.SaveChangesAsync();
+
+            // Add current month (no end date)
+            var currentMonth = new HistoricMonthlyData
+            {
+                StartDate = DateTime.UtcNow.Date.AddDays(-DateTime.UtcNow.Day + 1),
+                EndDate = null,
+                MonthlyIncome = 300000,
+                AmountSpent = 0,
+                AmountSaved = 50000,
+                AmountLeftOver = 0,
+                SubscriptionCostAmount = 5000
+            };
+
+            await context.HistoricData.AddAsync(currentMonth);
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedTestAutomaticTransactions(AppDbContext context)
+        {
+            await context.AutomaticTransactions.AddRangeAsync(new List<AutomaticTransaction>
+            {
+                new AutomaticTransaction
+                {
+                    MerchantName = "Netflix",
+                    PotId = 1
+                },
+                new AutomaticTransaction
+                {
+                    MerchantName = "Spotify",
+                    PotId = 1
+                }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedTestJournalEntries(AppDbContext context)
+        {
+            await context.JournalEntries.AddRangeAsync(new List<JournalEntry>
+            {
+                new JournalEntry
+                {
+                    Title = "Test Entry 1",
+                    Content = "This is a test journal entry content",
+                    CreatedAt = DateTime.UtcNow.AddDays(-5),
+                    Mood = Orbit.Domain.Enums.JournalMoodEnum.Good
+                },
+                new JournalEntry
+                {
+                    Title = "Test Entry 2",
+                    Content = "Another test journal entry",
+                    CreatedAt = DateTime.UtcNow.AddDays(-3),
+                    Mood = Orbit.Domain.Enums.JournalMoodEnum.Great
+                },
+                new JournalEntry
+                {
+                    Title = "Test Entry 3",
+                    Content = "A neutral mood entry",
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    Mood = Orbit.Domain.Enums.JournalMoodEnum.Neutral
+                }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedTestMoodTrackerEntries(AppDbContext context)
+        {
+            await context.MoodTrackerEntries.AddRangeAsync(new List<MoodTrackerEntry>
+            {
+                new MoodTrackerEntry
+                {
+                    MoodType = Orbit.Domain.Enums.MoodTrackerEnum.Good,
+                    DateRecorded = DateTime.UtcNow.AddDays(-5)
+                },
+                new MoodTrackerEntry
+                {
+                    MoodType = Orbit.Domain.Enums.MoodTrackerEnum.Excellent,
+                    DateRecorded = DateTime.UtcNow.AddDays(-4)
+                },
+                new MoodTrackerEntry
+                {
+                    MoodType = Orbit.Domain.Enums.MoodTrackerEnum.Neutral,
+                    DateRecorded = DateTime.UtcNow.AddDays(-3)
+                }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedTestNotes(AppDbContext context)
+        {
+            await context.NoteFolders.AddRangeAsync(new List<NoteFolder>
+            {
+                new NoteFolder
+                {
+                    FolderName = "Test Work",
+                    FolderIcon = "??"
+                },
+                new NoteFolder
+                {
+                    FolderName = "Test Personal",
+                    FolderIcon = "??"
+                }
+            });
+
+            await context.SaveChangesAsync();
+
+            await context.NotePages.AddRangeAsync(new List<NotePage>
+            {
+                new NotePage
+                {
+                    Title = "Test Note 1",
+                    Content = "<p>This is test note 1 content</p>",
+                    CreatedAt = DateTime.UtcNow.AddDays(-5),
+                    IsFavourite = true,
+                    FolderId = 1
+                },
+                new NotePage
+                {
+                    Title = "Test Note 2",
+                    Content = "<p>This is test note 2 content</p>",
+                    CreatedAt = DateTime.UtcNow.AddDays(-3),
+                    IsFavourite = false,
+                    FolderId = 1
+                },
+                new NotePage
+                {
+                    Title = "Test Note 3",
+                    Content = "<p>This is test note 3 content</p>",
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    IsFavourite = false,
+                    FolderId = null
+                }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedTestShoppingData(AppDbContext context)
+        {
+            await context.ShoppingListItems.AddRangeAsync(new List<ShoppingListItem>
+            {
+                new ShoppingListItem
+                {
+                    Name = "Milk",
+                    AddedAt = DateTime.UtcNow.AddDays(-2),
+                    IsPurchased = false
+                },
+                new ShoppingListItem
+                {
+                    Name = "Bread",
+                    AddedAt = DateTime.UtcNow.AddDays(-1),
+                    IsPurchased = false
+                },
+                new ShoppingListItem
+                {
+                    Name = "Eggs",
+                    AddedAt = DateTime.UtcNow.AddHours(-6),
+                    IsPurchased = true
+                },
+                new ShoppingListItem
+                {
+                    Name = "Butter",
+                    AddedAt = DateTime.UtcNow.AddHours(-3),
+                    IsPurchased = true
+                }
+            });
+
+            await context.ShoppingListQuickAddItems.AddRangeAsync(new List<ShoppingListQuickAddItem>
+            {
+                new ShoppingListQuickAddItem { Name = "Milk" },
+                new ShoppingListQuickAddItem { Name = "Bread" },
+                new ShoppingListQuickAddItem { Name = "Eggs" }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
         public static async Task SeedMinimalData(AppDbContext context)
         {
             await SeedTestUser(context);
