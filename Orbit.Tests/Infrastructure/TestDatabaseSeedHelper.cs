@@ -226,6 +226,29 @@ namespace Orbit.Tests.Infrastructure
             await context.HistoricData.AddAsync(historicMonth);
             await context.SaveChangesAsync();
 
+            // Add historic spending pot data for the completed month
+            await context.HistoricSpendingPotData.AddRangeAsync(new List<HistoricSpendingPotData>
+            {
+                new HistoricSpendingPotData
+                {
+                    PotId = 1,
+                    HistoricMonthlyDataId = historicMonth.Id,
+                    PotAmount = 100m,
+                    PotAmountSpent = 50m,
+                    PotAmountLeft = 50m
+                },
+                new HistoricSpendingPotData
+                {
+                    PotId = 2,
+                    HistoricMonthlyDataId = historicMonth.Id,
+                    PotAmount = 200m,
+                    PotAmountSpent = 100m,
+                    PotAmountLeft = 100m
+                }
+            });
+
+            await context.SaveChangesAsync();
+
             // Add current month (no end date)
             var currentMonth = new HistoricMonthlyData
             {

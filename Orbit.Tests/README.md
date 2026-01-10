@@ -15,10 +15,11 @@ This test project uses **NUnit**, **Testcontainers**, and **Moq** to provide com
 #### `DatabaseIntegrationTestBase.cs`
 - **Purpose**: Base class for integration tests requiring a real database
 - **Features**:
-  - Automatically creates a fresh database for each test
-  - Provides `DbContext` property
+  - Automatically creates a fresh database for each test using **migrations** (not `EnsureCreated`)
+  - Provides `DbContext` property with **lazy loading proxies** enabled
   - Implements `SetUp` and `TearDown` automatically
 - **Usage**: Inherit from this class for integration tests
+- **Important**: Uses `MigrateAsync()` to ensure lazy loading proxies work correctly
 
 #### `TestDatabaseSeedHelper.cs`
 - **Purpose**: Seeds test-specific data (separate from production seed data)

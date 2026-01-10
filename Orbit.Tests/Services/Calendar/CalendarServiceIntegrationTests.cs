@@ -274,9 +274,12 @@ namespace Orbit.Tests.Services.Calendar
             await _calendarService.DeleteCalendarEvent(request);
 
             // Assert
+            // because it uses ExecuteDeleteAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var deletedEvent = await DbContext.CalendarEvents.FindAsync(eventId);
             var finalCount = await DbContext.CalendarEvents.CountAsync();
-
             Assert.That(deletedEvent, Is.Null);
             Assert.That(finalCount, Is.EqualTo(initialCount - 1));
         }
