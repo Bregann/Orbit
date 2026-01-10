@@ -24,7 +24,7 @@ namespace Orbit.Tests.Infrastructure
 
             // Ensure database is created fresh for each test
             await DbContext.Database.EnsureDeletedAsync();
-            
+
             // Use MigrateAsync instead of EnsureCreatedAsync to properly configure lazy loading proxies
             await DbContext.Database.MigrateAsync();
 

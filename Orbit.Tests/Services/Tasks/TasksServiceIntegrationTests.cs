@@ -87,7 +87,7 @@ namespace Orbit.Tests.Services.Tasks
             var nonExistentTaskId = 99999;
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () => 
+            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
                 await _tasksService.CompleteTask(nonExistentTaskId));
 
             Assert.That(exception.Message, Does.Contain($"Task with ID {nonExistentTaskId} not found"));
@@ -123,7 +123,7 @@ namespace Orbit.Tests.Services.Tasks
             var nonExistentTaskId = 99999;
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () => 
+            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
                 await _tasksService.DeleteTask(nonExistentTaskId));
 
             Assert.That(exception.Message, Does.Contain($"Task with ID {nonExistentTaskId} not found"));
@@ -170,7 +170,7 @@ namespace Orbit.Tests.Services.Tasks
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<InvalidOperationException>(async () => 
+            var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
                 await _tasksService.AddNewCategory(request));
 
             Assert.That(exception.Message, Does.Contain("Category with name 'Test Work' already exists"));
@@ -206,7 +206,7 @@ namespace Orbit.Tests.Services.Tasks
             var nonExistentCategoryId = 99999;
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () => 
+            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
                 await _tasksService.DeleteCategory(nonExistentCategoryId));
 
             Assert.That(exception.Message, Does.Contain($"Category with ID {nonExistentCategoryId} not found"));

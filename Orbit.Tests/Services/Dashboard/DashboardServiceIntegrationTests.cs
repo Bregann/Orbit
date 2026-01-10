@@ -185,7 +185,7 @@ namespace Orbit.Tests.Services.Dashboard
 
             // Assert
             Assert.That(result.UpcomingTasks, Is.Not.Empty);
-            
+
             var firstTask = result.UpcomingTasks[0];
             Assert.That(firstTask.TaskId, Is.GreaterThan(0));
             Assert.That(firstTask.TaskTitle, Is.Not.Null);
@@ -279,7 +279,7 @@ namespace Orbit.Tests.Services.Dashboard
 
             // Assert
             Assert.That(result.UpcomingEvents, Is.Not.Empty);
-            
+
             var firstEvent = result.UpcomingEvents[0];
             Assert.That(firstEvent.EventId, Is.GreaterThan(0));
             Assert.That(firstEvent.EventTitle, Is.Not.Null);

@@ -83,6 +83,7 @@ namespace Orbit.Tests.Services.Auth
         {
             // Arrange
             await TestDatabaseSeedHelper.SeedTestUser(DbContext, "existinguser");
+
             var request = new RegisterUserRequest
             {
                 Username = "existinguser",
@@ -103,6 +104,7 @@ namespace Orbit.Tests.Services.Auth
         {
             // Arrange
             await TestDatabaseSeedHelper.SeedTestUser(DbContext, "existinguser");
+
             var request = new RegisterUserRequest
             {
                 Username = "differentuser",
@@ -123,6 +125,7 @@ namespace Orbit.Tests.Services.Auth
         {
             // Arrange
             await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
+
             var request = new LoginUserRequest
             {
                 Email = "testuser@test.com",
@@ -143,6 +146,7 @@ namespace Orbit.Tests.Services.Auth
         {
             // Arrange
             await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
+
             var request = new LoginUserRequest
             {
                 Email = "testuser@test.com",
@@ -167,6 +171,7 @@ namespace Orbit.Tests.Services.Auth
         {
             // Arrange
             await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
+
             var request = new LoginUserRequest
             {
                 Email = "TESTUSER@TEST.COM",
@@ -204,6 +209,7 @@ namespace Orbit.Tests.Services.Auth
         {
             // Arrange
             await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
+
             var request = new LoginUserRequest
             {
                 Email = "testuser@test.com",
@@ -222,6 +228,7 @@ namespace Orbit.Tests.Services.Auth
         {
             // Arrange
             await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
+
             var loginRequest = new LoginUserRequest
             {
                 Email = "testuser@test.com",
@@ -240,7 +247,7 @@ namespace Orbit.Tests.Services.Auth
             Assert.That(result.AccessToken, Is.Not.Empty);
             Assert.That(result.RefreshToken, Is.Not.Empty);
             Assert.That(result.RefreshToken, Is.Not.EqualTo(loginResult.RefreshToken));
-            
+
             // Verify the access token is valid JWT
             var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
             var token = handler.ReadJwtToken(result.AccessToken);
@@ -252,6 +259,7 @@ namespace Orbit.Tests.Services.Auth
         {
             // Arrange
             await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
+
             var loginRequest = new LoginUserRequest
             {
                 Email = "testuser@test.com",
@@ -276,6 +284,7 @@ namespace Orbit.Tests.Services.Auth
         {
             // Arrange
             await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
+
             var loginRequest = new LoginUserRequest
             {
                 Email = "testuser@test.com",
@@ -313,6 +322,7 @@ namespace Orbit.Tests.Services.Auth
         {
             // Arrange
             var user = await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
+
             var expiredToken = new Domain.Database.Models.UserRefreshToken
             {
                 Token = "ExpiredToken123",
@@ -320,6 +330,7 @@ namespace Orbit.Tests.Services.Auth
                 ExpiresAt = DateTime.UtcNow.AddDays(-1),
                 IsRevoked = false
             };
+
             DbContext.UserRefreshTokens.Add(expiredToken);
             await DbContext.SaveChangesAsync();
 
@@ -334,14 +345,16 @@ namespace Orbit.Tests.Services.Auth
         public async Task RefreshToken_ShouldThrowUnauthorizedAccessException_WhenTokenIsRevoked()
         {
             // Arrange
-            var user = await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
+            await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
+
             var loginRequest = new LoginUserRequest
             {
                 Email = "testuser@test.com",
                 Password = "Password123!"
             };
+
             var loginResult = await _authService.LoginUser(loginRequest);
-            
+
             // Use the refresh token once to revoke it
             await _authService.RefreshToken(loginResult.RefreshToken);
 
@@ -395,6 +408,7 @@ namespace Orbit.Tests.Services.Auth
         {
             // Arrange
             await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
+
             var request = new LoginUserRequest
             {
                 Email = "testuser@test.com",
@@ -407,7 +421,7 @@ namespace Orbit.Tests.Services.Auth
             // Assert
             var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
             var token = handler.ReadJwtToken(result.AccessToken);
-            
+
             var usernameClaim = token.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Name);
             var userIdClaim = token.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier);
 

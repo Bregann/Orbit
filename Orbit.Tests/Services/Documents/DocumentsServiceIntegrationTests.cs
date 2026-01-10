@@ -93,7 +93,7 @@ namespace Orbit.Tests.Services.Documents
             };
 
             var testContent = "This is a test document content";
-            var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(testContent));
+            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(testContent));
 
             // Act
             await _documentsService.UploadDocument(request, stream, ".txt");
@@ -120,7 +120,7 @@ namespace Orbit.Tests.Services.Documents
             };
 
             var testContent = "File storage test content";
-            var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(testContent));
+            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(testContent));
 
             // Act
             await _documentsService.UploadDocument(request, stream, ".txt");
@@ -393,7 +393,7 @@ namespace Orbit.Tests.Services.Documents
                 CategoryId = 1
             };
 
-            var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("test content"));
+            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("test content"));
 
             // Act
             await _documentsService.UploadDocument(request, stream, extension);
@@ -436,7 +436,7 @@ namespace Orbit.Tests.Services.Documents
                 CategoryId = 1
             };
 
-            var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("test"));
+            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("test"));
 
             // Act
             await _documentsService.UploadDocument(request, stream, ".txt");
