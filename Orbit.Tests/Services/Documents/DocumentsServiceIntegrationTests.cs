@@ -93,7 +93,7 @@ namespace Orbit.Tests.Services.Documents
             };
 
             var testContent = "This is a test document content";
-            var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(testContent));
+            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(testContent));
 
             // Act
             await _documentsService.UploadDocument(request, stream, ".txt");
