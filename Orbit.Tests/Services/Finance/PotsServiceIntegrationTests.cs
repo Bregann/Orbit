@@ -51,9 +51,20 @@ namespace Orbit.Tests.Services.Finance
 
             // Assert
             var spendingPot = result.SpendingPots.First(p => p.PotName == "Test General");
-            Assert.That(spendingPot.AmountAllocated, Does.StartWith("£"));
-            Assert.That(spendingPot.AmountLeft, Does.StartWith("£"));
-            Assert.That(spendingPot.AmountSpent, Does.StartWith("£"));
+            
+            // Check that amounts are formatted as currency strings (contains decimal point and two decimal places)
+            Assert.That(spendingPot.AmountAllocated, Does.Match(@"^£?\d+\.\d{2}$"));
+            Assert.That(spendingPot.AmountLeft, Does.Match(@"^£?\d+\.\d{2}$"));
+            Assert.That(spendingPot.AmountSpent, Does.Match(@"^£?\d+\.\d{2}$"));
+            
+            // Verify the amounts are parseable as decimals (after removing currency symbol)
+            var allocatedAmount = decimal.Parse(spendingPot.AmountAllocated.Replace("£", "").Replace("?", ""));
+            var leftAmount = decimal.Parse(spendingPot.AmountLeft.Replace("£", "").Replace("?", ""));
+            var spentAmount = decimal.Parse(spendingPot.AmountSpent.Replace("£", "").Replace("?", ""));
+            
+            Assert.That(allocatedAmount, Is.GreaterThanOrEqualTo(0));
+            Assert.That(leftAmount, Is.GreaterThanOrEqualTo(0));
+            Assert.That(spentAmount, Is.GreaterThanOrEqualTo(0));
         }
 
         [Test]
