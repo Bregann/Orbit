@@ -26,8 +26,7 @@ namespace Orbit.Tests
         [OneTimeSetUp]
         public async Task OneTimeSetUp()
         {
-            _postgresContainer = new PostgreSqlBuilder()
-                .WithImage("postgres:16")
+            _postgresContainer = new PostgreSqlBuilder("postgres:16")
                 .WithDatabase("orbit_test_db")
                 .WithUsername("test_user")
                 .WithPassword("test_password")

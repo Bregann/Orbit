@@ -70,6 +70,10 @@ namespace Orbit.Tests.Services.Tasks
             await _tasksService.CompleteTask(taskId);
 
             // Assert
+            // because it uses ExecuteUpdateAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var completedTask = await DbContext.Tasks.FindAsync(taskId);
             Assert.That(completedTask, Is.Not.Null);
             Assert.That(completedTask.CompletedAt, Is.Not.Null);
@@ -101,6 +105,10 @@ namespace Orbit.Tests.Services.Tasks
             await _tasksService.DeleteTask(taskId);
 
             // Assert
+            // because it uses ExecuteDeleteAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var deletedTask = await DbContext.Tasks.FindAsync(taskId);
             var finalCount = await DbContext.Tasks.CountAsync();
 
@@ -180,6 +188,10 @@ namespace Orbit.Tests.Services.Tasks
             await _tasksService.DeleteCategory(categoryId);
 
             // Assert
+            // because it uses ExecuteDeleteAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var deletedCategory = await DbContext.TaskCategories.FindAsync(categoryId);
             var finalCount = await DbContext.TaskCategories.CountAsync();
 

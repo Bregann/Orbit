@@ -166,6 +166,10 @@ namespace Orbit.Tests.Services.Shopping
             await _shoppingService.MarkShoppingListItemAsPurchased(itemId);
 
             // Assert
+            // because it uses ExecuteUpdateAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var updated = await DbContext.ShoppingListItems.FindAsync(itemId);
             Assert.That(updated!.IsPurchased, Is.True);
         }
@@ -192,6 +196,10 @@ namespace Orbit.Tests.Services.Shopping
             await _shoppingService.RemoveShoppingListItem(itemId);
 
             // Assert
+            // because it uses ExecuteDeleteAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var deleted = await DbContext.ShoppingListItems.FindAsync(itemId);
             var finalCount = await DbContext.ShoppingListItems.CountAsync();
 
@@ -249,6 +257,10 @@ namespace Orbit.Tests.Services.Shopping
             await _shoppingService.RemoveShoppingListQuickAddItem(itemId);
 
             // Assert
+            // because it uses ExecuteDeleteAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var deleted = await DbContext.ShoppingListQuickAddItems.FindAsync(itemId);
             var finalCount = await DbContext.ShoppingListQuickAddItems.CountAsync();
 
@@ -347,6 +359,10 @@ namespace Orbit.Tests.Services.Shopping
             await _shoppingService.MarkShoppingListItemAsPurchased(item.Id);
 
             // Assert
+            // because it uses ExecuteUpdateAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var updated = await DbContext.ShoppingListItems.FindAsync(item.Id);
             Assert.That(updated!.IsPurchased, Is.True);
         }
@@ -367,6 +383,10 @@ namespace Orbit.Tests.Services.Shopping
             await _shoppingService.ClearPurchasedShoppingListItems();
 
             // Assert
+            // because it uses ExecuteUpdateAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var afterClear = await DbContext.ShoppingListItems.CountAsync();
             var deletedItem = await DbContext.ShoppingListItems.FindAsync(item.Id);
 

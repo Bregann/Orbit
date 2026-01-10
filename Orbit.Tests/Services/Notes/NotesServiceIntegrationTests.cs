@@ -221,6 +221,10 @@ namespace Orbit.Tests.Services.Notes
             await _notesService.UpdateNotePageContent(request);
 
             // Assert
+            // because it uses ExecuteUpdateAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var updated = await DbContext.NotePages.FindAsync(page.Id);
             Assert.That(updated!.Content, Is.EqualTo("<p>Updated content</p>"));
         }
@@ -258,6 +262,10 @@ namespace Orbit.Tests.Services.Notes
             await _notesService.UpdateNotePageContent(request);
 
             // Assert
+            // because it uses ExecuteUpdateAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var updated = await DbContext.NotePages.FindAsync(page.Id);
             Assert.That(updated!.Content, Is.EqualTo(richContent));
         }
@@ -334,6 +342,10 @@ namespace Orbit.Tests.Services.Notes
             await _notesService.DeleteNotePage(pageId);
 
             // Assert
+            // because it uses ExecuteDeleteAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var deleted = await DbContext.NotePages.FindAsync(pageId);
             var finalCount = await DbContext.NotePages.CountAsync();
 
@@ -404,6 +416,10 @@ namespace Orbit.Tests.Services.Notes
             await _notesService.DeleteNoteFolder(folderId);
 
             // Assert
+            // because it uses ExecuteDeleteAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var deleted = await DbContext.NoteFolders.FindAsync(folderId);
             var finalCount = await DbContext.NoteFolders.CountAsync();
 
@@ -429,6 +445,10 @@ namespace Orbit.Tests.Services.Notes
             await _notesService.DeleteNoteFolder(folderId);
 
             // Assert
+            // because it uses ExecuteDeleteAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             foreach (var page in pagesInFolder)
             {
                 var updatedPage = await DbContext.NotePages.FindAsync(page.Id);

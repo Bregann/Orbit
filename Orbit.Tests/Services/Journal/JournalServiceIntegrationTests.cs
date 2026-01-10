@@ -181,6 +181,10 @@ namespace Orbit.Tests.Services.Journal
             await _journalService.DeleteJournalEntry(entryId);
 
             // Assert
+            // because it uses ExecuteDeleteAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var deletedEntry = await DbContext.JournalEntries.FindAsync(entryId);
             var finalCount = await DbContext.JournalEntries.CountAsync();
 

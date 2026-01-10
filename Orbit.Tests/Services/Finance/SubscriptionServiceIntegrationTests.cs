@@ -188,6 +188,11 @@ namespace Orbit.Tests.Services.Finance
             await _subscriptionService.DeleteSubscription(subscriptionId);
 
             // Assert
+
+            // because it uses ExecuteDeleteAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
             var deleted = await DbContext.Subscriptions.FindAsync(subscriptionId);
             var finalCount = await DbContext.Subscriptions.CountAsync();
 
