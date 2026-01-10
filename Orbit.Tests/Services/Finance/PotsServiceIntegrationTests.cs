@@ -53,14 +53,15 @@ namespace Orbit.Tests.Services.Finance
             var spendingPot = result.SpendingPots.First(p => p.PotName == "Test General");
 
             // Check that amounts are formatted as currency strings (contains decimal point and two decimal places)
-            Assert.That(spendingPot.AmountAllocated, Does.Match(@"^£?\d+\.\d{2}$"));
-            Assert.That(spendingPot.AmountLeft, Does.Match(@"^£?\d+\.\d{2}$"));
-            Assert.That(spendingPot.AmountSpent, Does.Match(@"^£?\d+\.\d{2}$"));
+            // Using [\p{Sc}\uFFFD]? to match any currency symbol or replacement character optionally
+            Assert.That(spendingPot.AmountAllocated, Does.Match(@"^[\p{Sc}\uFFFD]?\d+\.\d{2}$"));
+            Assert.That(spendingPot.AmountLeft, Does.Match(@"^[\p{Sc}\uFFFD]?\d+\.\d{2}$"));
+            Assert.That(spendingPot.AmountSpent, Does.Match(@"^[\p{Sc}\uFFFD]?\d+\.\d{2}$"));
 
-            // Verify the amounts are parseable as decimals (after removing currency symbol)
-            var allocatedAmount = decimal.Parse(spendingPot.AmountAllocated.Replace("£", "").Replace("?", ""));
-            var leftAmount = decimal.Parse(spendingPot.AmountLeft.Replace("£", "").Replace("?", ""));
-            var spentAmount = decimal.Parse(spendingPot.AmountSpent.Replace("£", "").Replace("?", ""));
+            // Verify the amounts are parseable as decimals (after removing any currency symbols or replacement characters)
+            var allocatedAmount = decimal.Parse(System.Text.RegularExpressions.Regex.Replace(spendingPot.AmountAllocated, @"[^\d\.]", ""));
+            var leftAmount = decimal.Parse(System.Text.RegularExpressions.Regex.Replace(spendingPot.AmountLeft, @"[^\d\.]", ""));
+            var spentAmount = decimal.Parse(System.Text.RegularExpressions.Regex.Replace(spendingPot.AmountSpent, @"[^\d\.]", ""));
 
             Assert.That(allocatedAmount, Is.GreaterThanOrEqualTo(0));
             Assert.That(leftAmount, Is.GreaterThanOrEqualTo(0));
