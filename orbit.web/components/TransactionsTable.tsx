@@ -48,7 +48,7 @@ export default function TransactionsTableComponent(props: TransactionsTableProps
   })
 
   const handleMarkAsSubscription = async (transactionId: string) => {
-    const result = await doPatch('/api/Transactions/MarkAsSubscription', { body: { transactionId } })
+    const result = await doPatch('/api/Transactions/MarkAsSubscription?transactionId=' + transactionId)
     if (result.ok) {
       queryClient.invalidateQueries({ queryKey: [QueryKeys.GetUnprocessedTransactions] })
       queryClient.invalidateQueries({ queryKey: [QueryKeys.GetAutomaticTransactions] })

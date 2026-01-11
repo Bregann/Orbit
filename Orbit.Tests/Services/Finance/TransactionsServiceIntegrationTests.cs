@@ -380,7 +380,7 @@ namespace Orbit.Tests.Services.Finance
             Assert.That(automaticTransaction, Is.Not.Null);
             Assert.That(automaticTransaction.MerchantName, Is.EqualTo("Subscription With Pot"));
             Assert.That(automaticTransaction.PotId, Is.EqualTo(1));
-            Assert.That(automaticTransaction.IsSubscription, Is.False); // Should be false based on current implementation
+            Assert.That(automaticTransaction.IsSubscription, Is.True); // Explicit IsSubscription=true should be respected even when PotId is provided
         }
 
         [Test]
@@ -407,8 +407,8 @@ namespace Orbit.Tests.Services.Finance
         public async Task MarkAsSubscription_ShouldMarkTransactionAsSubscription()
         {
             // Arrange
-            var automaticTransaction = DbContext.AutomaticTransactions.First(at => !at.IsSubscription);
-            var transactionId = automaticTransaction.Id;
+            var transaction = DbContext.Transactions.First(t => !t.IsSubscriptionPayment);
+            var transactionId = int.Parse(transaction.Id);
 
             // Act
             await _transactionsService.MarkAsSubscription(transactionId);
@@ -418,9 +418,9 @@ namespace Orbit.Tests.Services.Finance
             // we need to clear the change tracker to avoid stale data
             DbContext.ChangeTracker.Clear();
 
-            var updated = await DbContext.AutomaticTransactions.FindAsync(transactionId);
+            var updated = await DbContext.Transactions.FindAsync(transaction.Id);
             Assert.That(updated, Is.Not.Null);
-            Assert.That(updated.IsSubscription, Is.True);
+            Assert.That(updated.IsSubscriptionPayment, Is.True);
         }
 
         [Test]
@@ -433,17 +433,18 @@ namespace Orbit.Tests.Services.Finance
             var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
                 await _transactionsService.MarkAsSubscription(nonExistentId));
 
-            Assert.That(exception.Message, Does.Contain($"Automatic transaction with ID {nonExistentId} not found"));
+            Assert.That(exception.Message, Does.Contain($"Transaction with ID {nonExistentId} not found"));
         }
 
         [Test]
         public async Task MarkAsSubscription_ShouldNotAffectOtherProperties()
         {
             // Arrange
-            var automaticTransaction = DbContext.AutomaticTransactions.First(at => !at.IsSubscription);
-            var transactionId = automaticTransaction.Id;
-            var originalMerchantName = automaticTransaction.MerchantName;
-            var originalPotId = automaticTransaction.PotId;
+            var transaction = DbContext.Transactions.First(t => !t.IsSubscriptionPayment);
+            var transactionId = int.Parse(transaction.Id);
+            var originalMerchantName = transaction.MerchantName;
+            var originalPotId = transaction.PotId;
+            var originalProcessed = transaction.Processed;
 
             // Act
             await _transactionsService.MarkAsSubscription(transactionId);
@@ -453,42 +454,45 @@ namespace Orbit.Tests.Services.Finance
             // we need to clear the change tracker to avoid stale data
             DbContext.ChangeTracker.Clear();
 
-            var updated = await DbContext.AutomaticTransactions.FindAsync(transactionId);
+            var updated = await DbContext.Transactions.FindAsync(transaction.Id);
             Assert.That(updated, Is.Not.Null);
             Assert.That(updated.MerchantName, Is.EqualTo(originalMerchantName));
             Assert.That(updated.PotId, Is.EqualTo(originalPotId));
-            Assert.That(updated.IsSubscription, Is.True);
+            Assert.That(updated.Processed, Is.EqualTo(originalProcessed));
+            Assert.That(updated.IsSubscriptionPayment, Is.True);
         }
 
         [Test]
         public async Task MarkAsSubscription_ShouldOnlyUpdateSpecifiedTransaction()
         {
             // Arrange
-            var nonSubscriptionTransactions = DbContext.AutomaticTransactions
-                .Where(at => !at.IsSubscription)
+            var nonSubscriptionTransactions = DbContext.Transactions
+                .Where(t => !t.IsSubscriptionPayment)
                 .Take(2)
                 .ToList();
 
             if (nonSubscriptionTransactions.Count < 2)
             {
-                Assert.Inconclusive("Test requires at least two non-subscription automatic transactions in the database.");
+                Assert.Inconclusive("Test requires at least two non-subscription transactions in the database.");
             }
 
             var transaction1 = nonSubscriptionTransactions[0];
             var transaction2 = nonSubscriptionTransactions[1];
+            var transactionId1 = int.Parse(transaction1.Id);
+
             // Act - Only mark transaction1 as subscription
-            await _transactionsService.MarkAsSubscription(transaction1.Id);
+            await _transactionsService.MarkAsSubscription(transactionId1);
 
             // Assert
             // because it uses ExecuteUpdateAsync which bypasses tracking
             // we need to clear the change tracker to avoid stale data
             DbContext.ChangeTracker.Clear();
 
-            var updated1 = await DbContext.AutomaticTransactions.FindAsync(transaction1.Id);
-            var updated2 = await DbContext.AutomaticTransactions.FindAsync(transaction2.Id);
+            var updated1 = await DbContext.Transactions.FindAsync(transaction1.Id);
+            var updated2 = await DbContext.Transactions.FindAsync(transaction2.Id);
 
-            Assert.That(updated1!.IsSubscription, Is.True);
-            Assert.That(updated2!.IsSubscription, Is.False);
+            Assert.That(updated1!.IsSubscriptionPayment, Is.True);
+            Assert.That(updated2!.IsSubscriptionPayment, Is.False);
         }
     }
 }

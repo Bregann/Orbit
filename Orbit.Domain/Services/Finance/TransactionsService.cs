@@ -183,14 +183,14 @@ namespace Orbit.Domain.Services.Finance
 
         public async Task MarkAsSubscription(int transactionId)
         {
-            var rows = await context.AutomaticTransactions
-                .Where(at => at.Id == transactionId)
+            var rows = await context.Transactions
+                .Where(t => t.Id == transactionId.ToString())
                 .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(at => at.IsSubscription, true));
+                    .SetProperty(t => t.IsSubscriptionPayment, true));
 
             if (rows == 0)
             {
-                throw new KeyNotFoundException($"Automatic transaction with ID {transactionId} not found.");
+                throw new KeyNotFoundException($"Transaction with ID {transactionId} not found.");
             }
         }
     }
