@@ -114,19 +114,3 @@ export const formatLongDate = (dateString: string): string => {
     year: 'numeric'
   })
 }
-
-/**
- * Formats a date string to full format using user's locale (e.g., "Weekday, Month Day, Year")
- * @param dateString - ISO date string
- * @returns Formatted date string in user's locale
- */
-export const formatFullDate = (dateString: string): string => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString(undefined, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
-

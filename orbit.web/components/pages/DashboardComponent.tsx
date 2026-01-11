@@ -23,7 +23,8 @@ import {
   IconNotes,
   IconCalendarEvent,
   IconTrendingDown,
-  IconMoodSmile
+  IconMoodSmile,
+  IconNotebook
 } from '@tabler/icons-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -104,7 +105,7 @@ export default function DashboardComponent() {
     {
       title: 'Journal',
       description: 'Daily thoughts & reflections',
-      icon: IconMoodSmile,
+      icon: IconNotebook,
       color: 'pink',
       href: '/journal'
     },

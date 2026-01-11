@@ -9,7 +9,7 @@ import { notifications } from '@mantine/notifications'
 import { QueryKeys } from '@/helpers/QueryKeys'
 import { useMutationPost } from '@/helpers/mutations/useMutationPost'
 import { moodOptions } from '@/helpers/moodOptions'
-import { formatFullDate } from '@/helpers/dateHelper'
+import { formatLongDate } from '@/helpers/dateHelper'
 
 interface RecordMoodModalProps {
   opened: boolean
@@ -30,7 +30,7 @@ export default function RecordMoodModal({ opened, onClose, date, currentMood }: 
 
   const { mutate: recordMood, isPending } = useMutationPost<RecordMoodForDateRequest, void>({
     url: '/api/Mood/RecordMoodForDate',
-    queryKey: [QueryKeys.YearlyMoodData],
+    queryKey: [QueryKeys.YearlyMoodData, QueryKeys.TodaysMood],
     invalidateQuery: true,
     onSuccess: () => {
       notifications.show({
@@ -60,7 +60,7 @@ export default function RecordMoodModal({ opened, onClose, date, currentMood }: 
     <Modal
       opened={opened}
       onClose={onClose}
-      title={<Text fw={600}>Record Mood for {formatFullDate(date)}</Text>}
+      title={<Text fw={600}>Record Mood for {formatLongDate(date)}</Text>}
       centered
       size="md"
     >
