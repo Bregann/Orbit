@@ -196,7 +196,12 @@ export default function AutomaticTransactionsManagement({
                     <Table.Td w="35%">
                       <Select
                         value={transaction.potId?.toString() ?? null}
-                        onChange={setAddMerchantPotId}
+                        onChange={(value) =>
+                          handleSaveAutomaticTransaction({
+                            ...transaction,
+                            potId: value ? Number(value) : undefined
+                          })
+                        }
                         placeholder="Pick pot (optional)"
                         data={potOptions.potOptions.map(option => ({
                           value: option.potId.toString(),
