@@ -199,7 +199,7 @@ export default function AutomaticTransactionsManagement({
                         onChange={(value) =>
                           handleSaveAutomaticTransaction({
                             ...transaction,
-                            potId: value ? Number(value) : undefined
+                            potId: value ? Number(value) : null
                           })
                         }
                         placeholder="Pick pot (optional)"

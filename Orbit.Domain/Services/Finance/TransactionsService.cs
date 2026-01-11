@@ -169,7 +169,8 @@ namespace Orbit.Domain.Services.Finance
                 var automaticTransaction = new Database.Models.AutomaticTransaction
                 {
                     MerchantName = request.MerchantName,
-                    PotId = request.PotId
+                    PotId = request.PotId,
+                    IsSubscription = request.IsSubscription
                 };
 
                 context.AutomaticTransactions.Add(automaticTransaction);
@@ -181,10 +182,10 @@ namespace Orbit.Domain.Services.Finance
             throw new Exception("Failed to add automatic transaction.");
         }
 
-        public async Task MarkAsSubscription(int transactionId)
+        public async Task MarkAsSubscription(string transactionId)
         {
             var rows = await context.Transactions
-                .Where(t => t.Id == transactionId.ToString())
+                .Where(t => t.Id == transactionId)
                 .ExecuteUpdateAsync(setters => setters
                     .SetProperty(t => t.IsSubscriptionPayment, true));
 

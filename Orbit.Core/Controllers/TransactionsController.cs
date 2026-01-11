@@ -66,7 +66,7 @@ namespace Orbit.Core.Controllers
         }
 
         [HttpPatch]
-        public async Task<IActionResult> MarkAsSubscription([FromQuery] int transactionId)
+        public async Task<IActionResult> MarkAsSubscription([FromQuery] string transactionId)
         {
             try
             {

@@ -408,10 +408,9 @@ namespace Orbit.Tests.Services.Finance
         {
             // Arrange
             var transaction = DbContext.Transactions.First(t => !t.IsSubscriptionPayment);
-            var transactionId = int.Parse(transaction.Id);
 
             // Act
-            await _transactionsService.MarkAsSubscription(transactionId);
+            await _transactionsService.MarkAsSubscription(transaction.Id);
 
             // Assert
             // because it uses ExecuteUpdateAsync which bypasses tracking
@@ -427,7 +426,7 @@ namespace Orbit.Tests.Services.Finance
         public async Task MarkAsSubscription_ShouldThrowKeyNotFoundException_WhenTransactionNotFound()
         {
             // Arrange
-            var nonExistentId = 99999;
+            var nonExistentId = "non-existent-txn-id";
 
             // Act & Assert
             var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
@@ -441,13 +440,12 @@ namespace Orbit.Tests.Services.Finance
         {
             // Arrange
             var transaction = DbContext.Transactions.First(t => !t.IsSubscriptionPayment);
-            var transactionId = int.Parse(transaction.Id);
             var originalMerchantName = transaction.MerchantName;
             var originalPotId = transaction.PotId;
             var originalProcessed = transaction.Processed;
 
             // Act
-            await _transactionsService.MarkAsSubscription(transactionId);
+            await _transactionsService.MarkAsSubscription(transaction.Id);
 
             // Assert
             // because it uses ExecuteUpdateAsync which bypasses tracking
@@ -478,10 +476,9 @@ namespace Orbit.Tests.Services.Finance
 
             var transaction1 = nonSubscriptionTransactions[0];
             var transaction2 = nonSubscriptionTransactions[1];
-            var transactionId1 = int.Parse(transaction1.Id);
 
             // Act - Only mark transaction1 as subscription
-            await _transactionsService.MarkAsSubscription(transactionId1);
+            await _transactionsService.MarkAsSubscription(transaction1.Id);
 
             // Assert
             // because it uses ExecuteUpdateAsync which bypasses tracking
