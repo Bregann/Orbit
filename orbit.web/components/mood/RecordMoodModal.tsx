@@ -9,6 +9,7 @@ import { notifications } from '@mantine/notifications'
 import { QueryKeys } from '@/helpers/QueryKeys'
 import { useMutationPost } from '@/helpers/mutations/useMutationPost'
 import { moodOptions } from '@/helpers/moodOptions'
+import { formatFullDate } from '@/helpers/dateHelper'
 
 interface RecordMoodModalProps {
   opened: boolean
@@ -55,16 +56,11 @@ export default function RecordMoodModal({ opened, onClose, date, currentMood }: 
     }
   }
 
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr)
-    return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-  }
-
   return (
     <Modal
       opened={opened}
       onClose={onClose}
-      title={<Text fw={600}>Record Mood for {formatDate(date)}</Text>}
+      title={<Text fw={600}>Record Mood for {formatFullDate(date)}</Text>}
       centered
       size="md"
     >
