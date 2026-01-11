@@ -3,6 +3,7 @@
     public class AddAutomaticTransactionRequest
     {
         public string MerchantName { get; set; } = string.Empty;
-        public int PotId { get; set; }
+        public int? PotId { get; set; }
+        public bool IsSubscription { get; set; }
     }
 }

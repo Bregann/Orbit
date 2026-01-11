@@ -26,5 +26,7 @@ namespace Orbit.Domain.Database.Models
 
         [ForeignKey(nameof(PotId))]
         public virtual SpendingPot? Pot { get; set; }
+
+        public bool IsSubscriptionPayment { get; set; } = false;
     }
 }

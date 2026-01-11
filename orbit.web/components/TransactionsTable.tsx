@@ -11,13 +11,16 @@ import {
   ActionIcon,
   Image,
   Text,
-  Paper
+  Paper,
+  Group,
+  Tooltip
 } from '@mantine/core'
 import {
   IconTrash,
   IconPhotoX,
   IconCheck,
-  IconX
+  IconX,
+  IconCalendar
 } from '@tabler/icons-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -43,6 +46,19 @@ export default function TransactionsTableComponent(props: TransactionsTableProps
       notificationHelper.showErrorNotification('Error', 'Failed to update transaction', 3000, <IconX />)
     }
   })
+
+  const handleMarkAsSubscription = async (transactionId: string) => {
+    const result = await doPatch('/api/Transactions/MarkAsSubscription?transactionId=' + transactionId)
+    if (result.ok) {
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.GetUnprocessedTransactions] })
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.GetAutomaticTransactions] })
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.HomepageStats] })
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.ThisMonthTransactions] })
+      notificationHelper.showSuccessNotification('Success', 'Marked as subscription successfully', 3000, <IconCheck />)
+    } else {
+      notificationHelper.showErrorNotification('Error', 'Failed to mark as subscription', 3000, <IconX />)
+    }
+  }
 
   return (
     <Paper withBorder radius="md" p="md" shadow="sm">
@@ -97,13 +113,26 @@ export default function TransactionsTableComponent(props: TransactionsTableProps
                 />
               </Table.Td>
               <Table.Td>
-                <ActionIcon
-                  variant="light"
-                  color="red"
-                  onClick={async () => { await updateTransactionMutation.mutateAsync({ transactionId: transaction.id, potId: null }) }}
-                >
-                  <IconTrash size={16} />
-                </ActionIcon>
+                <Group gap="xs" wrap="nowrap">
+                  <Tooltip label="Mark as subscription">
+                    <ActionIcon
+                      variant="light"
+                      color="blue"
+                      onClick={async () => { await handleMarkAsSubscription(transaction.id) }}
+                    >
+                      <IconCalendar size={16} />
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip label="Remove pot assignment">
+                    <ActionIcon
+                      variant="light"
+                      color="red"
+                      onClick={async () => { await updateTransactionMutation.mutateAsync({ transactionId: transaction.id, potId: null }) }}
+                    >
+                      <IconTrash size={16} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Group>
               </Table.Td>
             </Table.Tr>
           ))}

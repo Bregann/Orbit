@@ -4,6 +4,7 @@ using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.Finance.Pots;
 using Orbit.Domain.DTOs.Finance.Pots.Request;
 using Orbit.Domain.DTOs.Finance.Pots.Responses;
+using Orbit.Domain.Extensions;
 using Orbit.Domain.Interfaces.Api.Finance;
 
 namespace Orbit.Domain.Services.Finance
@@ -31,9 +32,9 @@ namespace Orbit.Domain.Services.Finance
                 {
                     PotId = p.Id,
                     PotName = p.PotName,
-                    AmountAllocated = $"£{p.AmountToAdd / 100m:0.00}",
-                    AmountLeft = $"£{p.PotAmountLeft / 100m:0.00}",
-                    AmountSpent = $"£{p.PotAmountSpent / 100m:0.00}",
+                    AmountAllocated = p.AmountToAdd.ToPoundsString(),
+                    AmountLeft = p.PotAmountLeft.ToPoundsString(),
+                    AmountSpent = p.PotAmountSpent.ToPoundsString(),
                     RolloverByDefault = p.RolloverDefaultChecked
                 })
                 .ToArrayAsync();
@@ -43,8 +44,8 @@ namespace Orbit.Domain.Services.Finance
                 {
                     PotId = p.Id,
                     PotName = p.PotName,
-                    AmountSaved = $"£{p.PotAmount / 100m:0.00}",
-                    AmountAddedThisMonth = $"£{p.AmountToAdd / 100m:0.00}"
+                    AmountSaved = p.PotAmount.ToPoundsString(),
+                    AmountAddedThisMonth = p.AmountToAdd.ToPoundsString()
                 })
                 .ToArrayAsync();
 
@@ -91,7 +92,7 @@ namespace Orbit.Domain.Services.Finance
                     PotId = p.Id,
                     PotName = p.PotName,
                     AmountToAdd = p.AmountToAdd / 100m,
-                    RolloverAmount = $"£{p.PotAmountLeft / 100.0:0.00}",
+                    RolloverAmount = p.PotAmountLeft.ToPoundsString(),
                     RolloverByDefault = p.RolloverDefaultChecked
                 })
                 .ToArrayAsync();

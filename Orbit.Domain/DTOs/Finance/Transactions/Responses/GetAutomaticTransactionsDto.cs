@@ -9,6 +9,7 @@
     {
         public required int Id { get; set; }
         public required string MerchantName { get; set; }
-        public required int PotId { get; set; }
+        public required int? PotId { get; set; }
+        public required bool IsSubscription { get; set; }
     }
 }

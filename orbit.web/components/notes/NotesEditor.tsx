@@ -91,7 +91,7 @@ export default function NotesEditor({ selectedPageId, folders, onCreatePage }: N
   const { mutateAsync: updateContent, isPending } = useMutationPut<UpdateNotePageContentRequest, void>({
     url: '/api/notes/UpdateNotePageContent',
     queryKey: [QueryKeys.NotePageDetails, selectedPageId?.toString() ?? 'none'],
-    invalidateQuery: false,
+    invalidateQuery: true,
     onSuccess: () => {
       notificationHelper.showSuccessNotification('Success', 'Page updated', 3000, <IconCheck />)
       setHasUnsavedChanges(false)

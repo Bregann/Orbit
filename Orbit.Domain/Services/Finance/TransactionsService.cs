@@ -3,6 +3,7 @@ using Orbit.Domain.Database.Context;
 using Orbit.Domain.DTOs.Finance.Transactions;
 using Orbit.Domain.DTOs.Finance.Transactions.Requests;
 using Orbit.Domain.DTOs.Finance.Transactions.Responses;
+using Orbit.Domain.Extensions;
 using Orbit.Domain.Interfaces.Api.Finance;
 
 namespace Orbit.Domain.Services.Finance
@@ -66,7 +67,7 @@ namespace Orbit.Domain.Services.Finance
                         Id = t.Id,
                         MerchantName = t.MerchantName,
                         IconUrl = t.ImgUrl ?? "",
-                        TransactionAmount = $"£{t.TransactionAmount / 100.0:0.00}",
+                        TransactionAmount = t.TransactionAmount.ToPoundsString(),
                         TransactionDate = t.TransactionDate,
                         PotId = t.PotId
                     })
@@ -98,7 +99,7 @@ namespace Orbit.Domain.Services.Finance
                     Id = t.Id,
                     MerchantName = t.MerchantName,
                     IconUrl = t.ImgUrl ?? "",
-                    TransactionAmount = $"£{t.TransactionAmount / 100.0:0.00}",
+                    TransactionAmount = t.TransactionAmount.ToPoundsString(),
                     TransactionDate = t.TransactionDate,
                     PotId = t.PotId
                 })
@@ -119,7 +120,8 @@ namespace Orbit.Domain.Services.Finance
                     {
                         Id = at.Id,
                         MerchantName = at.MerchantName,
-                        PotId = at.PotId
+                        PotId = at.PotId,
+                        IsSubscription = at.IsSubscription
                     })
                     .ToArrayAsync()
             };
@@ -132,13 +134,6 @@ namespace Orbit.Domain.Services.Finance
                 throw new ArgumentException("Invalid merchant name or pot ID.");
             }
 
-            var pot = await context.SpendingPots.FindAsync(request.PotId);
-
-            if (pot == null)
-            {
-                throw new KeyNotFoundException($"Spending pot with ID {request.PotId} not found.");
-            }
-
             // check if an automatic transaction with the same merchant name already exists
             var existing = await context.AutomaticTransactions
                 .AnyAsync(at => at.MerchantName.ToLower() == request.MerchantName.ToLower());
@@ -148,16 +143,56 @@ namespace Orbit.Domain.Services.Finance
                 throw new InvalidOperationException($"An automatic transaction for merchant '{request.MerchantName}' already exists.");
             }
 
-            var automaticTransaction = new Database.Models.AutomaticTransaction
+            if (request.PotId == null && request.IsSubscription)
             {
-                MerchantName = request.MerchantName,
-                PotId = request.PotId
-            };
+                var automaticTransaction = new Database.Models.AutomaticTransaction
+                {
+                    MerchantName = request.MerchantName,
+                    PotId = null,
+                    IsSubscription = true
+                };
 
-            context.AutomaticTransactions.Add(automaticTransaction);
-            await context.SaveChangesAsync();
+                await context.AutomaticTransactions.AddAsync(automaticTransaction);
+                await context.SaveChangesAsync();
 
-            return automaticTransaction.Id;
+                return automaticTransaction.Id;
+            }
+            else
+            {
+                var pot = await context.SpendingPots.FindAsync(request.PotId);
+
+                if (pot == null)
+                {
+                    throw new KeyNotFoundException($"Spending pot with ID {request.PotId} not found.");
+                }
+
+                var automaticTransaction = new Database.Models.AutomaticTransaction
+                {
+                    MerchantName = request.MerchantName,
+                    PotId = request.PotId,
+                    IsSubscription = request.IsSubscription
+                };
+
+                context.AutomaticTransactions.Add(automaticTransaction);
+                await context.SaveChangesAsync();
+
+                return automaticTransaction.Id;
+            }
+
+            throw new Exception("Failed to add automatic transaction.");
+        }
+
+        public async Task MarkAsSubscription(string transactionId)
+        {
+            var rows = await context.Transactions
+                .Where(t => t.Id == transactionId)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(t => t.IsSubscriptionPayment, true));
+
+            if (rows == 0)
+            {
+                throw new KeyNotFoundException($"Transaction with ID {transactionId} not found.");
+            }
         }
     }
 }
