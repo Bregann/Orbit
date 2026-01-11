@@ -29,6 +29,7 @@ import {
   IconNote,
   IconChevronDown,
   IconApps,
+  IconNotebook,
 } from '@tabler/icons-react'
 import { useRouter, usePathname } from 'next/navigation'
 import classes from '@/css/navigation.module.css'
@@ -62,7 +63,8 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
     { label: 'Tasks', icon: IconCheckbox, href: '/tasks' },
     { label: 'Documents', icon: IconFiles, href: '/documents' },
     { label: 'Shopping', icon: IconShoppingCart, href: '/shopping' },
-    { label: 'Journal', icon: IconMoodSmile, href: '/journal' },
+    { label: 'Journal', icon: IconNotebook, href: '/journal' },
+    { label: 'Mood Tracker', icon: IconMoodSmile, href: '/mood' },
     { label: 'Calendar', icon: IconCalendarEvent, href: '/calendar' },
     { label: 'Notes', icon: IconNote, href: '/notes' },
     { label: 'Settings', icon: IconSettings, href: '/settings' },

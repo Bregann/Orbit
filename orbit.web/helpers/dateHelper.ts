@@ -53,7 +53,7 @@ export const formatDateForInput = (date: Date | null): string => {
  */
 export const formatDateWithTime = (dateString: string, time?: string, isAllDay?: boolean): string => {
   const date = new Date(dateString + 'T00:00:00')
-  const dateStr = date.toLocaleDateString('en-GB', {
+  const dateStr = date.toLocaleDateString(undefined, {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
@@ -107,11 +107,10 @@ export const isPastDate = (date: Date): boolean => {
  */
 export const formatLongDate = (dateString: string): string => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-GB', {
+  return date.toLocaleDateString(undefined, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   })
 }
-

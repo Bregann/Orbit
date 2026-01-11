@@ -338,6 +338,53 @@ namespace Orbit.Tests.Infrastructure
             await context.SaveChangesAsync();
         }
 
+        public static async Task SeedTestMoodTrackerEntry(AppDbContext context, Domain.Enums.MoodTrackerEnum mood, DateTime date)
+        {
+            await context.MoodTrackerEntries.AddAsync(new MoodTrackerEntry
+            {
+                MoodType = mood,
+                DateRecorded = DateTime.SpecifyKind(date, DateTimeKind.Utc)
+            });
+
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedTestMoodTrackerEntriesForYear(AppDbContext context, int year, int count = 12)
+        {
+            var entries = new List<MoodTrackerEntry>();
+            var moods = new[] {
+                Orbit.Domain.Enums.MoodTrackerEnum.Excellent,
+                Orbit.Domain.Enums.MoodTrackerEnum.Good,
+                Orbit.Domain.Enums.MoodTrackerEnum.Neutral,
+                Orbit.Domain.Enums.MoodTrackerEnum.Low,
+                Orbit.Domain.Enums.MoodTrackerEnum.Difficult
+            };
+
+            for (int i = 0; i < count; i++)
+            {
+                var month = (i % 12) + 1;
+                var day = 15; // Middle of the month
+                var mood = moods[i % moods.Length];
+
+                entries.Add(new MoodTrackerEntry
+                {
+                    MoodType = mood,
+                    DateRecorded = new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc)
+                });
+            }
+
+            await context.MoodTrackerEntries.AddRangeAsync(entries);
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedTestMoodTrackerEntriesForMultipleYears(AppDbContext context, params int[] years)
+        {
+            foreach (var year in years)
+            {
+                await SeedTestMoodTrackerEntriesForYear(context, year, 3); // 3 entries per year
+            }
+        }
+
         public static async Task SeedTestNotes(AppDbContext context)
         {
             await context.NoteFolders.AddRangeAsync(new List<NoteFolder>

@@ -28,6 +28,8 @@ export enum QueryKeys {
   GetAllPotData = 'getAllPotData',
   GetNotePagesAndFolders = 'getNotePagesAndFolders',
   TodaysMood = 'todaysMood',
+  YearlyMoodData = 'yearlyMoodData',
+  AvailableYears = 'availableYears',
   FitbitConnectionStatus = 'fitbitConnectionStatus',
   FitbitProfile = 'fitbitProfile',
   FitbitDailyActivity = 'fitbitDailyActivity'
