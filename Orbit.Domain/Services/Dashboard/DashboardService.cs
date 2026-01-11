@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.Database.Context;
 using Orbit.Domain.DTOs.Dashboard;
+using Orbit.Domain.Extensions;
 using Orbit.Domain.Interfaces.Api.Dashboard;
 
 namespace Orbit.Domain.Services.Dashboard
@@ -16,14 +17,17 @@ namespace Orbit.Domain.Services.Dashboard
 
             var eventsScheduled = await context.CalendarEvents.Where(ce => ce.StartTime >= DateTime.UtcNow).CountAsync();
 
+            var threeDaysAgo = DateTime.UtcNow.AddDays(-3);
+
             return new GetDashboardOverviewDataDto
             {
-                MoneyLeft = moneyLeft.ToString("C"),
-                MoneySpent = moneySpent.ToString("C"),
+                MoneyLeft = moneyLeft.ToPoundsString(),
+                MoneySpent = moneySpent.ToPoundsString(),
                 TasksCompleted = tasksCompleted,
                 TotalTasks = totalTasks,
                 EventsScheduled = eventsScheduled,
                 UpcomingTasks = await context.Tasks
+                    .Where(t => t.CompletedAt == null || t.CompletedAt > threeDaysAgo)
                     .OrderBy(t => t.DueDate)
                     .ThenByDescending(t => t.Priority)
                     .Select(t => new UpcomingTasksData
@@ -37,7 +41,7 @@ namespace Orbit.Domain.Services.Dashboard
                     .Take(5)
                     .ToArrayAsync(),
                 UpcomingEvents = await context.CalendarEvents
-                    .Where(ce => ce.StartTime > DateTime.UtcNow)
+                    .Where(ce => ce.StartTime > DateTime.UtcNow.AddDays(-3))
                     .OrderBy(ce => ce.StartTime)
                     .Select(ce => new UpcomingEventsData
                     {

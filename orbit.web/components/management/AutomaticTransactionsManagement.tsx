@@ -22,7 +22,8 @@ import {
   Divider,
   Center,
   ActionIcon,
-  Tooltip
+  Tooltip,
+  Checkbox
 } from '@mantine/core'
 import {
   IconCheck,
@@ -30,7 +31,8 @@ import {
   IconBolt,
   IconTrash,
   IconDeviceFloppy,
-  IconPlus
+  IconPlus,
+  IconCalendar
 } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -44,6 +46,7 @@ export default function AutomaticTransactionsManagement({
 }: AutomaticTransactionsManagementProps) {
   const [addMerchantName, setAddMerchantName] = useState('')
   const [addMerchantPotId, setAddMerchantPotId] = useState<string | null>(null)
+  const [addIsSubscription, setAddIsSubscription] = useState(false)
 
   const { data: potOptions } = useQuery({
     queryKey: [QueryKeys.GetSpendingPotDropdownOptions],
@@ -63,6 +66,7 @@ export default function AutomaticTransactionsManagement({
       notificationHelper.showSuccessNotification('Success', 'Automatic transaction added successfully', 3000, <IconCheck />)
       setAddMerchantName('')
       setAddMerchantPotId(null)
+      setAddIsSubscription(false)
     },
     onError: (error) => {
       notificationHelper.showErrorNotification('Error', error.message, 3000, <IconCross />)
@@ -72,7 +76,8 @@ export default function AutomaticTransactionsManagement({
   const handleAddAutomaticTransaction = async () => {
     const reqBody = {
       merchantName: addMerchantName,
-      potId: addMerchantPotId
+      potId: addMerchantPotId,
+      isSubscription: addIsSubscription
     }
     await addAutomaticTransactionMutation(reqBody)
   }
@@ -125,7 +130,7 @@ export default function AutomaticTransactionsManagement({
                   <Select
                     value={addMerchantPotId}
                     onChange={setAddMerchantPotId}
-                    placeholder="Select pot"
+                    placeholder="Select pot (optional)"
                     data={potOptions.potOptions.map(option => ({
                       value: option.potId.toString(),
                       label: option.potName
@@ -135,6 +140,7 @@ export default function AutomaticTransactionsManagement({
                     }}
                     size="sm"
                     style={{ flex: 1 }}
+                    clearable
                   />
                   <Button
                     onClick={handleAddAutomaticTransaction}
@@ -144,6 +150,14 @@ export default function AutomaticTransactionsManagement({
                     Add
                   </Button>
                 </Group>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12 }}>
+                <Checkbox
+                  checked={addIsSubscription}
+                  onChange={(e) => setAddIsSubscription(e.currentTarget.checked)}
+                  label="Is Subscription"
+                  size="sm"
+                />
               </Grid.Col>
             </Grid>
           </Stack>
@@ -156,13 +170,14 @@ export default function AutomaticTransactionsManagement({
               <Table.Tr>
                 <Table.Th>Merchant Name</Table.Th>
                 <Table.Th>Pot Assignment</Table.Th>
+                <Table.Th>Subscription</Table.Th>
                 <Table.Th ta="right">Actions</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {automaticTransactionData.automaticTransactions.length === 0 ? (
                 <Table.Tr>
-                  <Table.Td colSpan={3}>
+                  <Table.Td colSpan={4}>
                     <Center py="md">
                       <Text size="sm" c="dimmed">No automatic rules configured yet</Text>
                     </Center>
@@ -180,9 +195,9 @@ export default function AutomaticTransactionsManagement({
                     </Table.Td>
                     <Table.Td w="35%">
                       <Select
-                        value={transaction.potId.toString()}
+                        value={transaction.potId?.toString() ?? null}
                         onChange={setAddMerchantPotId}
-                        placeholder="Pick pot"
+                        placeholder="Pick pot (optional)"
                         data={potOptions.potOptions.map(option => ({
                           value: option.potId.toString(),
                           label: option.potName
@@ -191,7 +206,22 @@ export default function AutomaticTransactionsManagement({
                           transitionProps: { transition: 'pop', duration: 200 }
                         }}
                         size="sm"
+                        clearable
                       />
+                    </Table.Td>
+                    <Table.Td>
+                      <Group gap="xs">
+                        {transaction.isSubscription && (
+                          <Badge
+                            size="sm"
+                            variant="light"
+                            color="blue"
+                            leftSection={<IconCalendar size="0.8rem" />}
+                          >
+                            Sub
+                          </Badge>
+                        )}
+                      </Group>
                     </Table.Td>
                     <Table.Td ta="right">
                       <Group gap="xs" justify="flex-end" wrap="nowrap">

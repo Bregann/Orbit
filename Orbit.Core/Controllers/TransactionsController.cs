@@ -64,5 +64,19 @@ namespace Orbit.Core.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPatch]
+        public async Task<IActionResult> MarkAsSubscription([FromQuery] int transactionId)
+        {
+            try
+            {
+                await transactionsService.MarkAsSubscription(transactionId);
+                return Ok();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
     }
 }

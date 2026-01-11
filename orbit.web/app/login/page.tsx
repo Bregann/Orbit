@@ -37,6 +37,12 @@ export default function LoginPage() {
     setLoading(false)
   }
 
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' && email !== '' && password !== '' && !loading) {
+      handleLogin()
+    }
+  }
+
   return (
     <Container size={420} my={40}>
       <Center>
@@ -60,6 +66,7 @@ export default function LoginPage() {
                 placeholder="your@email.com"
                 value={email}
                 onChange={(event) => setEmail(event.currentTarget.value)}
+                onKeyDown={handleKeyPress}
                 leftSection={<IconUser size={16} />}
                 required
               />
@@ -69,6 +76,7 @@ export default function LoginPage() {
                 placeholder="Your password"
                 value={password}
                 onChange={(event) => setPassword(event.currentTarget.value)}
+                onKeyDown={handleKeyPress}
                 leftSection={<IconLock size={16} />}
                 required
               />

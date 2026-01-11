@@ -9,6 +9,7 @@ namespace Orbit.Domain.Interfaces.Api.Finance
         Task<GetAutomaticTransactionsDto> GetAutomaticTransactions();
         Task<GetTransactionsForCurrentMonthDto> GetTransactionsForMonth();
         Task<GetUnprocessedTransactionsDto> GetUnprocessedTransactions();
+        Task MarkAsSubscription(int transactionId);
         Task UpdateTransaction(UpdateTransactionRequest request);
     }
 }

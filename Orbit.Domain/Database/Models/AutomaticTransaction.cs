@@ -11,10 +11,11 @@ namespace Orbit.Domain.Database.Models
         [Required]
         public required string MerchantName { get; set; }
 
-        [Required]
-        public required int PotId { get; set; }
+        public int? PotId { get; set; }
 
         [ForeignKey(nameof(PotId))]
         public virtual SpendingPot Pot { get; set; } = null!;
+
+        public bool IsSubscription { get; set; } = false;
     }
 }

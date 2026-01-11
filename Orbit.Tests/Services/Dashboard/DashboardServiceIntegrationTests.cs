@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Orbit.Domain.Extensions;
 using Orbit.Domain.Services.Dashboard;
 using Orbit.Tests.Infrastructure;
 
@@ -44,7 +45,7 @@ namespace Orbit.Tests.Services.Dashboard
 
             // Assert
             var expectedMoneyLeft = await DbContext.SpendingPots.SumAsync(sp => sp.PotAmountLeft);
-            Assert.That(result.MoneyLeft, Does.Contain(expectedMoneyLeft.ToString("F2")));
+            Assert.That(result.MoneyLeft, Does.Contain(expectedMoneyLeft.ToPoundsString()));
         }
 
         [Test]
@@ -57,7 +58,7 @@ namespace Orbit.Tests.Services.Dashboard
 
             // Assert
             var expectedMoneySpent = await DbContext.SpendingPots.SumAsync(sp => sp.PotAmountSpent);
-            Assert.That(result.MoneySpent, Does.Contain(expectedMoneySpent.ToString("F2")));
+            Assert.That(result.MoneySpent, Does.Contain(expectedMoneySpent.ToPoundsString()));
         }
 
         [Test]

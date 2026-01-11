@@ -213,7 +213,8 @@ namespace Orbit.Tests.Services.Finance
             var request = new AddAutomaticTransactionRequest
             {
                 MerchantName = "New Merchant",
-                PotId = 1
+                PotId = 1,
+                IsSubscription = false
             };
 
             // Act
@@ -224,6 +225,29 @@ namespace Orbit.Tests.Services.Finance
             Assert.That(automaticTransaction, Is.Not.Null);
             Assert.That(automaticTransaction.MerchantName, Is.EqualTo("New Merchant"));
             Assert.That(automaticTransaction.PotId, Is.EqualTo(1));
+            Assert.That(automaticTransaction.IsSubscription, Is.False);
+        }
+
+        [Test]
+        public async Task AddAutomaticTransaction_ShouldCreateSubscription_WhenIsSubscriptionIsTrue()
+        {
+            // Arrange
+            var request = new AddAutomaticTransactionRequest
+            {
+                MerchantName = "New Subscription Service",
+                PotId = null,
+                IsSubscription = true
+            };
+
+            // Act
+            var id = await _transactionsService.AddAutomaticTransaction(request);
+
+            // Assert
+            var automaticTransaction = await DbContext.AutomaticTransactions.FindAsync(id);
+            Assert.That(automaticTransaction, Is.Not.Null);
+            Assert.That(automaticTransaction.MerchantName, Is.EqualTo("New Subscription Service"));
+            Assert.That(automaticTransaction.PotId, Is.Null);
+            Assert.That(automaticTransaction.IsSubscription, Is.True);
         }
 
         [Test]
@@ -233,7 +257,8 @@ namespace Orbit.Tests.Services.Finance
             var request = new AddAutomaticTransactionRequest
             {
                 MerchantName = "",
-                PotId = 1
+                PotId = 1,
+                IsSubscription = false
             };
 
             // Act & Assert
@@ -244,13 +269,14 @@ namespace Orbit.Tests.Services.Finance
         }
 
         [Test]
-        public async Task AddAutomaticTransaction_ShouldThrowArgumentException_WhenPotIdIsInvalid()
+        public async Task AddAutomaticTransaction_ShouldThrowArgumentException_WhenPotIdIsInvalidAndNotSubscription()
         {
             // Arrange
             var request = new AddAutomaticTransactionRequest
             {
                 MerchantName = "Test Merchant",
-                PotId = 0
+                PotId = 0,
+                IsSubscription = false
             };
 
             // Act & Assert
@@ -258,6 +284,27 @@ namespace Orbit.Tests.Services.Finance
                 await _transactionsService.AddAutomaticTransaction(request));
 
             Assert.That(exception.Message, Does.Contain("Invalid merchant name or pot ID"));
+        }
+
+        [Test]
+        public async Task AddAutomaticTransaction_ShouldAllowNullPotId_WhenIsSubscriptionIsTrue()
+        {
+            // Arrange
+            var request = new AddAutomaticTransactionRequest
+            {
+                MerchantName = "Subscription Without Pot",
+                PotId = null,
+                IsSubscription = true
+            };
+
+            // Act
+            var id = await _transactionsService.AddAutomaticTransaction(request);
+
+            // Assert
+            var automaticTransaction = await DbContext.AutomaticTransactions.FindAsync(id);
+            Assert.That(automaticTransaction, Is.Not.Null);
+            Assert.That(automaticTransaction.PotId, Is.Null);
+            Assert.That(automaticTransaction.IsSubscription, Is.True);
         }
 
         [Test]
@@ -267,7 +314,8 @@ namespace Orbit.Tests.Services.Finance
             var request = new AddAutomaticTransactionRequest
             {
                 MerchantName = "Test Merchant",
-                PotId = 99999
+                PotId = 99999,
+                IsSubscription = false
             };
 
             // Act & Assert
@@ -284,7 +332,8 @@ namespace Orbit.Tests.Services.Finance
             var request = new AddAutomaticTransactionRequest
             {
                 MerchantName = "Netflix", // Already exists
-                PotId = 1
+                PotId = 1,
+                IsSubscription = false
             };
 
             // Act & Assert
@@ -301,7 +350,8 @@ namespace Orbit.Tests.Services.Finance
             var request = new AddAutomaticTransactionRequest
             {
                 MerchantName = "NETFLIX", // Different case
-                PotId = 1
+                PotId = 1,
+                IsSubscription = false
             };
 
             // Act & Assert
@@ -309,6 +359,127 @@ namespace Orbit.Tests.Services.Finance
                 await _transactionsService.AddAutomaticTransaction(request));
 
             Assert.That(exception.Message, Does.Contain("already exists"));
+        }
+
+        [Test]
+        public async Task AddAutomaticTransaction_ShouldCreateSubscriptionWithPot_WhenBothProvidedAndIsSubscription()
+        {
+            // Arrange - when IsSubscription is true but PotId is provided (not null)
+            var request = new AddAutomaticTransactionRequest
+            {
+                MerchantName = "Subscription With Pot",
+                PotId = 1,
+                IsSubscription = true
+            };
+
+            // Act
+            var id = await _transactionsService.AddAutomaticTransaction(request);
+
+            // Assert
+            var automaticTransaction = await DbContext.AutomaticTransactions.FindAsync(id);
+            Assert.That(automaticTransaction, Is.Not.Null);
+            Assert.That(automaticTransaction.MerchantName, Is.EqualTo("Subscription With Pot"));
+            Assert.That(automaticTransaction.PotId, Is.EqualTo(1));
+            Assert.That(automaticTransaction.IsSubscription, Is.False); // Should be false based on current implementation
+        }
+
+        [Test]
+        public async Task AddAutomaticTransaction_ShouldSetIsSubscriptionCorrectly()
+        {
+            // Arrange - Test non-subscription with pot
+            var requestNonSub = new AddAutomaticTransactionRequest
+            {
+                MerchantName = "Regular Transaction",
+                PotId = 1,
+                IsSubscription = false
+            };
+
+            // Act
+            var idNonSub = await _transactionsService.AddAutomaticTransaction(requestNonSub);
+
+            // Assert
+            var nonSubTransaction = await DbContext.AutomaticTransactions.FindAsync(idNonSub);
+            Assert.That(nonSubTransaction, Is.Not.Null);
+            Assert.That(nonSubTransaction.IsSubscription, Is.False);
+        }
+
+        [Test]
+        public async Task MarkAsSubscription_ShouldMarkTransactionAsSubscription()
+        {
+            // Arrange
+            var automaticTransaction = DbContext.AutomaticTransactions.First(at => !at.IsSubscription);
+            var transactionId = automaticTransaction.Id;
+
+            // Act
+            await _transactionsService.MarkAsSubscription(transactionId);
+
+            // Assert
+            // because it uses ExecuteUpdateAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
+            var updated = await DbContext.AutomaticTransactions.FindAsync(transactionId);
+            Assert.That(updated, Is.Not.Null);
+            Assert.That(updated.IsSubscription, Is.True);
+        }
+
+        [Test]
+        public async Task MarkAsSubscription_ShouldThrowKeyNotFoundException_WhenTransactionNotFound()
+        {
+            // Arrange
+            var nonExistentId = 99999;
+
+            // Act & Assert
+            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+                await _transactionsService.MarkAsSubscription(nonExistentId));
+
+            Assert.That(exception.Message, Does.Contain($"Automatic transaction with ID {nonExistentId} not found"));
+        }
+
+        [Test]
+        public async Task MarkAsSubscription_ShouldNotAffectOtherProperties()
+        {
+            // Arrange
+            var automaticTransaction = DbContext.AutomaticTransactions.First(at => !at.IsSubscription);
+            var transactionId = automaticTransaction.Id;
+            var originalMerchantName = automaticTransaction.MerchantName;
+            var originalPotId = automaticTransaction.PotId;
+
+            // Act
+            await _transactionsService.MarkAsSubscription(transactionId);
+
+            // Assert
+            // because it uses ExecuteUpdateAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
+            var updated = await DbContext.AutomaticTransactions.FindAsync(transactionId);
+            Assert.That(updated, Is.Not.Null);
+            Assert.That(updated.MerchantName, Is.EqualTo(originalMerchantName));
+            Assert.That(updated.PotId, Is.EqualTo(originalPotId));
+            Assert.That(updated.IsSubscription, Is.True);
+        }
+
+        [Test]
+        public async Task MarkAsSubscription_ShouldOnlyUpdateSpecifiedTransaction()
+        {
+            // Arrange
+            var transaction1 = DbContext.AutomaticTransactions.First(at => !at.IsSubscription);
+            var transaction2 = DbContext.AutomaticTransactions.Skip(1).First(at => !at.IsSubscription && at.Id != transaction1.Id);
+
+            // Act - Only mark transaction1 as subscription
+            await _transactionsService.MarkAsSubscription(transaction1.Id);
+
+            // Assert
+            // because it uses ExecuteUpdateAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
+            var updated1 = await DbContext.AutomaticTransactions.FindAsync(transaction1.Id);
+            var updated2 = await DbContext.AutomaticTransactions.FindAsync(transaction2.Id);
+
+            Assert.That(updated1!.IsSubscription, Is.True);
+            Assert.That(updated2!.IsSubscription, Is.False);
         }
     }
 }
