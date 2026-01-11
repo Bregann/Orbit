@@ -464,9 +464,18 @@ namespace Orbit.Tests.Services.Finance
         public async Task MarkAsSubscription_ShouldOnlyUpdateSpecifiedTransaction()
         {
             // Arrange
-            var transaction1 = DbContext.AutomaticTransactions.First(at => !at.IsSubscription);
-            var transaction2 = DbContext.AutomaticTransactions.Skip(1).First(at => !at.IsSubscription && at.Id != transaction1.Id);
+            var nonSubscriptionTransactions = DbContext.AutomaticTransactions
+                .Where(at => !at.IsSubscription)
+                .Take(2)
+                .ToList();
 
+            if (nonSubscriptionTransactions.Count < 2)
+            {
+                Assert.Inconclusive("Test requires at least two non-subscription automatic transactions in the database.");
+            }
+
+            var transaction1 = nonSubscriptionTransactions[0];
+            var transaction2 = nonSubscriptionTransactions[1];
             // Act - Only mark transaction1 as subscription
             await _transactionsService.MarkAsSubscription(transaction1.Id);
 
