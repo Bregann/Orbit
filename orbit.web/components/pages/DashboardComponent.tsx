@@ -22,7 +22,8 @@ import {
   IconCalendar,
   IconNotes,
   IconCalendarEvent,
-  IconTrendingDown
+  IconTrendingDown,
+  IconMoodSmile
 } from '@tabler/icons-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -99,6 +100,20 @@ export default function DashboardComponent() {
       icon: IconShoppingCart,
       color: 'orange',
       href: '/shopping'
+    },
+    {
+      title: 'Journal',
+      description: 'Daily thoughts & reflections',
+      icon: IconMoodSmile,
+      color: 'pink',
+      href: '/journal'
+    },
+    {
+      title: 'Mood Tracker',
+      description: 'Track your daily mood',
+      icon: IconMoodSmile,
+      color: 'teal',
+      href: '/mood'
     },
     {
       title: 'Calendar',

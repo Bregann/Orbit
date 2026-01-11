@@ -63,6 +63,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
     { label: 'Documents', icon: IconFiles, href: '/documents' },
     { label: 'Shopping', icon: IconShoppingCart, href: '/shopping' },
     { label: 'Journal', icon: IconMoodSmile, href: '/journal' },
+    { label: 'Mood Tracker', icon: IconMoodSmile, href: '/mood' },
     { label: 'Calendar', icon: IconCalendarEvent, href: '/calendar' },
     { label: 'Notes', icon: IconNote, href: '/notes' },
     { label: 'Settings', icon: IconSettings, href: '/settings' },

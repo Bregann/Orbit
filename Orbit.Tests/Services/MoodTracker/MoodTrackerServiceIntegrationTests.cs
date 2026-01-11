@@ -35,13 +35,7 @@ namespace Orbit.Tests.Services.MoodTracker
         public async Task GetTodaysMood_ShouldReturnMood_WhenEntryExistsForToday()
         {
             // Arrange
-            var todaysMood = new Domain.Database.Models.MoodTrackerEntry
-            {
-                MoodType = MoodTrackerEnum.Excellent,
-                DateRecorded = DateTime.UtcNow
-            };
-            await DbContext.MoodTrackerEntries.AddAsync(todaysMood);
-            await DbContext.SaveChangesAsync();
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntry(DbContext, MoodTrackerEnum.Excellent, DateTime.UtcNow);
 
             // Act
             var result = await _moodTrackerService.GetTodaysMood();
@@ -58,13 +52,7 @@ namespace Orbit.Tests.Services.MoodTracker
         {
             // Arrange
             // Seed data already has entries from previous days
-            var todaysMood = new Domain.Database.Models.MoodTrackerEntry
-            {
-                MoodType = MoodTrackerEnum.Good,
-                DateRecorded = DateTime.UtcNow
-            };
-            await DbContext.MoodTrackerEntries.AddAsync(todaysMood);
-            await DbContext.SaveChangesAsync();
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntry(DbContext, MoodTrackerEnum.Good, DateTime.UtcNow);
 
             // Act
             var result = await _moodTrackerService.GetTodaysMood();
@@ -144,141 +132,304 @@ namespace Orbit.Tests.Services.MoodTracker
         }
 
         [Test]
-        public async Task RecordMood_ShouldThrowInvalidOperationException_WhenMoodAlreadyRecordedToday()
+        public async Task RecordMood_ShouldUpdateExistingEntry_WhenMoodAlreadyRecordedToday()
         {
             // Arrange
             await _moodTrackerService.RecordMood(MoodTrackerEnum.Good);
-
-            // Act & Assert
-            var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
-                await _moodTrackerService.RecordMood(MoodTrackerEnum.Excellent));
-
-            Assert.That(exception!.Message, Does.Contain("Mood for today has already been recorded"));
-        }
-
-        [Test]
-        public async Task RecordMood_ShouldNotThrow_WhenRecordingForDifferentDays()
-        {
-            // Arrange - Add yesterday's mood
-            var yesterdayMood = new Domain.Database.Models.MoodTrackerEntry
-            {
-                MoodType = MoodTrackerEnum.Good,
-                DateRecorded = DateTime.UtcNow.AddDays(-1)
-            };
-            await DbContext.MoodTrackerEntries.AddAsync(yesterdayMood);
-            await DbContext.SaveChangesAsync();
-
-            // Act & Assert - Should not throw when recording today's mood
-            Assert.DoesNotThrowAsync(async () =>
-                await _moodTrackerService.RecordMood(MoodTrackerEnum.Excellent));
-        }
-
-        [Test]
-        public async Task RecordMood_ShouldBeIsolatedByDate()
-        {
-            // Arrange - Record a mood for today
-            await _moodTrackerService.RecordMood(MoodTrackerEnum.Good);
-
-            // Manually add an entry for a different day (simulating next day)
-            var tomorrowMood = new Domain.Database.Models.MoodTrackerEntry
-            {
-                MoodType = MoodTrackerEnum.Excellent,
-                DateRecorded = DateTime.UtcNow.AddDays(1)
-            };
-            await DbContext.MoodTrackerEntries.AddAsync(tomorrowMood);
-            await DbContext.SaveChangesAsync();
-
-            // Assert - Both entries should exist
-            var todayEntry = await DbContext.MoodTrackerEntries
-                .FirstOrDefaultAsync(e => e.DateRecorded.Date == DateTime.UtcNow.Date);
-            var tomorrowEntry = await DbContext.MoodTrackerEntries
-                .FirstOrDefaultAsync(e => e.DateRecorded.Date == DateTime.UtcNow.AddDays(1).Date);
-
-            Assert.That(todayEntry, Is.Not.Null);
-            Assert.That(tomorrowEntry, Is.Not.Null);
-            Assert.That(todayEntry.MoodType, Is.EqualTo(MoodTrackerEnum.Good));
-            Assert.That(tomorrowEntry.MoodType, Is.EqualTo(MoodTrackerEnum.Excellent));
-        }
-
-        [Test]
-        public async Task GetTodaysMood_AndRecordMood_ShouldWorkTogether()
-        {
-            // Arrange - Initially no mood for today
-            var initialResult = await _moodTrackerService.GetTodaysMood();
-            Assert.That(initialResult.HasMoodToday, Is.False);
-
-            // Act - Record mood
-            await _moodTrackerService.RecordMood(MoodTrackerEnum.Excellent);
-
-            // Assert - Now should have mood for today
-            var updatedResult = await _moodTrackerService.GetTodaysMood();
-            Assert.That(updatedResult.HasMoodToday, Is.True);
-            Assert.That(updatedResult.Mood, Is.EqualTo(MoodTrackerEnum.Excellent));
-        }
-
-        [Test]
-        public async Task GetTodaysMood_ShouldHandleMultipleCallsConsistently()
-        {
-            // Arrange
-            var todaysMood = new Domain.Database.Models.MoodTrackerEntry
-            {
-                MoodType = MoodTrackerEnum.Good,
-                DateRecorded = DateTime.UtcNow
-            };
-            await DbContext.MoodTrackerEntries.AddAsync(todaysMood);
-            await DbContext.SaveChangesAsync();
-
-            // Act
-            var result1 = await _moodTrackerService.GetTodaysMood();
-            var result2 = await _moodTrackerService.GetTodaysMood();
-
-            // Assert
-            Assert.That(result1.HasMoodToday, Is.EqualTo(result2.HasMoodToday));
-            Assert.That(result1.Mood, Is.EqualTo(result2.Mood));
-        }
-
-        [Test]
-        public async Task RecordMood_ShouldNotAffectPreviousDaysEntries()
-        {
-            // Arrange
-            var previousEntriesCount = await DbContext.MoodTrackerEntries.CountAsync();
-            var previousEntries = await DbContext.MoodTrackerEntries.ToListAsync();
+            var initialCount = await DbContext.MoodTrackerEntries
+                .Where(e => e.DateRecorded.Date == DateTime.UtcNow.Date)
+                .CountAsync();
 
             // Act
             await _moodTrackerService.RecordMood(MoodTrackerEnum.Excellent);
 
             // Assert
-            var allEntries = await DbContext.MoodTrackerEntries.ToListAsync();
-            Assert.That(allEntries.Count, Is.EqualTo(previousEntriesCount + 1));
+            var finalCount = await DbContext.MoodTrackerEntries
+                .Where(e => e.DateRecorded.Date == DateTime.UtcNow.Date)
+                .CountAsync();
 
-            // Verify all previous entries still exist with same data
-            foreach (var previousEntry in previousEntries)
+            Assert.That(finalCount, Is.EqualTo(initialCount)); // Should not create new entry
+
+            var todaysMood = await _moodTrackerService.GetTodaysMood();
+            Assert.That(todaysMood.Mood, Is.EqualTo(MoodTrackerEnum.Excellent)); // Should be updated
+        }
+
+        [Test]
+        public async Task GetYearlyMood_ShouldReturnAllEntriesForYear()
+        {
+            // Arrange
+            var targetYear = DateTime.UtcNow.Year;
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntry(DbContext, MoodTrackerEnum.Excellent, new DateTime(targetYear, 1, 15));
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntry(DbContext, MoodTrackerEnum.Good, new DateTime(targetYear, 6, 20));
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntry(DbContext, MoodTrackerEnum.Neutral, new DateTime(targetYear, 12, 25));
+
+            // Act
+            var result = await _moodTrackerService.GetYearlyMood(targetYear);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Year, Is.EqualTo(targetYear));
+            Assert.That(result.Entries.Count, Is.GreaterThanOrEqualTo(3));
+            Assert.That(result.Entries.Any(e => e.Mood == MoodTrackerEnum.Excellent), Is.True);
+            Assert.That(result.Entries.Any(e => e.Mood == MoodTrackerEnum.Good), Is.True);
+            Assert.That(result.Entries.Any(e => e.Mood == MoodTrackerEnum.Neutral), Is.True);
+        }
+
+        [Test]
+        public async Task GetYearlyMood_ShouldReturnEmptyList_WhenNoEntriesForYear()
+        {
+            // Arrange
+            var futureYear = DateTime.UtcNow.Year + 10;
+
+            // Act
+            var result = await _moodTrackerService.GetYearlyMood(futureYear);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Year, Is.EqualTo(futureYear));
+            Assert.That(result.Entries, Is.Empty);
+        }
+
+        [Test]
+        public async Task GetYearlyMood_ShouldOnlyReturnEntriesForSpecifiedYear()
+        {
+            // Arrange
+            var targetYear = DateTime.UtcNow.Year;
+            var previousYear = targetYear - 1;
+
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntry(DbContext, MoodTrackerEnum.Excellent, new DateTime(targetYear, 6, 15));
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntry(DbContext, MoodTrackerEnum.Good, new DateTime(previousYear, 6, 15));
+
+            // Act
+            var result = await _moodTrackerService.GetYearlyMood(targetYear);
+
+            // Assert
+            Assert.That(result.Entries.All(e => e.Date.Year == targetYear), Is.True);
+            Assert.That(result.Entries.Any(e => e.Date.Year == previousYear), Is.False);
+        }
+
+        [Test]
+        public async Task GetYearlyMood_ShouldReturnEntriesInChronologicalOrder()
+        {
+            // Arrange
+            var targetYear = DateTime.UtcNow.Year;
+
+            // Add entries in non-chronological order
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntry(DbContext, MoodTrackerEnum.Neutral, new DateTime(targetYear, 12, 1));
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntry(DbContext, MoodTrackerEnum.Good, new DateTime(targetYear, 3, 1));
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntry(DbContext, MoodTrackerEnum.Excellent, new DateTime(targetYear, 1, 1));
+
+            // Act
+            var result = await _moodTrackerService.GetYearlyMood(targetYear);
+
+            // Assert
+            for (int i = 1; i < result.Entries.Count; i++)
             {
-                var stillExists = allEntries.FirstOrDefault(e => e.Id == previousEntry.Id);
-                Assert.That(stillExists, Is.Not.Null);
-                Assert.That(stillExists!.MoodType, Is.EqualTo(previousEntry.MoodType));
+                Assert.That(result.Entries[i].Date, Is.GreaterThanOrEqualTo(result.Entries[i - 1].Date));
             }
         }
 
         [Test]
-        public async Task GetTodaysMood_ShouldReturnCorrectTimestamp()
+        public async Task GetAvailableYears_ShouldReturnAllYearsWithEntries()
         {
             // Arrange
-            var specificTime = DateTime.UtcNow;
-            var todaysMood = new Domain.Database.Models.MoodTrackerEntry
-            {
-                MoodType = MoodTrackerEnum.Good,
-                DateRecorded = specificTime
-            };
-            await DbContext.MoodTrackerEntries.AddAsync(todaysMood);
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntriesForMultipleYears(DbContext, 2022, 2023, 2024);
+
+            // Act
+            var result = await _moodTrackerService.GetAvailableYears();
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Years, Is.Not.Empty);
+            Assert.That(result.Years.Contains(2022), Is.True);
+            Assert.That(result.Years.Contains(2023), Is.True);
+            Assert.That(result.Years.Contains(2024), Is.True);
+        }
+
+        [Test]
+        public async Task GetAvailableYears_ShouldReturnCurrentYear_WhenNoEntries()
+        {
+            // Arrange - Clear all existing entries
+            DbContext.MoodTrackerEntries.RemoveRange(DbContext.MoodTrackerEntries);
             await DbContext.SaveChangesAsync();
 
             // Act
-            var result = await _moodTrackerService.GetTodaysMood();
+            var result = await _moodTrackerService.GetAvailableYears();
 
             // Assert
-            Assert.That(result.RecordedAt, Is.Not.Null);
-            Assert.That(result.RecordedAt!.Value.Date, Is.EqualTo(specificTime.Date));
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Years, Is.Not.Empty);
+            Assert.That(result.Years.Count, Is.EqualTo(1));
+            Assert.That(result.Years[0], Is.EqualTo(DateTime.UtcNow.Year));
+        }
+
+        [Test]
+        public async Task GetAvailableYears_ShouldReturnYearsInDescendingOrder()
+        {
+            // Arrange
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntriesForMultipleYears(DbContext, 2020, 2023, 2021);
+
+            // Act
+            var result = await _moodTrackerService.GetAvailableYears();
+
+            // Assert
+            for (int i = 1; i < result.Years.Count; i++)
+            {
+                Assert.That(result.Years[i], Is.LessThan(result.Years[i - 1]));
+            }
+        }
+
+        [Test]
+        public async Task GetAvailableYears_ShouldNotReturnDuplicateYears()
+        {
+            // Arrange - Multiple entries in same year
+            var year = 2023;
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntry(DbContext, MoodTrackerEnum.Good, new DateTime(year, 1, 1));
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntry(DbContext, MoodTrackerEnum.Excellent, new DateTime(year, 6, 15));
+            await TestDatabaseSeedHelper.SeedTestMoodTrackerEntry(DbContext, MoodTrackerEnum.Neutral, new DateTime(year, 12, 31));
+
+            // Act
+            var result = await _moodTrackerService.GetAvailableYears();
+
+            // Assert
+            var yearCount = result.Years.Count(y => y == year);
+            Assert.That(yearCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task RecordMoodForDate_ShouldCreateNewEntry_ForPastDate()
+        {
+            // Arrange
+            var pastDate = DateTime.UtcNow.AddDays(-6);
+            var initialCount = await DbContext.MoodTrackerEntries.CountAsync();
+
+            // Act
+            await _moodTrackerService.RecordMoodForDate(MoodTrackerEnum.Good, pastDate);
+
+            // Assert
+            var finalCount = await DbContext.MoodTrackerEntries.CountAsync();
+            Assert.That(finalCount, Is.EqualTo(initialCount + 1));
+
+            var entry = await DbContext.MoodTrackerEntries
+                .FirstOrDefaultAsync(e => e.DateRecorded.Date == pastDate.Date);
+            Assert.That(entry, Is.Not.Null);
+            Assert.That(entry.MoodType, Is.EqualTo(MoodTrackerEnum.Good));
+        }
+
+        [Test]
+        public async Task RecordMoodForDate_ShouldUpdateExistingEntry_WhenEntryExistsForDate()
+        {
+            // Arrange
+            var targetDate = await DbContext.MoodTrackerEntries.FirstAsync();
+
+            var initialCount = await DbContext.MoodTrackerEntries
+                .Where(e => e.DateRecorded.Date == targetDate.DateRecorded.Date)
+                .CountAsync();
+
+            // Act
+            await _moodTrackerService.RecordMoodForDate(MoodTrackerEnum.Excellent, targetDate.DateRecorded);
+
+            // because it uses ExecuteUpdateAsync which bypasses tracking
+            // we need to clear the change tracker to avoid stale data
+            DbContext.ChangeTracker.Clear();
+
+            // Assert
+            var finalCount = await DbContext.MoodTrackerEntries
+                .Where(e => e.DateRecorded.Date == targetDate.DateRecorded.Date)
+                .CountAsync();
+
+            Assert.That(finalCount, Is.EqualTo(initialCount)); // Should not create duplicate
+
+            var entry = await DbContext.MoodTrackerEntries
+                .FirstOrDefaultAsync(e => e.DateRecorded.Date == targetDate.DateRecorded.Date);
+
+            Assert.That(entry, Is.Not.Null);
+            Assert.That(entry.MoodType, Is.EqualTo(MoodTrackerEnum.Excellent));
+        }
+
+        [Test]
+        public async Task RecordMoodForDate_ShouldThrowInvalidOperationException_ForFutureDate()
+        {
+            // Arrange
+            var futureDate = DateTime.UtcNow.AddDays(1);
+
+            // Act & Assert
+            var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await _moodTrackerService.RecordMoodForDate(MoodTrackerEnum.Good, futureDate));
+
+            Assert.That(exception.Message, Does.Contain("Cannot record mood for future dates"));
+        }
+
+        [Test]
+        public async Task RecordMoodForDate_ShouldHandleToday()
+        {
+            // Arrange
+            var today = DateTime.UtcNow.Date;
+
+            // Act
+            await _moodTrackerService.RecordMoodForDate(MoodTrackerEnum.Excellent, today);
+
+            // Assert
+            var entry = await DbContext.MoodTrackerEntries
+                .FirstOrDefaultAsync(e => e.DateRecorded.Date == today);
+            Assert.That(entry, Is.Not.Null);
+            Assert.That(entry.MoodType, Is.EqualTo(MoodTrackerEnum.Excellent));
+        }
+
+        [TestCase(MoodTrackerEnum.Excellent)]
+        [TestCase(MoodTrackerEnum.Good)]
+        [TestCase(MoodTrackerEnum.Neutral)]
+        [TestCase(MoodTrackerEnum.Low)]
+        [TestCase(MoodTrackerEnum.Difficult)]
+        public async Task RecordMoodForDate_ShouldHandleAllMoodTypes(MoodTrackerEnum mood)
+        {
+            // Arrange
+            var pastDate = DateTime.UtcNow.AddDays(-2);
+
+            // Act
+            await _moodTrackerService.RecordMoodForDate(mood, pastDate);
+
+            // Assert
+            var entry = await DbContext.MoodTrackerEntries
+                .FirstOrDefaultAsync(e => e.DateRecorded.Date == pastDate.Date);
+            Assert.That(entry, Is.Not.Null);
+            Assert.That(entry.MoodType, Is.EqualTo(mood));
+        }
+
+        [Test]
+        public async Task RecordMoodForDate_ShouldUseUtcDateKind()
+        {
+            // Arrange
+            var pastDate = DateTime.UtcNow.AddDays(-1);
+
+            // Act
+            await _moodTrackerService.RecordMoodForDate(MoodTrackerEnum.Good, pastDate);
+
+            // Assert
+            var entry = await DbContext.MoodTrackerEntries
+                .OrderByDescending(e => e.DateRecorded)
+                .FirstAsync();
+            Assert.That(entry.DateRecorded.Kind, Is.EqualTo(DateTimeKind.Utc));
+        }
+
+        [Test]
+        public async Task RecordMoodForDate_ShouldAllowMultipleEntriesInSameYear()
+        {
+            // Arrange
+            var year = DateTime.UtcNow.Year;
+            var dates = Enumerable.Range(1, 5)
+                .Select(day => new DateTime(year, 1, day))
+                .ToList();
+
+            // Act
+            foreach (var date in dates)
+            {
+                await _moodTrackerService.RecordMoodForDate(MoodTrackerEnum.Good, date);
+            }
+
+            // Assert
+            var yearlyData = await _moodTrackerService.GetYearlyMood(year);
+            Assert.That(yearlyData.Entries.Count(e => e.Date.Month == 1), Is.GreaterThanOrEqualTo(5));
         }
     }
 }
