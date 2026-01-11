@@ -116,7 +116,7 @@ export const formatLongDate = (dateString: string): string => {
 }
 
 /**
- * Formats a date string to full format using user's locale (e.g., "Monday, January 11, 2026")
+ * Formats a date string to full format using user's locale (e.g., "Weekday, Month Day, Year")
  * @param dateString - ISO date string
  * @returns Formatted date string in user's locale
  */
