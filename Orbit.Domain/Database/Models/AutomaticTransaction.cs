@@ -14,7 +14,7 @@ namespace Orbit.Domain.Database.Models
         public int? PotId { get; set; }
 
         [ForeignKey(nameof(PotId))]
-        public virtual SpendingPot Pot { get; set; } = null!;
+        public virtual SpendingPot? Pot { get; set; }
 
         public bool IsSubscription { get; set; } = false;
     }
