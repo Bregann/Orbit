@@ -1,7 +1,7 @@
 # Orbit Test Infrastructure Guide
 
 ## Overview
-This test project uses **NUnit**, **Testcontainers**, and **Moq** to provide comprehensive testing capabilities.
+This test project uses **NUnit**, **Testcontainers**, and **Moq** to provide integration testing with a real PostgreSQL database.
 
 ## Test Structure
 
@@ -10,218 +10,293 @@ This test project uses **NUnit**, **Testcontainers**, and **Moq** to provide com
 #### `TestContainerSetup.cs`
 - **Purpose**: Manages the PostgreSQL container lifecycle for ALL tests
 - **Scope**: `[SetUpFixture]` - runs once for the entire test suite
-- **Usage**: Automatically starts/stops the container; you don't need to interact with it directly
+- **Key Details**:
+  - Starts a PostgreSQL 16 container before any tests run
+  - Automatically cleans up when tests complete
+  - Connection string is available via `TestContainerSetup.ConnectionString`
 
 #### `DatabaseIntegrationTestBase.cs`
-- **Purpose**: Base class for integration tests requiring a real database
+- **Purpose**: Base class for all integration tests requiring a real database
 - **Features**:
-  - Automatically creates a fresh database for each test using **migrations** (not `EnsureCreated`)
-  - Provides `DbContext` property with **lazy loading proxies** enabled
-  - Implements `SetUp` and `TearDown` automatically
-- **Usage**: Inherit from this class for integration tests
-- **Important**: Uses `MigrateAsync()` to ensure lazy loading proxies work correctly
+  - Automatically creates a **fresh database for each test**
+  - Uses **migrations** (not `EnsureCreated`) to ensure lazy loading proxies work
+  - Provides `DbContext` property with lazy loading enabled
+  - Handles `SetUp` and `TearDown` automatically
+  - Supports `CustomSetUp()` and `CustomTearDown()` overrides for test-specific setup
+- **Usage**: Inherit from this class for all integration tests
 
 #### `TestDatabaseSeedHelper.cs`
-- **Purpose**: Seeds test-specific data (separate from production seed data)
+- **Purpose**: Provides reusable seed data methods for tests
 - **Features**:
   - Focused, minimal test data
-  - Reusable seed methods
-  - `ClearAllData()` for cleanup
-- **Usage**: Call methods in your test's `CustomSetUp()`
+  - Separate methods for seeding different entities (Users, Pots, Transactions, etc.)
+  - `ClearAllData()` for cleanup (rarely needed since each test gets a fresh DB)
+- **Usage**: Call methods in your test's `CustomSetUp()` or within individual tests
 
 #### `MockFactory.cs`
-- **Purpose**: Creates commonly used mocks
-- **Features**:
-  - Pre-configured mocks for common interfaces
-  - Consistent mock setup across tests
-- **Usage**: `var mock = MockFactory.CreateUserContextHelper();`
+- **Purpose**: Creates commonly used mocks for external dependencies
+- **Available Mocks**:
+  - `CreateHttpContextAccessor()` - Mock HTTP context with user claims
+  - `CreateUserContextHelper()` - Mock user context helper
+  - `CreateEnvironmentalSettingHelper()` - Mock environmental settings
+  - `CreateBankApiHelper()` - Mock bank API interactions
+  - `CreateFitbitApiHelper()` - Mock Fitbit API calls
+  - `CreateCommsSenderClient()` - Mock notification/messaging
+  - `CreateMockHttpClient()` - Mock HTTP client for API calls
+- **Usage**: Use these to mock external dependencies, not the database
 
-## Test Types
+## Writing Integration Tests
 
-### Integration Tests (with Real Database)
-Use `DatabaseIntegrationTestBase` when testing:
-- Services that interact with the database
-- Complex queries and transactions
-- Database relationships and constraints
+All tests in this project are **integration tests** that use a real database. Here's the standard pattern:
 
 ```csharp
 [TestFixture]
 public class MyServiceIntegrationTests : DatabaseIntegrationTestBase
 {
     private MyService _sut;
+    private Mock<IExternalDependency> _mockDependency;
     
     protected override async Task CustomSetUp()
     {
-        // Seed data
-        await TestDatabaseSeedHelper.SeedTestUser(DbContext);
+        // Seed required test data
+        await TestDatabaseSeedHelper.SeedTestPots(DbContext);
         
-        // Create service
-        _sut = new MyService(DbContext, mockDependency);
+        // Setup mocks for external dependencies
+        _mockDependency = MockFactory.CreateSomeMock();
+        
+        // Create service under test
+        _sut = new MyService(DbContext, _mockDependency.Object);
     }
     
     [Test]
-    public async Task MyTest()
+    public async Task MethodName_Scenario_ExpectedResult()
     {
-        // Arrange, Act, Assert
-    }
-}
-```
-
-### Unit Tests (with Mocked Database)
-Use standard NUnit with mocked `DbContext` when testing:
-- Business logic without database interaction
-- Service methods that can be isolated
-- Faster tests that don't need real data
-
-```csharp
-[TestFixture]
-public class MyServiceUnitTests
-{
-    private Mock<AppDbContext> _mockDbContext;
-    private MyService _sut;
-    
-    [SetUp]
-    public void SetUp()
-    {
-        _mockDbContext = new Mock<AppDbContext>();
-        _sut = new MyService(_mockDbContext.Object);
-    }
-    
-    [Test]
-    public void MyTest()
-    {
-        // Arrange, Act, Assert
+        // Arrange - setup test-specific data
+        var request = new SomeRequest { /* ... */ };
+        
+        // Act - call the method being tested
+        var result = await _sut.SomeMethod(request);
+        
+        // Assert - verify the results
+        Assert.That(result, Is.Not.Null);
+        
+        // Verify database changes if needed
+        var savedEntity = await DbContext.SomeEntities.FindAsync(result.Id);
+        Assert.That(savedEntity.Property, Is.EqualTo(expected));
     }
 }
 ```
 
 ## Best Practices
 
-### 1. Seed Data Strategy
-? **DO**: Use `TestDatabaseSeedHelper` for test data
-? **DON'T**: Use production `DatabaseSeedHelper` in tests
+### 1. Test Isolation
+? **DO**: Each test automatically gets a fresh database - no need to clean up between tests  
+? **DO**: Tests can run in parallel - they share the container but use the same fresh database  
+? **DON'T**: Rely on data from other tests or assume a specific test order
 
-### 2. Test Isolation
-? **DO**: Each test gets a fresh database (automatic)
-? **DO**: Tests can run in parallel (each uses the same container but fresh DB)
-? **DON'T**: Rely on data from other tests
+### 2. Seed Data Strategy
+? **DO**: Use `TestDatabaseSeedHelper` methods to seed test data  
+? **DO**: Only seed the minimum data required for your test  
+? **DO**: Seed data in `CustomSetUp()` for data needed by all tests in the fixture  
+? **DON'T**: Use production seed helpers or seed excessive data
 
 ### 3. Mock Usage
-? **DO**: Use `MockFactory` for common mocks
-? **DO**: Mock external dependencies (APIs, services)
-? **DON'T**: Mock the database in integration tests
+? **DO**: Use `MockFactory` for common mocks like `IUserContextHelper`, API helpers  
+? **DO**: Mock external dependencies (APIs, file systems, third-party services)  
+? **DON'T**: Mock the database - use the real `DbContext` provided by the base class  
+? **DON'T**: Mock Entity Framework `DbSet` objects
 
-### 4. Test Naming
+### 4. Test Naming Convention
 ```csharp
 [Test]
 public async Task MethodName_Scenario_ExpectedResult()
 {
-    // Example: GetTasks_WhenUserHasTasks_ShouldReturnTasks()
+    // Examples:
+    // AddTransaction_WithValidData_ShouldPersistToDatabase()
+    // GetTasks_WhenUserHasNoTasks_ShouldReturnEmptyList()
+    // DeletePot_WhenPotNotFound_ShouldThrowKeyNotFoundException()
 }
 ```
+
+### 5. Assertions
+? **DO**: Use NUnit's fluent assertion syntax: `Assert.That(actual, Is.EqualTo(expected))`  
+? **DO**: Verify database state after operations: `await DbContext.Entities.FindAsync(id)`  
+? **DO**: Use specific assertions: `Is.Not.Null`, `Is.True`, `Does.Contain`, etc.
 
 ## Running Tests
 
 ### From Visual Studio
-- Test Explorer ? Run All Tests
+- **Test Explorer** ? Run All Tests
 - Container starts automatically on first test run
 - Container stops when test session ends
+- Right-click on a test ? **Debug Test(s)** for debugging
 
 ### From Command Line
 ```bash
+# Run all tests
 dotnet test
+
+# Run specific test class
+dotnet test --filter "FullyQualifiedName~TransactionsServiceIntegrationTests"
+
+# Run tests matching a pattern
+dotnet test --filter "Name~AddTransaction"
 ```
 
 ### Debugging Tests
-- Set breakpoints in your tests
-- Right-click ? Debug Test(s)
-- Full debugging support with real database
+- Set breakpoints in your test or service code
+- Right-click test ? **Debug Test(s)**
+- Full debugging support with real database access
+- Inspect `DbContext` and database state during debugging
 
-## Example Scenarios
+## Example Test Scenarios
 
 ### Testing a Create Operation
 ```csharp
 [Test]
-public async Task CreateTransaction_ShouldPersistToDatabase()
+public async Task AddTransaction_WithValidData_ShouldPersistToDatabase()
 {
     // Arrange
-    var request = new CreateTransactionRequest { /* ... */ };
+    await TestDatabaseSeedHelper.SeedTestPots(DbContext);
+    var request = new AddTransactionRequest
+    {
+        MerchantName = "Test Merchant",
+        Amount = 1000,
+        PotId = 1
+    };
     
     // Act
-    await _sut.CreateTransaction(request);
+    var id = await _sut.AddTransaction(request);
     
     // Assert
-    var transaction = await DbContext.Transactions
-        .FirstOrDefaultAsync(t => t.MerchantName == request.MerchantName);
+    var transaction = await DbContext.Transactions.FindAsync(id);
     Assert.That(transaction, Is.Not.Null);
+    Assert.That(transaction.MerchantName, Is.EqualTo("Test Merchant"));
+    Assert.That(transaction.TransactionAmount, Is.EqualTo(1000));
 }
 ```
 
-### Testing with Multiple Contexts
+### Testing Exception Handling
 ```csharp
 [Test]
-public async Task Update_ShouldBeVisibleInNewContext()
+public void DeletePot_WhenPotNotFound_ShouldThrowKeyNotFoundException()
 {
-    // Arrange & Act
-    await _sut.UpdateSomething(id);
+    // Arrange
+    int nonExistentId = 999;
     
-    // Assert - verify with fresh context
-    using var newContext = CreateNewContext();
-    var updated = await newContext.Something.FindAsync(id);
-    Assert.That(updated.IsModified, Is.True);
+    // Act & Assert
+    var exception = Assert.ThrowsAsync<KeyNotFoundException>(
+        async () => await _sut.DeletePot(nonExistentId)
+    );
+    Assert.That(exception.Message, Does.Contain("not found"));
 }
 ```
 
-### Testing Relationships
+### Testing with Relationships
 ```csharp
 [Test]
-public async Task GetTransactions_ShouldIncludePotData()
+public async Task GetTransactions_ShouldIncludeRelatedPotData()
 {
     // Arrange
     await TestDatabaseSeedHelper.SeedTestPots(DbContext);
     await TestDatabaseSeedHelper.SeedTestTransactions(DbContext);
     
     // Act
-    var result = await _sut.GetTransactionsWithPots();
+    var result = await _sut.GetAllTransactions();
     
     // Assert
-    Assert.That(result.First().PotName, Is.Not.Null);
+    Assert.That(result, Is.Not.Empty);
+    var transactionWithPot = result.First(t => t.PotId != null);
+    Assert.That(transactionWithPot.Pot, Is.Not.Null); // Lazy loading should work
+    Assert.That(transactionWithPot.Pot.PotName, Is.Not.Null);
 }
 ```
 
-## Performance Tips
+### Testing Update Operations
+```csharp
+[Test]
+public async Task UpdateTransaction_ShouldModifyExistingRecord()
+{
+    // Arrange
+    await TestDatabaseSeedHelper.SeedTestTransactions(DbContext);
+    var existingTransaction = await DbContext.Transactions.FirstAsync();
+    var updateRequest = new UpdateTransactionRequest
+    {
+        Id = existingTransaction.Id,
+        MerchantName = "Updated Merchant"
+    };
+    
+    // Act
+    await _sut.UpdateTransaction(updateRequest);
+    
+    // Assert - reload to verify changes persisted
+    var updated = await DbContext.Transactions.FindAsync(existingTransaction.Id);
+    Assert.That(updated.MerchantName, Is.EqualTo("Updated Merchant"));
+}
+```
 
-1. **Integration tests are slower** - use sparingly for critical paths
-2. **Unit tests are faster** - prefer these for business logic
-3. **Container reuse** - container starts once and is shared
-4. **Minimize seeding** - only seed data you need for each test
+## Performance Considerations
+
+- **Container startup**: Container starts once for all tests (~5-10 seconds)
+- **Database creation**: Each test creates a fresh database using migrations (~100-500ms per test)
+- **Test execution**: Integration tests are slower than pure unit tests, but provide higher confidence
+- **Parallel execution**: Tests run in parallel by default, sharing the container
 
 ## Troubleshooting
 
 ### Container won't start
-- Check Docker Desktop is running
-- Verify port 5432 isn't already in use
+- Ensure Docker Desktop is running
+- Check if port 5432 is already in use: `netstat -an | findstr 5432`
+- Check Docker logs for PostgreSQL container errors
 
 ### Tests fail with connection errors
-- Ensure `[SetUpFixture]` is working (check test output)
-- Verify connection string in test output
+- Verify `[SetUpFixture]` is running (check test output)
+- Ensure `TestContainerSetup.ConnectionString` is accessible
+- Check Docker container is running: `docker ps`
 
-### Slow test execution
+### Tests are very slow
+- Check Docker performance settings
 - Reduce amount of seeded data
-- Consider unit tests instead of integration tests
-- Check if tests can run in parallel
+- Verify tests aren't running sequentially when they could run in parallel
+
+### Lazy loading not working
+- Ensure you're inheriting from `DatabaseIntegrationTestBase`
+- Verify migrations are being applied (not `EnsureCreated`)
+- Check that navigation properties are marked as `virtual`
 
 ## Adding New Tests
 
-1. Choose test type (integration vs unit)
-2. Create test class with appropriate base class
-3. Use `TestDatabaseSeedHelper` for data
-4. Use `MockFactory` for mocks
-5. Follow naming conventions
-6. Add assertions using NUnit's fluent syntax
+1. **Create a test class** inheriting from `DatabaseIntegrationTestBase`
+2. **Override `CustomSetUp()`** to seed required data and setup dependencies
+3. **Create test methods** following the naming convention
+4. **Use the `DbContext` property** provided by the base class
+5. **Mock external dependencies** using `MockFactory`
+6. **Verify database state** in assertions
+
+## Available Seed Methods
+
+The `TestDatabaseSeedHelper` provides the following methods:
+
+- `SeedTestUser()` - Create a test user
+- `SeedTestPots()` - Create spending and savings pots
+- `SeedTestTransactions()` - Create sample transactions
+- `SeedTestSubscriptions()` - Create subscription data
+- `SeedTestAutomaticTransactions()` - Create automatic transaction rules
+- `SeedTestTasks()` - Create tasks and categories
+- `SeedTestCalendarData()` - Create calendar events and types
+- `SeedTestDocuments()` - Create documents and categories
+- `SeedTestHistoricData()` - Create historic monthly data
+- `SeedTestJournalEntries()` - Create journal entries
+- `SeedTestMoodTrackerEntries()` - Create mood tracker entries
+- `SeedTestNotes()` - Create notes and folders
+- `SeedTestShoppingData()` - Create shopping list items
+- `SeedMinimalData()` - Seed user + pots + minimal transactions
+- `ClearAllData()` - Remove all data (rarely needed)
 
 ## Questions?
-Refer to the example test files:
-- `TransactionsServiceIntegrationTests.cs` - Integration test example
-- `PotsServiceUnitTests.cs` - Unit test example
-- `TasksServiceIntegrationTests.cs` - Full CRUD example
+
+Refer to existing test files for examples:
+- `TransactionsServiceIntegrationTests.cs` - Comprehensive service testing
+- `PotsServiceIntegrationTests.cs` - CRUD operations
+- `TasksServiceIntegrationTests.cs` - Testing with relationships
+- `CurrencyExtensionsTests.cs` - Simple unit tests for extension methods
