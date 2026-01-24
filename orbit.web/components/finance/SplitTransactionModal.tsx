@@ -122,7 +122,7 @@ export default function SplitTransactionModal(props: SplitTransactionModalProps)
     })
 
     if (hasInvalidPot) {
-      notificationHelper.showErrorNotification('Error', 'Please select a valid pot for all splits', 3000, <IconX />)
+      notificationHelper.showErrorNotification('Error', 'Each split must have a unique pot selection', 3000, <IconX />)
       return
     }
 
