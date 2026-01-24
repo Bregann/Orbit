@@ -68,7 +68,6 @@ export default function SplitTransactionModal(props: SplitTransactionModalProps)
         body: {
           transactionId: data.transactionId,
           splits: data.splits.map(split => ({
-            id: split.id,
             potId: split.potId,
             amount: Math.round(split.amount * 100) // Convert to pence
           }))
