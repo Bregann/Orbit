@@ -20,9 +20,12 @@ import {
   IconPhotoX,
   IconCheck,
   IconX,
-  IconCalendar
+  IconCalendar,
+  IconArrowsSplit
 } from '@tabler/icons-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import SplitTransactionModal from './finance/SplitTransactionModal'
 
 interface TransactionsTableProps {
   transactions: TransactionsTableRow[]
@@ -31,6 +34,8 @@ interface TransactionsTableProps {
 
 export default function TransactionsTableComponent(props: TransactionsTableProps) {
   const queryClient = useQueryClient()
+  const [splitModalOpened, setSplitModalOpened] = useState(false)
+  const [selectedTransaction, setSelectedTransaction] = useState<TransactionsTableRow | null>(null)
 
   const updateTransactionMutation = useMutation({
     mutationFn: async (data: { transactionId: string, potId: number | null }) => {
@@ -60,84 +65,115 @@ export default function TransactionsTableComponent(props: TransactionsTableProps
     }
   }
 
+  const handleOpenSplitModal = (transaction: TransactionsTableRow) => {
+    setSelectedTransaction(transaction)
+    setSplitModalOpened(true)
+  }
+
+  const handleCloseSplitModal = () => {
+    setSplitModalOpened(false)
+    setSelectedTransaction(null)
+  }
+
   return (
-    <Paper withBorder radius="md" p="md" shadow="sm">
-      <Table striped highlightOnHover>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Icon</Table.Th>
-            <Table.Th>Merchant</Table.Th>
-            <Table.Th>Amount</Table.Th>
-            <Table.Th>Date</Table.Th>
-            <Table.Th>Pot Type</Table.Th>
-            <Table.Th>Actions</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {props.transactions.map((transaction) => (
-            <Table.Tr key={transaction.id}>
-              <Table.Td>
-                {transaction.iconUrl !== '' ?
-                  <Image
-                    src={transaction.iconUrl}
-                    alt="Merchant icon"
-                    width={32}
-                    height={32}
-                    radius="sm"
-                  />
-                  :
-                  <IconPhotoX size={32} color="gray" />
-                }
-              </Table.Td>
-              <Table.Td>
-                <Text fw={500}>{transaction.merchantName}</Text>
-              </Table.Td>
-              <Table.Td>
-                <Text fw={500}>{transaction.transactionAmount}</Text>
-              </Table.Td>
-              <Table.Td>
-                <Text c="dimmed">{new Date(transaction.transactionDate).toLocaleDateString().concat(' ', new Date(transaction.transactionDate).toLocaleTimeString())}</Text>
-              </Table.Td>
-              <Table.Td>
-                <Select
-                  placeholder="Pick pot"
-                  data={props.potOptions.map(option => ({
-                    value: option.potId.toString(),
-                    label: option.potName
-                  }))}
-                  defaultValue={transaction.potId?.toString() ?? null}
-                  comboboxProps={{
-                    transitionProps: { transition: 'pop', duration: 200 }
-                  }}
-                  onChange={async (value) => { await updateTransactionMutation.mutateAsync({ transactionId: transaction.id, potId: value !== null ? Number(value) : null }) }}
-                />
-              </Table.Td>
-              <Table.Td>
-                <Group gap="xs" wrap="nowrap">
-                  <Tooltip label="Mark as subscription">
-                    <ActionIcon
-                      variant="light"
-                      color="blue"
-                      onClick={async () => { await handleMarkAsSubscription(transaction.id) }}
-                    >
-                      <IconCalendar size={16} />
-                    </ActionIcon>
-                  </Tooltip>
-                  <Tooltip label="Remove pot assignment">
-                    <ActionIcon
-                      variant="light"
-                      color="red"
-                      onClick={async () => { await updateTransactionMutation.mutateAsync({ transactionId: transaction.id, potId: null }) }}
-                    >
-                      <IconTrash size={16} />
-                    </ActionIcon>
-                  </Tooltip>
-                </Group>
-              </Table.Td>
+    <>
+      {selectedTransaction && (
+        <SplitTransactionModal
+          opened={splitModalOpened}
+          onClose={handleCloseSplitModal}
+          transactionId={selectedTransaction.id}
+          transactionAmount={selectedTransaction.transactionAmount}
+          merchantName={selectedTransaction.merchantName}
+          potOptions={props.potOptions}
+        />
+      )}
+      <Paper withBorder radius="md" p="md" shadow="sm">
+        <Table striped highlightOnHover>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Icon</Table.Th>
+              <Table.Th>Merchant</Table.Th>
+              <Table.Th>Amount</Table.Th>
+              <Table.Th>Date</Table.Th>
+              <Table.Th>Pot Type</Table.Th>
+              <Table.Th>Actions</Table.Th>
             </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
-    </Paper>
+          </Table.Thead>
+          <Table.Tbody>
+            {props.transactions.map((transaction) => (
+              <Table.Tr key={transaction.id}>
+                <Table.Td>
+                  {transaction.iconUrl !== '' ?
+                    <Image
+                      src={transaction.iconUrl}
+                      alt="Merchant icon"
+                      width={32}
+                      height={32}
+                      radius="sm"
+                    />
+                    :
+                    <IconPhotoX size={32} color="gray" />
+                  }
+                </Table.Td>
+                <Table.Td>
+                  <Text fw={500}>{transaction.merchantName}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Text fw={500}>{transaction.transactionAmount}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Text c="dimmed">{new Date(transaction.transactionDate).toLocaleDateString().concat(' ', new Date(transaction.transactionDate).toLocaleTimeString())}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Select
+                    placeholder="Pick pot"
+                    data={props.potOptions.map(option => ({
+                      value: option.potId.toString(),
+                      label: option.potName
+                    }))}
+                    defaultValue={transaction.potId?.toString() ?? null}
+                    comboboxProps={{
+                      transitionProps: { transition: 'pop', duration: 200 }
+                    }}
+                    onChange={async (value) => { await updateTransactionMutation.mutateAsync({ transactionId: transaction.id, potId: value !== null ? Number(value) : null }) }}
+                  />
+                </Table.Td>
+                <Table.Td>
+                  <Group gap="xs" wrap="nowrap">
+                    <Tooltip label="Split transaction">
+                      <ActionIcon
+                        variant="light"
+                        color="green"
+                        onClick={() => handleOpenSplitModal(transaction)}
+                      >
+                        <IconArrowsSplit size={16} />
+                      </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label="Mark as subscription">
+                      <ActionIcon
+                        variant="light"
+                        color="blue"
+                        onClick={async () => { await handleMarkAsSubscription(transaction.id) }}
+                      >
+                        <IconCalendar size={16} />
+                      </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label="Remove pot assignment">
+                      <ActionIcon
+                        variant="light"
+                        color="red"
+                        onClick={async () => { await updateTransactionMutation.mutateAsync({ transactionId: transaction.id, potId: null }) }}
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Tooltip>
+                  </Group>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      </Paper>
+    </>
   )
 }

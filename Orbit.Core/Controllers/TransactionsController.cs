@@ -78,5 +78,23 @@ namespace Orbit.Core.Controllers
                 return NotFound(ex.Message);
             }
         }
+
+        [HttpPatch]
+        public async Task<IActionResult> SplitTransaction([FromBody] SplitTransactionRequest request)
+        {
+            try
+            {
+                await transactionsService.SplitTransaction(request);
+                return Ok();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

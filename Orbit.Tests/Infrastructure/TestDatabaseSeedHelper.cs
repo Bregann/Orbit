@@ -43,6 +43,14 @@ namespace Orbit.Tests.Infrastructure
                     PotAmountLeft = 200,
                     PotAmountSpent = 0,
                     RolloverDefaultChecked = false
+                },
+                new SpendingPot
+                {
+                    PotName = "Test Entertainment",
+                    AmountToAdd = 150,
+                    PotAmountLeft = 100,
+                    PotAmountSpent = 50,
+                    RolloverDefaultChecked = true
                 }
             });
 

@@ -29,7 +29,7 @@ export async function proxy(request: NextRequest) {
   // Only when we have a refreshToken but no accessToken
   if (accessToken === undefined && refreshToken !== undefined) {
     try {
-      const refreshRes = await fetch(`${API_BASE_URL}/auth/RefreshToken`, {
+      const refreshRes = await fetch(`${API_BASE_URL}/Auth/RefreshToken`, {
         method: 'POST',
         headers: {
           // forward only the refreshToken cookie
