@@ -1,7 +1,11 @@
+using System.Globalization;
+
 namespace Orbit.Domain.Extensions
 {
     public static class CurrencyExtensions
     {
+        private static readonly CultureInfo GbCulture = new("en-GB");
+
         /// <summary>
         /// Converts pence (long) to pounds and formats as GBP currency string (e.g., "£123.45")
         /// </summary>
@@ -10,8 +14,7 @@ namespace Orbit.Domain.Extensions
         public static string ToPoundsString(this long pence)
         {
             var pounds = pence / 100m;
-            var sign = pence < 0 ? "-" : "";
-            return $"{sign}£{Math.Abs(pounds):N2}";
+            return pounds.ToString("C", GbCulture);
         }
 
         /// <summary>
@@ -22,8 +25,7 @@ namespace Orbit.Domain.Extensions
         public static string ToPoundsString(this decimal pence)
         {
             var pounds = pence / 100m;
-            var sign = pence < 0 ? "-" : "";
-            return $"{sign}£{Math.Abs(pounds):N2}";
+            return pounds.ToString("C", GbCulture);
         }
     }
 }
