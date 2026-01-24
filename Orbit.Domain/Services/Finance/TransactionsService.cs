@@ -194,5 +194,94 @@ namespace Orbit.Domain.Services.Finance
                 throw new KeyNotFoundException($"Transaction with ID {transactionId} not found.");
             }
         }
+
+        public async Task SplitTransaction(SplitTransactionRequest request)
+        {
+            var originalTransaction = await context.Transactions
+                .FirstOrDefaultAsync(t => t.Id == request.TransactionId);
+
+            if (originalTransaction == null)
+            {
+                throw new KeyNotFoundException($"Transaction with ID {request.TransactionId} not found.");
+            }
+
+            // Filter out splits with potId == -1 (these amounts are discarded)
+            var validSplits = request.Splits.Where(s => s.PotId != -1).ToList();
+
+            // Validate that split amounts don't exceed the original transaction amount
+            var totalSplitAmount = request.Splits.Sum(s => s.Amount);
+            if (totalSplitAmount != originalTransaction.TransactionAmount)
+            {
+                throw new ArgumentException($"Split amounts ({totalSplitAmount}) must equal the original transaction amount ({originalTransaction.TransactionAmount}).");
+            }
+
+            // If original transaction had a pot assigned, revert those amounts
+            if (originalTransaction.PotId.HasValue && originalTransaction.Pot != null)
+            {
+                originalTransaction.Pot.PotAmountLeft += originalTransaction.TransactionAmount;
+                originalTransaction.Pot.PotAmountSpent -= originalTransaction.TransactionAmount;
+            }
+
+            if (validSplits.Count == 0)
+            {
+                // All amounts were discarded (potId == -1), just remove the original transaction
+                context.Transactions.Remove(originalTransaction);
+            }
+            else if (validSplits.Count == 1)
+            {
+                // Only one valid split, update the original transaction
+                var split = validSplits[0];
+                var pot = await context.SpendingPots.FindAsync(split.PotId);
+
+                if (pot == null)
+                {
+                    throw new KeyNotFoundException($"Spending pot with ID {split.PotId} not found.");
+                }
+
+                originalTransaction.TransactionAmount = split.Amount;
+                originalTransaction.PotId = split.PotId;
+                originalTransaction.Processed = true;
+
+                // Update the pot amounts
+                pot.PotAmountLeft -= split.Amount;
+                pot.PotAmountSpent += split.Amount;
+            }
+            else
+            {
+                // Multiple valid splits, remove original and create new transactions
+                context.Transactions.Remove(originalTransaction);
+
+                for (int i = 0; i < validSplits.Count; i++)
+                {
+                    var split = validSplits[i];
+                    var pot = await context.SpendingPots.FindAsync(split.PotId);
+
+                    if (pot == null)
+                    {
+                        throw new KeyNotFoundException($"Spending pot with ID {split.PotId} not found.");
+                    }
+
+                    var newTransaction = new Database.Models.Transactions
+                    {
+                        Id = $"{request.TransactionId}-{i + 1}",
+                        MerchantName = originalTransaction.MerchantName,
+                        TransactionAmount = split.Amount,
+                        TransactionDate = originalTransaction.TransactionDate,
+                        Processed = true,
+                        PotId = split.PotId,
+                        ImgUrl = originalTransaction.ImgUrl,
+                        IsSubscriptionPayment = originalTransaction.IsSubscriptionPayment
+                    };
+
+                    await context.Transactions.AddAsync(newTransaction);
+
+                    // Update the pot amounts
+                    pot.PotAmountLeft -= split.Amount;
+                    pot.PotAmountSpent += split.Amount;
+                }
+            }
+
+            await context.SaveChangesAsync();
+        }
     }
 }

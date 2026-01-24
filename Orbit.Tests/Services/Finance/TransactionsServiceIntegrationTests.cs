@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.Finance.Transactions.Requests;
 using Orbit.Domain.Services.Finance;
 using Orbit.Tests.Infrastructure;
+using Task = System.Threading.Tasks.Task;
 
 namespace Orbit.Tests.Services.Finance
 {
@@ -490,6 +492,364 @@ namespace Orbit.Tests.Services.Finance
 
             Assert.That(updated1!.IsSubscriptionPayment, Is.True);
             Assert.That(updated2!.IsSubscriptionPayment, Is.False);
+        }
+
+        [Test]
+        public async Task SplitTransaction_ShouldThrowKeyNotFoundException_WhenTransactionNotFound()
+        {
+            // Arrange
+            var request = new SplitTransactionRequest
+            {
+                TransactionId = "non-existent-id",
+                Splits = [
+                    new TransactionSplit { Id = "1", PotId = 1, Amount = 1000 }
+                ]
+            };
+
+            // Act & Assert
+            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+                await _transactionsService.SplitTransaction(request));
+
+            Assert.That(exception.Message, Does.Contain("Transaction with ID non-existent-id not found"));
+        }
+
+        [Test]
+        public async Task SplitTransaction_ShouldThrowArgumentException_WhenSplitAmountsDontMatchOriginal()
+        {
+            // Arrange
+            var transaction = DbContext.Transactions.First();
+            var request = new SplitTransactionRequest
+            {
+                TransactionId = transaction.Id,
+                Splits = [
+                    new TransactionSplit { Id = "1", PotId = 1, Amount = 500 },
+                    new TransactionSplit { Id = "2", PotId = 2, Amount = 300 }
+                ]
+            };
+
+            // Act & Assert
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
+                await _transactionsService.SplitTransaction(request));
+
+            Assert.That(exception.Message, Does.Contain("must equal the original transaction amount"));
+        }
+
+        [Test]
+        public async Task SplitTransaction_ShouldThrowKeyNotFoundException_WhenPotNotFound()
+        {
+            // Arrange
+            var transaction = DbContext.Transactions.First();
+            var request = new SplitTransactionRequest
+            {
+                TransactionId = transaction.Id,
+                Splits = [
+                    new TransactionSplit { Id = "1", PotId = 99999, Amount = transaction.TransactionAmount }
+                ]
+            };
+
+            // Act & Assert
+            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+                await _transactionsService.SplitTransaction(request));
+
+            Assert.That(exception.Message, Does.Contain("Spending pot with ID 99999 not found"));
+        }
+
+        [Test]
+        public async Task SplitTransaction_ShouldRemoveTransaction_WhenAllSplitsAreDiscarded()
+        {
+            // Arrange
+            var transaction = DbContext.Transactions.First();
+            var transactionId = transaction.Id;
+            var request = new SplitTransactionRequest
+            {
+                TransactionId = transactionId,
+                Splits = [
+                    new TransactionSplit { Id = "1", PotId = -1, Amount = transaction.TransactionAmount }
+                ]
+            };
+
+            // Act
+            await _transactionsService.SplitTransaction(request);
+
+            // Assert
+            var deletedTransaction = await DbContext.Transactions.FindAsync(transactionId);
+            Assert.That(deletedTransaction, Is.Null);
+        }
+
+        [Test]
+        public async Task SplitTransaction_ShouldUpdateOriginalTransaction_WhenOnlyOneSplitIsValid()
+        {
+            // Arrange
+            var transaction = DbContext.Transactions.First(t => t.PotId == null);
+            var transactionId = transaction.Id;
+            var originalAmount = transaction.TransactionAmount;
+            var pot = DbContext.SpendingPots.First();
+            var originalPotAmountLeft = pot.PotAmountLeft;
+            var originalPotAmountSpent = pot.PotAmountSpent;
+
+            var request = new SplitTransactionRequest
+            {
+                TransactionId = transactionId,
+                Splits = [
+                    new TransactionSplit { Id = "1", PotId = pot.Id, Amount = 1000 },
+                    new TransactionSplit { Id = "2", PotId = -1, Amount = originalAmount - 1000 }
+                ]
+            };
+
+            // Act
+            await _transactionsService.SplitTransaction(request);
+
+            // Assert
+            var updatedTransaction = await DbContext.Transactions.FindAsync(transactionId);
+            Assert.That(updatedTransaction, Is.Not.Null);
+            Assert.That(updatedTransaction.TransactionAmount, Is.EqualTo(1000));
+            Assert.That(updatedTransaction.PotId, Is.EqualTo(pot.Id));
+            Assert.That(updatedTransaction.Processed, Is.True);
+
+            // Verify no additional transactions were created
+            var transactionCount = await DbContext.Transactions
+                .CountAsync(t => t.Id == transactionId || t.Id.StartsWith($"{transactionId}-"));
+            Assert.That(transactionCount, Is.EqualTo(1));
+
+            // Verify pot amounts
+            DbContext.ChangeTracker.Clear();
+            var updatedPot = await DbContext.SpendingPots.FindAsync(pot.Id);
+            Assert.That(updatedPot!.PotAmountLeft, Is.EqualTo(originalPotAmountLeft - 1000));
+            Assert.That(updatedPot.PotAmountSpent, Is.EqualTo(originalPotAmountSpent + 1000));
+        }
+
+        [Test]
+        public async Task SplitTransaction_ShouldCreateMultipleTransactions_WhenMultipleSplitsAreValid()
+        {
+            // Arrange
+            var transaction = DbContext.Transactions.First(t => t.TransactionAmount >= 3000 && !t.Processed);
+            var transactionId = transaction.Id;
+            var pot1 = DbContext.SpendingPots.First();
+            var pot2 = DbContext.SpendingPots.Skip(1).First();
+            var pot3 = DbContext.SpendingPots.Skip(2).First();
+
+            var originalPot1AmountLeft = pot1.PotAmountLeft;
+            var originalPot1AmountSpent = pot1.PotAmountSpent;
+            var originalPot2AmountLeft = pot2.PotAmountLeft;
+            var originalPot2AmountSpent = pot2.PotAmountSpent;
+            var originalPot3AmountLeft = pot3.PotAmountLeft;
+            var originalPot3AmountSpent = pot3.PotAmountSpent;
+
+            var request = new SplitTransactionRequest
+            {
+                TransactionId = transactionId,
+                Splits = [
+                    new TransactionSplit { Id = "1", PotId = pot1.Id, Amount = 1000 },
+                    new TransactionSplit { Id = "2", PotId = pot2.Id, Amount = 500 },
+                    new TransactionSplit { Id = "3", PotId = pot3.Id, Amount = transaction.TransactionAmount - 1500 }
+                ]
+            };
+
+            // Act
+            await _transactionsService.SplitTransaction(request);
+
+            // Assert - Original transaction should be removed
+            var originalDeleted = await DbContext.Transactions.FindAsync(transactionId);
+            Assert.That(originalDeleted, Is.Null);
+
+            // Verify new transactions were created
+            var newTransaction1 = await DbContext.Transactions.FindAsync($"{transactionId}-1");
+            var newTransaction2 = await DbContext.Transactions.FindAsync($"{transactionId}-2");
+            var newTransaction3 = await DbContext.Transactions.FindAsync($"{transactionId}-3");
+
+            Assert.That(newTransaction1, Is.Not.Null);
+            Assert.That(newTransaction1!.TransactionAmount, Is.EqualTo(1000));
+            Assert.That(newTransaction1.PotId, Is.EqualTo(pot1.Id));
+            Assert.That(newTransaction1.Processed, Is.True);
+            Assert.That(newTransaction1.MerchantName, Is.EqualTo(transaction.MerchantName));
+            Assert.That(newTransaction1.TransactionDate, Is.EqualTo(transaction.TransactionDate));
+
+            Assert.That(newTransaction2, Is.Not.Null);
+            Assert.That(newTransaction2!.TransactionAmount, Is.EqualTo(500));
+            Assert.That(newTransaction2.PotId, Is.EqualTo(pot2.Id));
+
+            Assert.That(newTransaction3, Is.Not.Null);
+            Assert.That(newTransaction3!.TransactionAmount, Is.EqualTo(transaction.TransactionAmount - 1500));
+            Assert.That(newTransaction3.PotId, Is.EqualTo(pot3.Id));
+
+            // Verify pot amounts
+            DbContext.ChangeTracker.Clear();
+            var updatedPot1 = await DbContext.SpendingPots.FindAsync(pot1.Id);
+            var updatedPot2 = await DbContext.SpendingPots.FindAsync(pot2.Id);
+            var updatedPot3 = await DbContext.SpendingPots.FindAsync(pot3.Id);
+
+            Assert.That(updatedPot1!.PotAmountLeft, Is.EqualTo(originalPot1AmountLeft - 1000));
+            Assert.That(updatedPot1.PotAmountSpent, Is.EqualTo(originalPot1AmountSpent + 1000));
+
+            Assert.That(updatedPot2!.PotAmountLeft, Is.EqualTo(originalPot2AmountLeft - 500));
+            Assert.That(updatedPot2.PotAmountSpent, Is.EqualTo(originalPot2AmountSpent + 500));
+
+            Assert.That(updatedPot3!.PotAmountLeft, Is.EqualTo(originalPot3AmountLeft - (transaction.TransactionAmount - 1500)));
+            Assert.That(updatedPot3.PotAmountSpent, Is.EqualTo(originalPot3AmountSpent + (transaction.TransactionAmount - 1500)));
+        }
+
+        [Test]
+        public async Task SplitTransaction_ShouldRevertOriginalPotAmounts_WhenTransactionHadPotAssigned()
+        {
+            // Arrange
+            var pot1 = DbContext.SpendingPots.First();
+            var pot2 = DbContext.SpendingPots.Skip(1).First();
+
+            // Create a transaction with a pot assigned
+            var transaction = new Transactions
+            {
+                Id = "test-split-txn-with-pot",
+                MerchantName = "Test Merchant",
+                TransactionAmount = 2000,
+                TransactionDate = DateTimeOffset.UtcNow,
+                Processed = true,
+                PotId = pot1.Id,
+                IsSubscriptionPayment = false
+            };
+
+            DbContext.Transactions.Add(transaction);
+            pot1.PotAmountSpent += 2000;
+            pot1.PotAmountLeft -= 2000;
+            await DbContext.SaveChangesAsync();
+
+            var originalPot1AmountLeft = pot1.PotAmountLeft;
+            var originalPot1AmountSpent = pot1.PotAmountSpent;
+            var originalPot2AmountLeft = pot2.PotAmountLeft;
+            var originalPot2AmountSpent = pot2.PotAmountSpent;
+
+            var request = new SplitTransactionRequest
+            {
+                TransactionId = transaction.Id,
+                Splits = [
+                    new TransactionSplit { Id = "1", PotId = pot2.Id, Amount = 2000 }
+                ]
+            };
+
+            // Act
+            await _transactionsService.SplitTransaction(request);
+
+            // Assert - Original pot should have amounts reverted
+            DbContext.ChangeTracker.Clear();
+            var updatedPot1 = await DbContext.SpendingPots.FindAsync(pot1.Id);
+            var updatedPot2 = await DbContext.SpendingPots.FindAsync(pot2.Id);
+
+            Assert.That(updatedPot1!.PotAmountLeft, Is.EqualTo(originalPot1AmountLeft + 2000));
+            Assert.That(updatedPot1.PotAmountSpent, Is.EqualTo(originalPot1AmountSpent - 2000));
+
+            Assert.That(updatedPot2!.PotAmountLeft, Is.EqualTo(originalPot2AmountLeft - 2000));
+            Assert.That(updatedPot2.PotAmountSpent, Is.EqualTo(originalPot2AmountSpent + 2000));
+        }
+
+        [Test]
+        public async Task SplitTransaction_ShouldPreserveTransactionProperties()
+        {
+            // Arrange
+            var transaction = DbContext.Transactions.First(t => t.TransactionAmount >= 2000);
+            var transactionId = transaction.Id;
+            var originalMerchantName = transaction.MerchantName;
+            var originalTransactionDate = transaction.TransactionDate;
+            var originalImgUrl = transaction.ImgUrl;
+            var originalIsSubscriptionPayment = transaction.IsSubscriptionPayment;
+
+            var pot1 = DbContext.SpendingPots.First();
+            var pot2 = DbContext.SpendingPots.Skip(1).First();
+
+            var request = new SplitTransactionRequest
+            {
+                TransactionId = transactionId,
+                Splits = [
+                    new TransactionSplit { Id = "1", PotId = pot1.Id, Amount = 1000 },
+                    new TransactionSplit { Id = "2", PotId = pot2.Id, Amount = transaction.TransactionAmount - 1000 }
+                ]
+            };
+
+            // Act
+            await _transactionsService.SplitTransaction(request);
+
+            // Assert
+            var newTransaction1 = await DbContext.Transactions.FindAsync($"{transactionId}-1");
+            var newTransaction2 = await DbContext.Transactions.FindAsync($"{transactionId}-2");
+
+            Assert.That(newTransaction1!.MerchantName, Is.EqualTo(originalMerchantName));
+            Assert.That(newTransaction1.TransactionDate, Is.EqualTo(originalTransactionDate));
+            Assert.That(newTransaction1.ImgUrl, Is.EqualTo(originalImgUrl));
+            Assert.That(newTransaction1.IsSubscriptionPayment, Is.EqualTo(originalIsSubscriptionPayment));
+
+            Assert.That(newTransaction2!.MerchantName, Is.EqualTo(originalMerchantName));
+            Assert.That(newTransaction2.TransactionDate, Is.EqualTo(originalTransactionDate));
+            Assert.That(newTransaction2.ImgUrl, Is.EqualTo(originalImgUrl));
+            Assert.That(newTransaction2.IsSubscriptionPayment, Is.EqualTo(originalIsSubscriptionPayment));
+        }
+
+        [Test]
+        public async Task SplitTransaction_ShouldHandleMixedValidAndDiscardedSplits()
+        {
+            // Arrange
+            var transaction = DbContext.Transactions.First(t => t.TransactionAmount >= 3000);
+            var transactionId = transaction.Id;
+            var pot1 = DbContext.SpendingPots.First();
+            var pot2 = DbContext.SpendingPots.Skip(1).First();
+
+            var request = new SplitTransactionRequest
+            {
+                TransactionId = transactionId,
+                Splits = [
+                    new TransactionSplit { Id = "1", PotId = pot1.Id, Amount = 1000 },
+                    new TransactionSplit { Id = "2", PotId = -1, Amount = 500 },
+                    new TransactionSplit { Id = "3", PotId = pot2.Id, Amount = transaction.TransactionAmount - 1500 }
+                ]
+            };
+
+            // Act
+            await _transactionsService.SplitTransaction(request);
+
+            // Assert - Original should be deleted
+            var originalDeleted = await DbContext.Transactions.FindAsync(transactionId);
+            Assert.That(originalDeleted, Is.Null);
+
+            // Only 2 new transactions should be created (discarded split not created)
+            var newTransaction1 = await DbContext.Transactions.FindAsync($"{transactionId}-1");
+            var newTransaction2 = await DbContext.Transactions.FindAsync($"{transactionId}-2");
+            var newTransaction3 = await DbContext.Transactions.FindAsync($"{transactionId}-3");
+
+            Assert.That(newTransaction1, Is.Not.Null);
+            Assert.That(newTransaction1!.TransactionAmount, Is.EqualTo(1000));
+            Assert.That(newTransaction1.PotId, Is.EqualTo(pot1.Id));
+
+            Assert.That(newTransaction2, Is.Not.Null);
+            Assert.That(newTransaction2!.TransactionAmount, Is.EqualTo(transaction.TransactionAmount - 1500));
+            Assert.That(newTransaction2.PotId, Is.EqualTo(pot2.Id));
+
+            Assert.That(newTransaction3, Is.Null); // Third split is not created (only 2 valid splits)
+        }
+
+        [Test]
+        public async Task SplitTransaction_ShouldMarkAllNewTransactionsAsProcessed()
+        {
+            // Arrange
+            var transaction = DbContext.Transactions.First(t => t.TransactionAmount >= 2000);
+            var transactionId = transaction.Id;
+            var pot1 = DbContext.SpendingPots.First();
+            var pot2 = DbContext.SpendingPots.Skip(1).First();
+
+            var request = new SplitTransactionRequest
+            {
+                TransactionId = transactionId,
+                Splits = [
+                    new TransactionSplit { Id = "1", PotId = pot1.Id, Amount = 1000 },
+                    new TransactionSplit { Id = "2", PotId = pot2.Id, Amount = transaction.TransactionAmount - 1000 }
+                ]
+            };
+
+            // Act
+            await _transactionsService.SplitTransaction(request);
+
+            // Assert
+            var newTransaction1 = await DbContext.Transactions.FindAsync($"{transactionId}-1");
+            var newTransaction2 = await DbContext.Transactions.FindAsync($"{transactionId}-2");
+
+            Assert.That(newTransaction1!.Processed, Is.True);
+            Assert.That(newTransaction2!.Processed, Is.True);
         }
     }
 }
