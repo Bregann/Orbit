@@ -10,7 +10,8 @@ namespace Orbit.Domain.Extensions
         public static string ToPoundsString(this long pence)
         {
             var pounds = pence / 100m;
-            return $"\u00A3{pounds:N2}";
+            var sign = pounds < 0 ? "-" : "";
+            return $"{sign}\u00A3{Math.Abs(pounds):N2}";
         }
 
         /// <summary>
@@ -21,7 +22,8 @@ namespace Orbit.Domain.Extensions
         public static string ToPoundsString(this decimal pence)
         {
             var pounds = pence / 100m;
-            return $"\u00A3{pounds:N2}";
+            var sign = pounds < 0 ? "-" : "";
+            return $"{sign}\u00A3{Math.Abs(pounds):N2}";
         }
     }
 }
