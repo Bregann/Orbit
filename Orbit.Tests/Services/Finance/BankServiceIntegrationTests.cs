@@ -172,6 +172,35 @@ namespace Orbit.Tests.Services.Finance
         }
 
         [Test]
+        public async Task GetMonzoTransactionsAndAddToDatabase_ShouldNotAddPositiveAmountTransactions()
+        {
+            // Arrange
+            var transactions = new List<Transaction>
+            {
+                new Transaction
+                {
+                    Id = "monzo-txn-positive",
+                    Amount = 1500, // Positive amount (money in/refund)
+                    Created = DateTimeOffset.UtcNow,
+                    Merchant = new Merchant { Name = "Refund", Logo = "" }
+                }
+            };
+
+            _mockBankApiHelper.Setup(x => x.GetMonzoTransactions())
+                .ReturnsAsync(transactions);
+
+            var initialCount = await DbContext.Transactions.CountAsync();
+
+            // Act
+            await _bankService.GetMonzoTransactionsAndAddToDatabase();
+
+            // Assert
+            var finalCount = await DbContext.Transactions.CountAsync();
+            Assert.That(finalCount, Is.EqualTo(initialCount)); // Should not be added
+            _mockCommsSenderClient.Verify(x => x.SendPushNotification(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
         public async Task GetOpenBankingTransactionsAndAddToDatabase_ShouldNotProceed_WhenNoAccessToken()
         {
             // Arrange
@@ -220,6 +249,41 @@ namespace Orbit.Tests.Services.Finance
             Assert.That(savedTransaction, Is.Not.Null);
             Assert.That(savedTransaction.MerchantName, Is.EqualTo("Test Payment"));
             Assert.That(savedTransaction.TransactionAmount, Is.EqualTo(2550)); // £25.50 in pence
+        }
+
+        [Test]
+        public async Task GetOpenBankingTransactionsAndAddToDatabase_ShouldNotAddPositiveAmountTransactions()
+        {
+            // Arrange
+            var response = new GoCardlessTransactionsResponse
+            {
+                Transactions = new Transactions
+                {
+                    Booked = new[]
+                    {
+                        new Booked
+                        {
+                            TransactionId = "gocardless-txn-positive",
+                            RemittanceInformationUnstructured = "Refund",
+                            BookingDateTime = DateTimeOffset.UtcNow,
+                            TransactionAmount = new TransactionAmount { Amount = "25.50" } // Positive amount
+                        }
+                    }
+                }
+            };
+
+            _mockBankApiHelper.Setup(x => x.GetGoCardlessBankingDataTransactions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(response);
+
+            var initialCount = await DbContext.Transactions.CountAsync();
+
+            // Act
+            await _bankService.GetOpenBankingTransactionsAndAddToDatabase();
+
+            // Assert
+            var finalCount = await DbContext.Transactions.CountAsync();
+            Assert.That(finalCount, Is.EqualTo(initialCount)); // Should not be added
+            _mockCommsSenderClient.Verify(x => x.SendPushNotification(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test]

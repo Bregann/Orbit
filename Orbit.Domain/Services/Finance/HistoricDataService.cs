@@ -41,9 +41,9 @@ namespace Orbit.Domain.Services.Finance
                 PotSpendings = historicData.HistoricPotData.Select(ps => new PotSpendingData
                 {
                     PotName = ps.Pot.PotName,
-                    AmountSpent = ps.PotAmountSpent,
+                    AmountSpent = ps.PotAmountSpent / 100m,
                     PercentageOfTotalSpent = historicData.AmountSpent == 0 ? 0 :
-                        ps.PotAmountSpent / historicData.AmountSpent * 100
+                        ps.PotAmountSpent / (decimal)historicData.AmountSpent * 100
                 }).ToArray()
             };
 
@@ -91,9 +91,9 @@ namespace Orbit.Domain.Services.Finance
 
             return new GetHistoricMonthDataDto
             {
-                TotalSpent = historicData.AmountSpent,
-                TotalSaved = historicData.AmountSaved,
-                AmountLeftOver = historicData.AmountLeftOver,
+                TotalSpent = historicData.AmountSpent / 100m,
+                TotalSaved = historicData.AmountSaved / 100m,
+                AmountLeftOver = historicData.AmountLeftOver / 100m,
                 SpendingDataBreakdown = potSpendingBreakdown,
                 TopSpendingMerchants = topSpendingMerchants.Take(5).ToArray(),
                 TopTransactions = topTransactions,
@@ -114,29 +114,29 @@ namespace Orbit.Domain.Services.Finance
                 MonthlySpending = last12Data.Select(hd => new MonthlySpendingData
                 {
                     Month = hd.StartDate.ToString("MMMM"),
-                    AmountSpent = hd.AmountSpent
+                    AmountSpent = hd.AmountSpent / 100m
                 }).ToArray(),
                 MonthlyLeftOver = last12Data.Select(hd => new MonthlyLeftOverData
                 {
                     Month = hd.StartDate.ToString("MMMM"),
-                    AmountLeftOver = hd.AmountLeftOver
+                    AmountLeftOver = hd.AmountLeftOver / 100m
                 }).ToArray(),
                 MonthlySavings = last12Data.Select(hd => new MonthlySavingsData
                 {
                     Month = hd.StartDate.ToString("MMMM"),
-                    AmountSaved = hd.AmountSaved
+                    AmountSaved = hd.AmountSaved / 100m
                 }).ToArray(),
                 AmountSpentPerPot = last12Data.SelectMany(hd => (hd.HistoricPotData ?? []).Select(pd => new AmountSpentPerPotData
                 {
                     Month = hd.StartDate.ToString("MMMM"),
                     PotName = pd.Pot.PotName,
-                    TotalAmountSpent = pd.PotAmountSpent
+                    TotalAmountSpent = pd.PotAmountSpent / 100m
                 })).ToArray(),
                 AmountSavedPerPot = last12Data.SelectMany(hd => (hd.HistoricSavingsPotData ?? []).Select(pd => new AmountSavedPerPotData
                 {
                     Month = hd.StartDate.ToString("MMMM"),
                     PotName = pd.Pot.PotName,
-                    TotalAmountSaved = pd.AmountSaved
+                    TotalAmountSaved = pd.AmountSaved / 100m
                 })).ToArray()
             };
         }

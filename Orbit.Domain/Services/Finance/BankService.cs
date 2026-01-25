@@ -23,6 +23,12 @@ namespace Orbit.Domain.Services.Finance
 
             foreach (var transaction in monzoTransactions)
             {
+                // Skip positive amounts (money in/refunds)
+                if (transaction.Amount > 0)
+                {
+                    continue;
+                }
+
                 // Check if the transaction already exists in the database
                 var existingTransaction = await context.Transactions
                     .AnyAsync(t => t.Id == transaction.Id);
@@ -85,6 +91,15 @@ namespace Orbit.Domain.Services.Finance
 
             foreach (var transaction in openBankingTransactions.Transactions.Booked)
             {
+                //Convert the amount to a positive
+                var positiveTransactionAmount = Math.Abs((int)(decimal.Parse(transaction.TransactionAmount.Amount) * 100));
+
+                // Skip positive amounts (money in/refunds)
+                if (positiveTransactionAmount == 0 || transaction.TransactionAmount.Amount[0] != '-')
+                {
+                    continue;
+                }
+
                 // Check if the transaction already exists in the database
                 var existingTransaction = await context.Transactions
                     .AnyAsync(t => t.Id == transaction.TransactionId);
@@ -93,9 +108,6 @@ namespace Orbit.Domain.Services.Finance
                 {
                     continue;
                 }
-
-                //Convert the amount to a positive
-                var positiveTransactionAmount = Math.Abs((int)(decimal.Parse(transaction.TransactionAmount.Amount) * 100));
 
                 await context.Transactions.AddAsync(new Transactions
                 {
