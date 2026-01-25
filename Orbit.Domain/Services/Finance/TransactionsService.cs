@@ -224,8 +224,9 @@ namespace Orbit.Domain.Services.Finance
 
             if (validSplits.Count == 0)
             {
-                // All amounts were discarded (potId == -1), just remove the original transaction
-                context.Transactions.Remove(originalTransaction);
+                // All amounts were discarded (potId == -1), set transaction to 0p and mark as processed
+                originalTransaction.TransactionAmount = 0;
+                originalTransaction.Processed = true;
             }
             else if (validSplits.Count == 1)
             {

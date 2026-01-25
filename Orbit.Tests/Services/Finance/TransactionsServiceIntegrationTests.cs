@@ -555,7 +555,7 @@ namespace Orbit.Tests.Services.Finance
         }
 
         [Test]
-        public async Task SplitTransaction_ShouldRemoveTransaction_WhenAllSplitsAreDiscarded()
+        public async Task SplitTransaction_ShouldSetTransactionTo0p_WhenAllSplitsAreDiscarded()
         {
             // Arrange
             var transaction = DbContext.Transactions.First();
@@ -572,8 +572,10 @@ namespace Orbit.Tests.Services.Finance
             await _transactionsService.SplitTransaction(request);
 
             // Assert
-            var deletedTransaction = await DbContext.Transactions.FindAsync(transactionId);
-            Assert.That(deletedTransaction, Is.Null);
+            var updatedTransaction = await DbContext.Transactions.FindAsync(transactionId);
+            Assert.That(updatedTransaction, Is.Not.Null);
+            Assert.That(updatedTransaction.TransactionAmount, Is.EqualTo(0));
+            Assert.That(updatedTransaction.Processed, Is.True);
         }
 
         [Test]
