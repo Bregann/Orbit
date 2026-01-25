@@ -41,10 +41,20 @@ namespace Orbit.Domain.Services.Finance
                 //Convert the amount to a positive
                 var positiveTransactionAmount = Math.Abs(transaction.Amount);
 
+                var merchantName = transaction.Merchant?.Name ?? "Unknown";
+
+                // Skip excluded merchants
+                if (merchantName == "Unknown" || 
+                    merchantName.Contains("MONZO CARD MONZO VIA MOBILE") || 
+                    merchantName.Contains("NSANDI"))
+                {
+                    continue;
+                }
+
                 await context.Transactions.AddAsync(new Transactions
                 {
                     Id = transaction.Id,
-                    MerchantName = transaction.Merchant?.Name ?? "Unknown",
+                    MerchantName = merchantName,
                     ImgUrl = transaction.Merchant?.Logo,
                     TransactionAmount = positiveTransactionAmount,
                     Processed = false,
@@ -53,9 +63,9 @@ namespace Orbit.Domain.Services.Finance
 
                 await context.SaveChangesAsync();
 
-                await commonsSender.SendPushNotification("New Transaction Added", $"A new transaction has been added: {transaction.Merchant?.Name ?? "Unknown"} - £{positiveTransactionAmount / 100.0:0.00}");
+                await commonsSender.SendPushNotification("New Transaction Added", $"A new transaction has been added: {merchantName} - £{positiveTransactionAmount / 100.0:0.00}");
 
-                Log.Information($"[Monzo Transactions Job] Added transaction {transaction.Id} - {transaction.Merchant?.Name ?? "Unknown"} - £{positiveTransactionAmount / 100.0:0.00}");
+                Log.Information($"[Monzo Transactions Job] Added transaction {transaction.Id} - {merchantName} - £{positiveTransactionAmount / 100.0:0.00}");
             }
         }
 
@@ -109,10 +119,20 @@ namespace Orbit.Domain.Services.Finance
                     continue;
                 }
 
+                var merchantName = transaction.RemittanceInformationUnstructured ?? "Unknown";
+
+                // Skip excluded merchants
+                if (merchantName == "Unknown" || 
+                    merchantName.Contains("MONZO CARD MONZO VIA MOBILE") || 
+                    merchantName.Contains("NSANDI"))
+                {
+                    continue;
+                }
+
                 await context.Transactions.AddAsync(new Transactions
                 {
                     Id = transaction.TransactionId,
-                    MerchantName = transaction.RemittanceInformationUnstructured ?? "Unknown",
+                    MerchantName = merchantName,
                     ImgUrl = null,
                     TransactionAmount = positiveTransactionAmount,
                     Processed = false,
@@ -121,9 +141,9 @@ namespace Orbit.Domain.Services.Finance
 
                 await context.SaveChangesAsync();
 
-                await commonsSender.SendPushNotification("New Transaction Added", $"A new transaction has been added: {transaction.RemittanceInformationUnstructured ?? "Unknown"} - £{positiveTransactionAmount / 100.0:0.00}");
+                await commonsSender.SendPushNotification("New Transaction Added", $"A new transaction has been added: {merchantName} - £{positiveTransactionAmount / 100.0:0.00}");
 
-                Log.Information($"[Open Banking Transactions Job] Added transaction {transaction.TransactionId} - {transaction.RemittanceInformationUnstructured ?? "Unknown"} - £{positiveTransactionAmount / 100.0:0.00}");
+                Log.Information($"[Open Banking Transactions Job] Added transaction {transaction.TransactionId} - {merchantName} - £{positiveTransactionAmount / 100.0:0.00}");
             }
         }
 

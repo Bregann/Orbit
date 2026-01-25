@@ -201,6 +201,90 @@ namespace Orbit.Tests.Services.Finance
         }
 
         [Test]
+        public async Task GetMonzoTransactionsAndAddToDatabase_ShouldNotAddUnknownMerchant()
+        {
+            // Arrange
+            var transactions = new List<Transaction>
+            {
+                new Transaction
+                {
+                    Id = "monzo-txn-unknown",
+                    Amount = -500,
+                    Created = DateTimeOffset.UtcNow,
+                    Merchant = null
+                }
+            };
+
+            _mockBankApiHelper.Setup(x => x.GetMonzoTransactions())
+                .ReturnsAsync(transactions);
+
+            var initialCount = await DbContext.Transactions.CountAsync();
+
+            // Act
+            await _bankService.GetMonzoTransactionsAndAddToDatabase();
+
+            // Assert
+            var finalCount = await DbContext.Transactions.CountAsync();
+            Assert.That(finalCount, Is.EqualTo(initialCount)); // Should not be added
+        }
+
+        [Test]
+        public async Task GetMonzoTransactionsAndAddToDatabase_ShouldNotAddMonzoBankTransfer()
+        {
+            // Arrange
+            var transactions = new List<Transaction>
+            {
+                new Transaction
+                {
+                    Id = "monzo-txn-monzo-card",
+                    Amount = -1000,
+                    Created = DateTimeOffset.UtcNow,
+                    Merchant = new Merchant { Name = "MONZO CARD MONZO VIA MOBILE", Logo = "" }
+                }
+            };
+
+            _mockBankApiHelper.Setup(x => x.GetMonzoTransactions())
+                .ReturnsAsync(transactions);
+
+            var initialCount = await DbContext.Transactions.CountAsync();
+
+            // Act
+            await _bankService.GetMonzoTransactionsAndAddToDatabase();
+
+            // Assert
+            var finalCount = await DbContext.Transactions.CountAsync();
+            Assert.That(finalCount, Is.EqualTo(initialCount)); // Should not be added
+        }
+
+        [Test]
+        public async Task GetMonzoTransactionsAndAddToDatabase_ShouldNotAddNsandi()
+        {
+            // Arrange
+            var transactions = new List<Transaction>
+            {
+                new Transaction
+                {
+                    Id = "monzo-txn-nsandi",
+                    Amount = -5000,
+                    Created = DateTimeOffset.UtcNow,
+                    Merchant = new Merchant { Name = "NSANDI SAVINGS ACCOUNT", Logo = "" }
+                }
+            };
+
+            _mockBankApiHelper.Setup(x => x.GetMonzoTransactions())
+                .ReturnsAsync(transactions);
+
+            var initialCount = await DbContext.Transactions.CountAsync();
+
+            // Act
+            await _bankService.GetMonzoTransactionsAndAddToDatabase();
+
+            // Assert
+            var finalCount = await DbContext.Transactions.CountAsync();
+            Assert.That(finalCount, Is.EqualTo(initialCount)); // Should not be added
+        }
+
+        [Test]
         public async Task GetOpenBankingTransactionsAndAddToDatabase_ShouldNotProceed_WhenNoAccessToken()
         {
             // Arrange
@@ -284,6 +368,108 @@ namespace Orbit.Tests.Services.Finance
             var finalCount = await DbContext.Transactions.CountAsync();
             Assert.That(finalCount, Is.EqualTo(initialCount)); // Should not be added
             _mockCommsSenderClient.Verify(x => x.SendPushNotification(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
+        public async Task GetOpenBankingTransactionsAndAddToDatabase_ShouldNotAddUnknownMerchant()
+        {
+            // Arrange
+            var response = new GoCardlessTransactionsResponse
+            {
+                Transactions = new Transactions
+                {
+                    Booked = new[]
+                    {
+                        new Booked
+                        {
+                            TransactionId = "gocardless-txn-unknown",
+                            RemittanceInformationUnstructured = "Unknown",
+                            BookingDateTime = DateTimeOffset.UtcNow,
+                            TransactionAmount = new TransactionAmount { Amount = "-10.00" }
+                        }
+                    }
+                }
+            };
+
+            _mockBankApiHelper.Setup(x => x.GetGoCardlessBankingDataTransactions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(response);
+
+            var initialCount = await DbContext.Transactions.CountAsync();
+
+            // Act
+            await _bankService.GetOpenBankingTransactionsAndAddToDatabase();
+
+            // Assert
+            var finalCount = await DbContext.Transactions.CountAsync();
+            Assert.That(finalCount, Is.EqualTo(initialCount)); // Should not be added
+        }
+
+        [Test]
+        public async Task GetOpenBankingTransactionsAndAddToDatabase_ShouldNotAddMonzoBankTransfer()
+        {
+            // Arrange
+            var response = new GoCardlessTransactionsResponse
+            {
+                Transactions = new Transactions
+                {
+                    Booked = new[]
+                    {
+                        new Booked
+                        {
+                            TransactionId = "gocardless-txn-monzo-card",
+                            RemittanceInformationUnstructured = "MONZO CARD MONZO VIA MOBILE TRANSFER",
+                            BookingDateTime = DateTimeOffset.UtcNow,
+                            TransactionAmount = new TransactionAmount { Amount = "-50.00" }
+                        }
+                    }
+                }
+            };
+
+            _mockBankApiHelper.Setup(x => x.GetGoCardlessBankingDataTransactions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(response);
+
+            var initialCount = await DbContext.Transactions.CountAsync();
+
+            // Act
+            await _bankService.GetOpenBankingTransactionsAndAddToDatabase();
+
+            // Assert
+            var finalCount = await DbContext.Transactions.CountAsync();
+            Assert.That(finalCount, Is.EqualTo(initialCount)); // Should not be added
+        }
+
+        [Test]
+        public async Task GetOpenBankingTransactionsAndAddToDatabase_ShouldNotAddNsandi()
+        {
+            // Arrange
+            var response = new GoCardlessTransactionsResponse
+            {
+                Transactions = new Transactions
+                {
+                    Booked = new[]
+                    {
+                        new Booked
+                        {
+                            TransactionId = "gocardless-txn-nsandi",
+                            RemittanceInformationUnstructured = "NSANDI SAVINGS ACCOUNT DEPOSIT",
+                            BookingDateTime = DateTimeOffset.UtcNow,
+                            TransactionAmount = new TransactionAmount { Amount = "-100.00" }
+                        }
+                    }
+                }
+            };
+
+            _mockBankApiHelper.Setup(x => x.GetGoCardlessBankingDataTransactions(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(response);
+
+            var initialCount = await DbContext.Transactions.CountAsync();
+
+            // Act
+            await _bankService.GetOpenBankingTransactionsAndAddToDatabase();
+
+            // Assert
+            var finalCount = await DbContext.Transactions.CountAsync();
+            Assert.That(finalCount, Is.EqualTo(initialCount)); // Should not be added
         }
 
         [Test]
