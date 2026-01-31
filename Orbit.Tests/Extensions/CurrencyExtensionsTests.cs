@@ -5,15 +5,15 @@ namespace Orbit.Tests.Extensions
     [TestFixture]
     public class CurrencyExtensionsTests
     {
-        [TestCase(0L, "£0.00")]
-        [TestCase(100L, "£1.00")]
-        [TestCase(1000L, "£10.00")]
-        [TestCase(12345L, "£123.45")]
-        [TestCase(999999L, "£9,999.99")]
-        [TestCase(1000000L, "£10,000.00")]
-        [TestCase(1L, "£0.01")]
-        [TestCase(99L, "£0.99")]
-        [TestCase(50L, "£0.50")]
+        [TestCase(0L, "\u00A30.00")]
+        [TestCase(100L, "\u00A31.00")]
+        [TestCase(1000L, "\u00A310.00")]
+        [TestCase(12345L, "\u00A3123.45")]
+        [TestCase(999999L, "\u00A39,999.99")]
+        [TestCase(1000000L, "\u00A310,000.00")]
+        [TestCase(1L, "\u00A30.01")]
+        [TestCase(99L, "\u00A30.99")]
+        [TestCase(50L, "\u00A30.50")]
         public void ToPoundsString_Long_ShouldFormatCorrectly(long pence, string expected)
         {
             // Act
@@ -23,15 +23,15 @@ namespace Orbit.Tests.Extensions
             Assert.That(result, Is.EqualTo(expected));
         }
 
-        [TestCase(0, "£0.00")]
-        [TestCase(100, "£1.00")]
-        [TestCase(1000, "£10.00")]
-        [TestCase(12345, "£123.45")]
-        [TestCase(999999, "£9,999.99")]
-        [TestCase(1000000, "£10,000.00")]
-        [TestCase(1, "£0.01")]
-        [TestCase(99, "£0.99")]
-        [TestCase(50, "£0.50")]
+        [TestCase(0, "\u00A30.00")]
+        [TestCase(100, "\u00A31.00")]
+        [TestCase(1000, "\u00A310.00")]
+        [TestCase(12345, "\u00A3123.45")]
+        [TestCase(999999, "\u00A39,999.99")]
+        [TestCase(1000000, "\u00A310,000.00")]
+        [TestCase(1, "\u00A30.01")]
+        [TestCase(99, "\u00A30.99")]
+        [TestCase(50, "\u00A30.50")]
         public void ToPoundsString_Decimal_ShouldFormatCorrectly(decimal pence, string expected)
         {
             // Act
@@ -51,7 +51,7 @@ namespace Orbit.Tests.Extensions
             var result = negativePence.ToPoundsString();
 
             // Assert
-            Assert.That(result, Is.EqualTo("-£123.45"));
+            Assert.That(result, Is.EqualTo("-\u00A3123.45"));
         }
 
         [Test]
@@ -64,33 +64,33 @@ namespace Orbit.Tests.Extensions
             var result = negativePence.ToPoundsString();
 
             // Assert
-            Assert.That(result, Is.EqualTo("-£123.45"));
+            Assert.That(result, Is.EqualTo("-\u00A3123.45"));
         }
 
         [Test]
         public void ToPoundsString_Long_ShouldHandleVeryLargeValues()
         {
             // Arrange
-            long largePence = 123456789012L; // £1,234,567,890.12
+            long largePence = 123456789012L; // \u00A31,234,567,890.12
 
             // Act
             var result = largePence.ToPoundsString();
 
             // Assert
-            Assert.That(result, Is.EqualTo("£1,234,567,890.12"));
+            Assert.That(result, Is.EqualTo("\u00A31,234,567,890.12"));
         }
 
         [Test]
         public void ToPoundsString_Decimal_ShouldHandleVeryLargeValues()
         {
             // Arrange
-            decimal largePence = 123456789012m; // £1,234,567,890.12
+            decimal largePence = 123456789012m; // \u00A31,234,567,890.12
 
             // Act
             var result = largePence.ToPoundsString();
 
             // Assert
-            Assert.That(result, Is.EqualTo("£1,234,567,890.12"));
+            Assert.That(result, Is.EqualTo("\u00A31,234,567,890.12"));
         }
 
         [Test]
@@ -103,8 +103,8 @@ namespace Orbit.Tests.Extensions
             var result = pence.ToPoundsString();
 
             // Assert
-            Assert.That(result, Is.EqualTo("£123.45"));
-            Assert.That(result, Does.Not.Contain("£123.449"));
+            Assert.That(result, Is.EqualTo("\u00A3123.45"));
+            Assert.That(result, Does.Not.Contain("\u00A3123.449"));
         }
 
         [Test]
@@ -117,64 +117,64 @@ namespace Orbit.Tests.Extensions
             var result = pence.ToPoundsString();
 
             // Assert
-            // Should round to 2 decimal places: 123.456789 ? £123.46
-            Assert.That(result, Is.EqualTo("£123.46"));
+            // Should round to 2 decimal places: 123.456789 ? \u00A3123.46
+            Assert.That(result, Is.EqualTo("\u00A3123.46"));
         }
 
         [Test]
         public void ToPoundsString_Long_ShouldIncludeThousandsSeparator()
         {
             // Arrange
-            long pence = 1234567L; // £12,345.67
+            long pence = 1234567L; // \u00A312,345.67
 
             // Act
             var result = pence.ToPoundsString();
 
             // Assert
             Assert.That(result, Does.Contain(","));
-            Assert.That(result, Is.EqualTo("£12,345.67"));
+            Assert.That(result, Is.EqualTo("\u00A312,345.67"));
         }
 
         [Test]
         public void ToPoundsString_Decimal_ShouldIncludeThousandsSeparator()
         {
             // Arrange
-            decimal pence = 1234567m; // £12,345.67
+            decimal pence = 1234567m; // \u00A312,345.67
 
             // Act
             var result = pence.ToPoundsString();
 
             // Assert
             Assert.That(result, Does.Contain(","));
-            Assert.That(result, Is.EqualTo("£12,345.67"));
+            Assert.That(result, Is.EqualTo("\u00A312,345.67"));
         }
 
         [Test]
         public void ToPoundsString_Long_ShouldAlwaysShowTwoDecimalPlaces()
         {
             // Arrange
-            long wholePounds = 100L; // £1.00
+            long wholePounds = 100L; // \u00A31.00
 
             // Act
             var result = wholePounds.ToPoundsString();
 
             // Assert
-            Assert.That(result, Is.EqualTo("£1.00"));
-            Assert.That(result, Does.Not.EqualTo("£1"));
+            Assert.That(result, Is.EqualTo("\u00A31.00"));
+            Assert.That(result, Does.Not.EqualTo("\u00A31"));
         }
 
         [Test]
         public void ToPoundsString_Decimal_ShouldAlwaysShowTwoDecimalPlaces()
         {
             // Arrange
-            decimal wholePounds = 100m; // £1.00
+            decimal wholePounds = 100m; // \u00A31.00
 
             // Act
             var result = wholePounds.ToPoundsString();
 
             // Assert
-            Assert.That(result, Is.EqualTo("£1.00"));
-            Assert.That(result, Does.Not.EqualTo("£1"));
+            Assert.That(result, Is.EqualTo("\u00A31.00"));
+            Assert.That(result, Does.Not.EqualTo("\u00A31"));
         }
 
         [Test]
@@ -216,7 +216,7 @@ namespace Orbit.Tests.Extensions
             var result = pence.ToPoundsString();
 
             // Assert
-            Assert.That(result, Does.StartWith("£"));
+            Assert.That(result, Does.StartWith("\u00A3"));
         }
 
         [Test]
@@ -229,7 +229,7 @@ namespace Orbit.Tests.Extensions
             var result = pence.ToPoundsString();
 
             // Assert
-            Assert.That(result, Does.StartWith("£"));
+            Assert.That(result, Does.StartWith("\u00A3"));
         }
     }
 }
