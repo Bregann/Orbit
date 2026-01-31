@@ -98,9 +98,9 @@ namespace Orbit.Tests.Services.Finance
 
             // Assert
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.TotalSpent, Is.EqualTo(historicMonth.AmountSpent));
-            Assert.That(result.TotalSaved, Is.EqualTo(historicMonth.AmountSaved));
-            Assert.That(result.AmountLeftOver, Is.EqualTo(historicMonth.AmountLeftOver));
+            Assert.That(result.TotalSpent, Is.EqualTo(historicMonth.AmountSpent / 100m));
+            Assert.That(result.TotalSaved, Is.EqualTo(historicMonth.AmountSaved / 100m));
+            Assert.That(result.AmountLeftOver, Is.EqualTo(historicMonth.AmountLeftOver / 100m));
         }
 
         [Test]

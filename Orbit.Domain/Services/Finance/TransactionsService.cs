@@ -249,8 +249,9 @@ namespace Orbit.Domain.Services.Finance
             }
             else
             {
-                // Multiple valid splits, remove original and create new transactions
-                context.Transactions.Remove(originalTransaction);
+                // Multiple valid splits, set original to 0p and processed and create new transactions
+                originalTransaction.TransactionAmount = 0;
+                originalTransaction.Processed = true;
 
                 for (int i = 0; i < validSplits.Count; i++)
                 {
