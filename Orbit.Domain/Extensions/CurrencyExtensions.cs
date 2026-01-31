@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Orbit.Domain.Extensions
 {
     public static class CurrencyExtensions
@@ -11,7 +13,9 @@ namespace Orbit.Domain.Extensions
         {
             var pounds = pence / 100m;
             var sign = pounds < 0 ? "-" : "";
-            return $"{sign}\u00A3{Math.Abs(pounds):N2}";
+            // We use "N2" with an explicit GB culture to ensure commas/dots are correct
+            var formattedNumber = Math.Abs(pounds).ToString("N2", CultureInfo.GetCultureInfo("en-GB"));
+            return $"{sign}\u00A3{formattedNumber}";
         }
 
         /// <summary>
@@ -23,7 +27,9 @@ namespace Orbit.Domain.Extensions
         {
             var pounds = pence / 100m;
             var sign = pounds < 0 ? "-" : "";
-            return $"{sign}\u00A3{Math.Abs(pounds):N2}";
+            // We use "N2" with an explicit GB culture to ensure commas/dots are correct
+            var formattedNumber = Math.Abs(pounds).ToString("N2", CultureInfo.GetCultureInfo("en-GB"));
+            return $"{sign}\u00A3{formattedNumber}";
         }
     }
 }
