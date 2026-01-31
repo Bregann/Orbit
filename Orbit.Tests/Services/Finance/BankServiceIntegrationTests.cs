@@ -167,8 +167,7 @@ namespace Orbit.Tests.Services.Finance
 
             // Assert
             var savedTransaction = await DbContext.Transactions.FindAsync("monzo-null-merchant");
-            Assert.That(savedTransaction, Is.Not.Null);
-            Assert.That(savedTransaction.MerchantName, Is.EqualTo("Unknown"));
+            Assert.That(savedTransaction, Is.Null);
         }
 
         [Test]
@@ -267,7 +266,7 @@ namespace Orbit.Tests.Services.Finance
                     Id = "monzo-txn-nsandi",
                     Amount = -5000,
                     Created = DateTimeOffset.UtcNow,
-                    Merchant = new Merchant { Name = "NSANDI SAVINGS ACCOUNT", Logo = "" }
+                    Merchant = new Merchant { Name = "NS&I", Logo = "" }
                 }
             };
 
@@ -451,7 +450,7 @@ namespace Orbit.Tests.Services.Finance
                         new Booked
                         {
                             TransactionId = "gocardless-txn-nsandi",
-                            RemittanceInformationUnstructured = "NSANDI SAVINGS ACCOUNT DEPOSIT",
+                            RemittanceInformationUnstructured = "NS&I SAVINGS ACCOUNT DEPOSIT",
                             BookingDateTime = DateTimeOffset.UtcNow,
                             TransactionAmount = new TransactionAmount { Amount = "-100.00" }
                         }

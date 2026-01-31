@@ -647,12 +647,16 @@ namespace Orbit.Tests.Services.Finance
                 ]
             };
 
+            var transaction3ExpectedAmount = transaction.TransactionAmount - 1500;
+
             // Act
             await _transactionsService.SplitTransaction(request);
 
-            // Assert - Original transaction should be removed
-            var originalDeleted = await DbContext.Transactions.FindAsync(transactionId);
-            Assert.That(originalDeleted, Is.Null);
+            // Assert - Original transaction should be processed and set to 0
+            var originalTransaction = await DbContext.Transactions.FindAsync(transactionId);
+            Assert.That(originalTransaction, Is.Not.Null);
+            Assert.That(originalTransaction.Processed, Is.True);
+            Assert.That(originalTransaction.TransactionAmount, Is.Zero);
 
             // Verify new transactions were created
             var newTransaction1 = await DbContext.Transactions.FindAsync($"{transactionId}-1");
@@ -671,7 +675,7 @@ namespace Orbit.Tests.Services.Finance
             Assert.That(newTransaction2.PotId, Is.EqualTo(pot2.Id));
 
             Assert.That(newTransaction3, Is.Not.Null);
-            Assert.That(newTransaction3!.TransactionAmount, Is.EqualTo(transaction.TransactionAmount - 1500));
+            Assert.That(newTransaction3!.TransactionAmount, Is.EqualTo(transaction3ExpectedAmount));
             Assert.That(newTransaction3.PotId, Is.EqualTo(pot3.Id));
 
             // Verify pot amounts
@@ -686,8 +690,8 @@ namespace Orbit.Tests.Services.Finance
             Assert.That(updatedPot2!.PotAmountLeft, Is.EqualTo(originalPot2AmountLeft - 500));
             Assert.That(updatedPot2.PotAmountSpent, Is.EqualTo(originalPot2AmountSpent + 500));
 
-            Assert.That(updatedPot3!.PotAmountLeft, Is.EqualTo(originalPot3AmountLeft - (transaction.TransactionAmount - 1500)));
-            Assert.That(updatedPot3.PotAmountSpent, Is.EqualTo(originalPot3AmountSpent + (transaction.TransactionAmount - 1500)));
+            Assert.That(updatedPot3!.PotAmountLeft, Is.EqualTo(originalPot3AmountLeft - transaction3ExpectedAmount));
+            Assert.That(updatedPot3.PotAmountSpent, Is.EqualTo(originalPot3AmountSpent + transaction3ExpectedAmount));
         }
 
         [Test]
@@ -802,12 +806,16 @@ namespace Orbit.Tests.Services.Finance
                 ]
             };
 
+            var transaction2ExpectedAmount = transaction.TransactionAmount - 1500;
+
             // Act
             await _transactionsService.SplitTransaction(request);
 
-            // Assert - Original should be deleted
-            var originalDeleted = await DbContext.Transactions.FindAsync(transactionId);
-            Assert.That(originalDeleted, Is.Null);
+            // Assert - Original transaction should be processed and set to 0
+            var originalTransaction = await DbContext.Transactions.FindAsync(transactionId);
+            Assert.That(originalTransaction, Is.Not.Null);
+            Assert.That(originalTransaction.Processed, Is.True);
+            Assert.That(originalTransaction.TransactionAmount, Is.Zero);
 
             // Only 2 new transactions should be created (discarded split not created)
             var newTransaction1 = await DbContext.Transactions.FindAsync($"{transactionId}-1");
@@ -819,7 +827,7 @@ namespace Orbit.Tests.Services.Finance
             Assert.That(newTransaction1.PotId, Is.EqualTo(pot1.Id));
 
             Assert.That(newTransaction2, Is.Not.Null);
-            Assert.That(newTransaction2!.TransactionAmount, Is.EqualTo(transaction.TransactionAmount - 1500));
+            Assert.That(newTransaction2!.TransactionAmount, Is.EqualTo(transaction2ExpectedAmount));
             Assert.That(newTransaction2.PotId, Is.EqualTo(pot2.Id));
 
             Assert.That(newTransaction3, Is.Null); // Third split is not created (only 2 valid splits)
