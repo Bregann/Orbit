@@ -20,10 +20,15 @@ import { useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import Placeholder from '@tiptap/extension-placeholder'
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { TableHeader } from '@tiptap/extension-table-header'
 import { useState, useEffect } from 'react'
 import { IconEdit, IconStar, IconStarFilled, IconChevronRight, IconHome, IconNote, IconPlus } from '@tabler/icons-react'
 import { useMutationPut } from '@/helpers/mutations/useMutationPut'
 import { useQuery } from '@tanstack/react-query'
+import styles from '@/css/notesEditor.module.css'
 import { doQueryGet } from '@/helpers/apiClient'
 import notificationHelper from '@/helpers/notificationHelper'
 import { IconCheck, IconX } from '@tabler/icons-react'
@@ -71,6 +76,12 @@ export default function NotesEditor({ selectedPageId, folders, onCreatePage }: N
       Underline,
       TiptapLink,
       Placeholder.configure({ placeholder: 'Start writing...' }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow.configure(),
+      TableHeader.configure(),
+      TableCell.configure(),
     ],
     content: page?.content || '',
     editable: isEditing,
@@ -78,7 +89,7 @@ export default function NotesEditor({ selectedPageId, folders, onCreatePage }: N
     onUpdate: () => {
       setHasUnsavedChanges(true)
     },
-  })
+  }, [page?.content, isEditing])
 
   useEffect(() => {
     if (editor && page) {
@@ -232,7 +243,7 @@ export default function NotesEditor({ selectedPageId, folders, onCreatePage }: N
         <Divider />
 
         {/* Rich Text Editor */}
-        <Box style={{ flex: 1 }}>
+        <Box style={{ flex: 1 }} className={styles.editorContent}>
           <RichTextEditor editor={editor} styles={{
             root: {
               border: isEditing ? undefined : 'none',
@@ -275,6 +286,85 @@ export default function NotesEditor({ selectedPageId, folders, onCreatePage }: N
                 <RichTextEditor.ControlsGroup>
                   <RichTextEditor.Blockquote />
                   <RichTextEditor.Hr />
+                </RichTextEditor.ControlsGroup>
+
+                <RichTextEditor.ControlsGroup>
+                  <RichTextEditor.Control
+                    onClick={() => {
+                      if (editor) {
+                        editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+                      }
+                    }}
+                    aria-label="Insert table"
+                    title="Insert table"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="3" y1="9" x2="21" y2="9"></line>
+                      <line x1="3" y1="15" x2="21" y2="15"></line>
+                      <line x1="9" y1="3" x2="9" y2="21"></line>
+                      <line x1="15" y1="3" x2="15" y2="21"></line>
+                    </svg>
+                  </RichTextEditor.Control>
+                  <RichTextEditor.Control
+                    onClick={() => editor?.chain().focus().addColumnBefore().run()}
+                    aria-label="Add column before"
+                    title="Add column before"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="8" y="4" width="8" height="16" rx="1"></rect>
+                      <line x1="12" y1="4" x2="12" y2="20"></line>
+                      <path d="M4 12h4M6 10v4"></path>
+                    </svg>
+                  </RichTextEditor.Control>
+                  <RichTextEditor.Control
+                    onClick={() => editor?.chain().focus().addRowAfter().run()}
+                    aria-label="Add row after"
+                    title="Add row after"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="4" y="8" width="16" height="8" rx="1"></rect>
+                      <line x1="4" y1="12" x2="20" y2="12"></line>
+                      <path d="M12 20v-4M10 18h4"></path>
+                    </svg>
+                  </RichTextEditor.Control>
+                  <RichTextEditor.Control
+                    onClick={() => editor?.chain().focus().deleteColumn().run()}
+                    aria-label="Delete column"
+                    title="Delete column"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="8" y="4" width="8" height="16" rx="1"></rect>
+                      <line x1="12" y1="4" x2="12" y2="20"></line>
+                      <line x1="3" y1="9" x2="6" y2="15"></line>
+                      <line x1="6" y1="9" x2="3" y2="15"></line>
+                    </svg>
+                  </RichTextEditor.Control>
+                  <RichTextEditor.Control
+                    onClick={() => editor?.chain().focus().deleteRow().run()}
+                    aria-label="Delete row"
+                    title="Delete row"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="4" y="8" width="16" height="8" rx="1"></rect>
+                      <line x1="4" y1="12" x2="20" y2="12"></line>
+                      <line x1="9" y1="3" x2="15" y2="6"></line>
+                      <line x1="15" y1="3" x2="9" y2="6"></line>
+                    </svg>
+                  </RichTextEditor.Control>
+                  <RichTextEditor.Control
+                    onClick={() => editor?.chain().focus().deleteTable().run()}
+                    aria-label="Delete table"
+                    title="Delete table"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 6h18"></path>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                  </RichTextEditor.Control>
                 </RichTextEditor.ControlsGroup>
 
                 <RichTextEditor.ControlsGroup>
