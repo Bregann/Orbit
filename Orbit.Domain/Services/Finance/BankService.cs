@@ -45,7 +45,7 @@ namespace Orbit.Domain.Services.Finance
 
                 // Skip excluded merchants
                 if (merchantName == "Unknown" ||
-                    merchantName.Contains("MONZO CARD MONZO VIA MOBILE") ||
+                    merchantName.Contains("MONZO CARD        MONZO             VIA MOBILE") ||
                     merchantName.Contains("NS&I"))
                 {
                     continue;
@@ -123,7 +123,7 @@ namespace Orbit.Domain.Services.Finance
 
                 // Skip excluded merchants
                 if (merchantName == "Unknown" ||
-                    merchantName.Contains("MONZO CARD MONZO VIA MOBILE") ||
+                    merchantName.Contains("MONZO CARD        MONZO             VIA MOBILE") ||
                     merchantName.Contains("NS&I"))
                 {
                     continue;

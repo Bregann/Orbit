@@ -238,7 +238,7 @@ namespace Orbit.Tests.Services.Finance
                     Id = "monzo-txn-monzo-card",
                     Amount = -1000,
                     Created = DateTimeOffset.UtcNow,
-                    Merchant = new Merchant { Name = "MONZO CARD MONZO VIA MOBILE", Logo = "" }
+                    Merchant = new Merchant { Name = "MONZO CARD        MONZO             VIA MOBILE", Logo = "" }
                 }
             };
 
@@ -416,7 +416,7 @@ namespace Orbit.Tests.Services.Finance
                         new Booked
                         {
                             TransactionId = "gocardless-txn-monzo-card",
-                            RemittanceInformationUnstructured = "MONZO CARD MONZO VIA MOBILE TRANSFER",
+                            RemittanceInformationUnstructured = "MONZO CARD        MONZO             VIA MOBILE TRANSFER",
                             BookingDateTime = DateTimeOffset.UtcNow,
                             TransactionAmount = new TransactionAmount { Amount = "-50.00" }
                         }
