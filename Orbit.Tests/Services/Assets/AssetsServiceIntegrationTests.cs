@@ -765,7 +765,7 @@ namespace Orbit.Tests.Services.Assets
             var updatedAsset = await DbContext.Assets.FindAsync(asset.Id);
 
             Assert.That(updatedAsset, Is.Not.Null);
-            Assert.That(updatedAsset.ReceiptPath, Does.Contain(asset.AssetName.Replace(" ", "_")));
+            Assert.That(updatedAsset.ReceiptPath, Does.Contain(asset.Id.ToString()));
             Assert.That(updatedAsset.ReceiptPath, Does.Contain("Receipt"));
             Assert.That(updatedAsset.ReceiptPath, Does.EndWith(extension));
 
