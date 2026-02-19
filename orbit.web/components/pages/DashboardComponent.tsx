@@ -24,7 +24,8 @@ import {
   IconCalendarEvent,
   IconTrendingDown,
   IconMoodSmile,
-  IconNotebook
+  IconNotebook,
+  IconDeviceLaptop
 } from '@tabler/icons-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -94,6 +95,13 @@ export default function DashboardComponent() {
       icon: IconFiles,
       color: 'violet',
       href: '/documents'
+    },
+    {
+      title: 'Assets',
+      description: 'Devices & equipment',
+      icon: IconDeviceLaptop,
+      color: 'indigo',
+      href: '/assets'
     },
     {
       title: 'Shopping List',

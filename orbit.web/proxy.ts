@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { isTokenExpired } from './helpers/jwtHelper'
 
 // Configuration
 // Use environment variables for configuration
@@ -21,14 +22,21 @@ export async function proxy(request: NextRequest) {
   const publicRoutes = ['/login', '/register', '/forgot-password']
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
 
-  // If user is on login page and already authenticated, redirect to home
-  if (pathname === '/login' && accessToken !== undefined) {
+  // If user is on login page and already authenticated with valid token, redirect to home
+  if (pathname === '/login' && accessToken !== undefined && !isTokenExpired(accessToken)) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
-  // Only when we have a refreshToken but no accessToken
-  if (accessToken === undefined && refreshToken !== undefined) {
+  // Check if we need to refresh the token:
+  // 1. Access token is missing OR expired
+  // 2. Refresh token exists
+  const needsRefresh = 
+    refreshToken !== undefined && 
+    (accessToken === undefined || isTokenExpired(accessToken))
+
+  if (needsRefresh) {
     try {
+      console.log('Access token expired or missing, attempting refresh...')
       const refreshRes = await fetch(`${API_BASE_URL}/Auth/RefreshToken`, {
         method: 'POST',
         headers: {
