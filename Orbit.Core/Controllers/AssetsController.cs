@@ -148,7 +148,7 @@ namespace Orbit.Core.Controllers
             try
             {
                 var (fileBytes, fileName) = await assetsService.DownloadAssetDocument(assetId, documentType);
-                
+
                 var contentType = Path.GetExtension(fileName).ToLower() switch
                 {
                     ".pdf" => "application/pdf",

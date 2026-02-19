@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const expirationTime = payload.exp * 1000
     const now = Date.now()
     const timeUntilExpiry = expirationTime - now
-    
+
     // Refresh 2 minutes before expiration (or immediately if already expired/expiring soon)
     const refreshTime = Math.max(0, timeUntilExpiry - 120000)
 
@@ -106,7 +106,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const res = await doPost('/api/auth/LoginUser', { body: { email, password } })
     if (res.status === 200) {
       console.log('Login successful')
-      
+
       // Get the new token and schedule refresh
       const token = getAccessToken()
       if (token) {
@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           scheduleTokenRefresh(token)
         }
       }
-      
+
       router.replace('/')
       return true
     }

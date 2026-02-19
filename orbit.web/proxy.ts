@@ -30,8 +30,8 @@ export async function proxy(request: NextRequest) {
   // Check if we need to refresh the token:
   // 1. Access token is missing OR expired
   // 2. Refresh token exists
-  const needsRefresh = 
-    refreshToken !== undefined && 
+  const needsRefresh =
+    refreshToken !== undefined &&
     (accessToken === undefined || isTokenExpired(accessToken))
 
   if (needsRefresh) {

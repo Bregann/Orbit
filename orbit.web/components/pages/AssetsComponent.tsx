@@ -26,7 +26,7 @@ import {
   IconX
 } from '@tabler/icons-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { doQueryGet, doGetBlob, doPostFormData } from '@/helpers/apiClient'
+import { doQueryGet, doPostFormData } from '@/helpers/apiClient'
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import { useMutationPost } from '@/helpers/mutations/useMutationPost'
 import { useMutationPut } from '@/helpers/mutations/useMutationPut'
@@ -117,17 +117,17 @@ export default function AssetsComponent() {
   const handleDownloadDocument = async (assetId: number, documentType: 'Receipt' | 'Manual') => {
     try {
       const response = await fetch(`/api/assets/DownloadAssetDocument?assetId=${assetId}&documentType=${documentType}`)
-      
+
       if (!response.ok) {
         throw new Error(`Failed to download ${documentType.toLowerCase()}`)
       }
 
       const blob = await response.blob()
-      
+
       // Get filename from Content-Disposition header if available
       const contentDisposition = response.headers.get('Content-Disposition')
       let filename = `${assets.find(a => a.assetId === assetId)?.assetName || 'asset'}_${documentType}`
-      
+
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
         if (filenameMatch && filenameMatch[1]) {
