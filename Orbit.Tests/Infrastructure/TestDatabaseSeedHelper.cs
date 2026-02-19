@@ -218,17 +218,81 @@ namespace Orbit.Tests.Infrastructure
             await context.SaveChangesAsync();
         }
 
+        public static async Task SeedTestAssets(AppDbContext context)
+        {
+            await context.AssetCategories.AddRangeAsync(new List<AssetCategory>
+            {
+                new AssetCategory { CategoryName = "Test Electronics" },
+                new AssetCategory { CategoryName = "Test Furniture" }
+            });
+
+            await context.SaveChangesAsync();
+
+            await context.Assets.AddRangeAsync(new List<Asset>
+            {
+                new Asset
+                {
+                    AssetName = "Test Laptop",
+                    Brand = "Test Brand",
+                    Model = "Test Model X",
+                    SerialNumber = "SN123456",
+                    PurchaseDate = DateTime.UtcNow.AddMonths(-6),
+                    PurchasePrice = 1200.00m,
+                    Location = "Test Office",
+                    WarrantyExpirationDate = DateTime.UtcNow.AddMonths(18),
+                    Notes = "Test laptop for development",
+                    Status = "Active",
+                    AssetCategoryId = 1,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-6),
+                    LastUpdatedAt = DateTime.UtcNow.AddMonths(-6)
+                },
+                new Asset
+                {
+                    AssetName = "Test Monitor",
+                    Brand = "Test Display Co",
+                    Model = "Monitor Pro",
+                    SerialNumber = "MON789012",
+                    PurchaseDate = DateTime.UtcNow.AddYears(-1),
+                    PurchasePrice = 450.00m,
+                    Location = "Test Office",
+                    WarrantyExpirationDate = DateTime.UtcNow.AddMonths(-6),
+                    Notes = "27 inch display",
+                    Status = "Active",
+                    AssetCategoryId = 1,
+                    CreatedAt = DateTime.UtcNow.AddYears(-1),
+                    LastUpdatedAt = DateTime.UtcNow.AddYears(-1)
+                },
+                new Asset
+                {
+                    AssetName = "Test Desk",
+                    Brand = "Test Furniture Inc",
+                    Model = "Standing Desk Pro",
+                    SerialNumber = "DESK345678",
+                    PurchaseDate = DateTime.UtcNow.AddYears(-2),
+                    PurchasePrice = 800.00m,
+                    Location = "Test Office",
+                    Notes = "Height adjustable desk",
+                    Status = "Active",
+                    AssetCategoryId = 2,
+                    CreatedAt = DateTime.UtcNow.AddYears(-2),
+                    LastUpdatedAt = DateTime.UtcNow.AddYears(-2)
+                }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
         public static async Task SeedTestHistoricData(AppDbContext context)
         {
             var historicMonth = new HistoricMonthlyData
             {
                 StartDate = DateTime.UtcNow.AddMonths(-1),
                 EndDate = DateTime.UtcNow.AddDays(-1),
-                MonthlyIncome = 300000, // £3000
-                AmountSpent = 150000, // £1500
-                AmountSaved = 50000, // £500
-                AmountLeftOver = 100000, // £1000
-                SubscriptionCostAmount = 5000 // £50
+                MonthlyIncome = 300000, // ï¿½3000
+                AmountSpent = 150000, // ï¿½1500
+                AmountSaved = 50000, // ï¿½500
+                AmountLeftOver = 100000, // ï¿½1000
+                SubscriptionCostAmount = 5000 // ï¿½50
             };
 
             await context.HistoricData.AddAsync(historicMonth);
@@ -506,6 +570,8 @@ namespace Orbit.Tests.Infrastructure
             context.RemoveRange(context.CalendarEventExceptions);
             context.RemoveRange(context.Documents);
             context.RemoveRange(context.DocumentCategories);
+            context.RemoveRange(context.Assets);
+            context.RemoveRange(context.AssetCategories);
             context.RemoveRange(context.ShoppingListItems);
             context.RemoveRange(context.ShoppingListQuickAddItems);
             context.RemoveRange(context.JournalEntries);

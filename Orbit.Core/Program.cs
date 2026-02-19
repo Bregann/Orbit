@@ -31,6 +31,8 @@ using Orbit.Domain.Interfaces.Api.MoodTracker;
 using Orbit.Domain.Services.MoodTracker;
 using Orbit.Domain.Interfaces.Api.Fitbit;
 using Orbit.Domain.Services.Fitbit;
+using Orbit.Domain.Interfaces.Api.Assets;
+using Orbit.Domain.Services.Assets;
 
 #if DEBUG
 using Hangfire.MemoryStorage;
@@ -86,6 +88,7 @@ builder.Services.AddScoped<IMoodTrackerService, MoodTrackerService>();
 builder.Services.AddScoped<INoteService, NotesService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddScoped<IFitbitService, FitbitService>();
+builder.Services.AddScoped<IAssetsService, AssetsService>();
 builder.Services.AddHttpClient<ICommsSenderClient, CommsSenderClient>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -125,7 +128,7 @@ var postgresContainer = new PostgreSqlBuilder("postgres:16")
     .WithDatabase("financemanagercontainer")
     .WithUsername("testuser")
     .WithPassword("testpass")
-    .WithPortBinding(5432, false)
+    .WithPortBinding(5432, true)
     .Build();
 
 await postgresContainer.StartAsync();

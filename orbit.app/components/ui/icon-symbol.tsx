@@ -43,6 +43,7 @@ const MAPPING = {
   'arrow.down.circle': 'download',
   'folder': 'folder',
   'chart.bar': 'bar-chart',
+  'shippingbox.fill': 'local-shipping'
 } as IconMapping;
 
 /**
