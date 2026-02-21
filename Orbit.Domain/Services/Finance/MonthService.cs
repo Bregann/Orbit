@@ -66,19 +66,16 @@ namespace Orbit.Domain.Services.Finance
                 // there could be a new pot amount from the request so get that
                 var potAmountFromRequest = (long)(request.SpendingPots.First(x => x.PotId == pot.Id).AmountToAdd * 100);
 
-                // check if the pot is to be rolled over
+                // check if the pot is to be rolled over, if not then set the amount left to 0
                 if (!request.PotIdsToRollover.Contains(pot.Id))
                 {
                     pot.PotAmountLeft = 0;
-                    pot.AmountToAdd = potAmountFromRequest;
-                }
-                else
-                {
-                    pot.AmountToAdd += potAmountFromRequest;
                 }
 
-                pot.PotAmountSpent = 0;
+                pot.AmountToAdd = potAmountFromRequest;
                 pot.PotAmountLeft += potAmountFromRequest;
+                pot.PotAmountSpent = 0;
+
                 await context.SaveChangesAsync();
             }
 
