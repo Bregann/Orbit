@@ -5,6 +5,9 @@ if (process.env.NODE_ENV === 'development') {
   API_BASE_URL = 'http://localhost:3000'
 }
 
+// Helper to check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined'
+
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 //TODO: comment it properly
 export interface FetchResponse<T> {
@@ -71,15 +74,21 @@ async function doRequest<T>(
             retry: false,
           })
         } else {
-          console.error('Refresh failed. You shall not pass.')
-          // Clear cookies and redirect to login
-          document.cookie = 'accessToken=; Max-Age=0; path=/'
-          document.cookie = 'refreshToken=; Max-Age=0; path=/'
-          window.location.href = '/login'
+          console.error('Refresh failed. Logging out...')
+          // Only clear cookies and redirect in browser environment
+          if (isBrowser) {
+            document.cookie = 'accessToken=; Max-Age=0; path=/'
+            document.cookie = 'refreshToken=; Max-Age=0; path=/'
+            // Use setTimeout to avoid blocking the request
+            setTimeout(() => {
+              window.location.href = '/login'
+            }, 100)
+          }
           return {
             data: undefined,
-            status: res.status,
+            status: 401,
             ok: false,
+            statusMessage: 'Session expired. Please log in again.'
           }
         }
       }
@@ -196,10 +205,14 @@ export async function doGetBlob(endpoint: string, options?: RequestOptions): Pro
           })
         } else {
           // Clear cookies and redirect to login
-          document.cookie = 'accessToken=; Max-Age=0; path=/'
-          document.cookie = 'refreshToken=; Max-Age=0; path=/'
-          window.location.href = '/login'
-          throw new Error('Authentication failed')
+          if (isBrowser) {
+            document.cookie = 'accessToken=; Max-Age=0; path=/'
+            document.cookie = 'refreshToken=; Max-Age=0; path=/'
+            setTimeout(() => {
+              window.location.href = '/login'
+            }, 100)
+          }
+          throw new Error('Session expired. Please log in again.')
         }
       }
 
@@ -270,10 +283,18 @@ export async function doPostFormData<T>(
           })
         } else {
           console.error('Refresh failed.')
+          if (isBrowser) {
+            document.cookie = 'accessToken=; Max-Age=0; path=/'
+            document.cookie = 'refreshToken=; Max-Age=0; path=/'
+            setTimeout(() => {
+              window.location.href = '/login'
+            }, 100)
+          }
           return {
             data: undefined,
-            status: res.status,
+            status: 401,
             ok: false,
+            statusMessage: 'Session expired. Please log in again.'
           }
         }
       }

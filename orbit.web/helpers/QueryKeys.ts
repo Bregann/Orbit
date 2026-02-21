@@ -32,5 +32,7 @@ export enum QueryKeys {
   AvailableYears = 'availableYears',
   FitbitConnectionStatus = 'fitbitConnectionStatus',
   FitbitProfile = 'fitbitProfile',
-  FitbitDailyActivity = 'fitbitDailyActivity'
+  FitbitDailyActivity = 'fitbitDailyActivity',
+  Assets = 'assets',
+  AssetCategories = 'assetCategories'
 }

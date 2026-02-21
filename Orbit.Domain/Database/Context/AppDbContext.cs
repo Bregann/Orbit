@@ -39,5 +39,8 @@ namespace Orbit.Domain.Database.Context
         public DbSet<MoodTrackerEntry> MoodTrackerEntries { get; set; } = null!;
 
         public DbSet<FitbitData> FitbitData { get; set; } = null!;
+
+        public DbSet<Asset> Assets { get; set; } = null!;
+        public DbSet<AssetCategory> AssetCategories { get; set; } = null!;
     }
 }
