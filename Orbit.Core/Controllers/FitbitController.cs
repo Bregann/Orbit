@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Orbit.Domain.DTOs.Fitbit;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.Fitbit;
 using Orbit.Domain.Interfaces.Helpers;
-using Serilog;
 
 namespace Orbit.Core.Controllers
 {
@@ -18,29 +18,21 @@ namespace Orbit.Core.Controllers
         [HttpGet]
         public ActionResult<FitbitAuthUrlResponse> GetAuthorizationUrl()
         {
-            try
-            {
-                var (authUrl, codeVerifier) = fitbitService.GenerateAuthorizationUrl();
+            var (authUrl, codeVerifier) = fitbitService.GenerateAuthorizationUrl();
 
-                Response.Cookies.Append("fitbit_code_verifier", codeVerifier, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Lax,
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(10)
-                });
-
-                return Ok(new FitbitAuthUrlResponse
-                {
-                    AuthorizationUrl = authUrl,
-                    CodeVerifier = codeVerifier
-                });
-            }
-            catch (Exception ex)
+            Response.Cookies.Append("fitbit_code_verifier", codeVerifier, new CookieOptions
             {
-                Log.Error(ex, "Error generating Fitbit authorization URL");
-                return BadRequest("Failed to generate authorization URL");
-            }
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(10)
+            });
+
+            return Ok(new FitbitAuthUrlResponse
+            {
+                AuthorizationUrl = authUrl,
+                CodeVerifier = codeVerifier
+            });
         }
 
         /// <summary>
@@ -49,39 +41,26 @@ namespace Orbit.Core.Controllers
         [HttpPost]
         public async Task<ActionResult> ExchangeCode([FromBody] FitbitCallbackRequest request)
         {
-            try
+            var userId = userContextHelper.GetUserId();
+
+            var codeVerifier = request.CodeVerifier;
+
+            if (string.IsNullOrEmpty(codeVerifier))
             {
-                var userId = userContextHelper.GetUserId();
-
-                var codeVerifier = request.CodeVerifier;
-
-                if (string.IsNullOrEmpty(codeVerifier))
-                {
-                    codeVerifier = Request.Cookies["fitbit_code_verifier"];
-                }
-
-                if (string.IsNullOrEmpty(codeVerifier))
-                {
-                    return BadRequest("Code verifier not found");
-                }
-
-                var tokens = await fitbitService.ExchangeCodeForTokens(request.Code, codeVerifier);
-                await fitbitService.SaveFitbitTokens(userId, tokens);
-
-                Response.Cookies.Delete("fitbit_code_verifier");
-
-                return Ok();
+                codeVerifier = Request.Cookies["fitbit_code_verifier"];
             }
-            catch (HttpRequestException ex)
+
+            if (string.IsNullOrEmpty(codeVerifier))
             {
-                Log.Error(ex, "Error exchanging Fitbit authorization code");
-                return BadRequest("Failed to exchange authorization code");
+                throw new BadRequestException("Code verifier not found");
             }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Unknown error during Fitbit code exchange");
-                return BadRequest("An error occurred");
-            }
+
+            var tokens = await fitbitService.ExchangeCodeForTokens(request.Code, codeVerifier);
+            await fitbitService.SaveFitbitTokens(userId, tokens);
+
+            Response.Cookies.Delete("fitbit_code_verifier");
+
+            return Ok();
         }
 
         /// <summary>
@@ -90,22 +69,9 @@ namespace Orbit.Core.Controllers
         [HttpGet]
         public async Task<ActionResult<FitbitConnectionStatus>> GetConnectionStatus()
         {
-            try
-            {
-                var userId = userContextHelper.GetUserId();
-
-                var status = await fitbitService.GetConnectionStatus(userId);
-                return Ok(status);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound("User not found");
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error getting Fitbit connection status");
-                return BadRequest("Failed to get connection status");
-            }
+            var userId = userContextHelper.GetUserId();
+            var status = await fitbitService.GetConnectionStatus(userId);
+            return Ok(status);
         }
 
         /// <summary>
@@ -114,22 +80,9 @@ namespace Orbit.Core.Controllers
         [HttpPost]
         public async Task<ActionResult> Disconnect()
         {
-            try
-            {
-                var userId = userContextHelper.GetUserId();
-
-                await fitbitService.DisconnectFitbit(userId);
-                return Ok();
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound("User not found");
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error disconnecting Fitbit");
-                return BadRequest("Failed to disconnect Fitbit");
-            }
+            var userId = userContextHelper.GetUserId();
+            await fitbitService.DisconnectFitbit(userId);
+            return Ok();
         }
 
         /// <summary>
@@ -138,28 +91,15 @@ namespace Orbit.Core.Controllers
         [HttpGet]
         public async Task<ActionResult<FitbitProfileResponse>> GetProfile()
         {
-            try
-            {
-                var userId = userContextHelper.GetUserId();
+            var userId = userContextHelper.GetUserId();
+            var profile = await fitbitService.GetProfile(userId);
 
-                var profile = await fitbitService.GetProfile(userId);
-
-                if (profile == null)
-                {
-                    return NotFound("Failed to get Fitbit profile");
-                }
-
-                return Ok(profile);
-            }
-            catch (InvalidOperationException ex)
+            if (profile == null)
             {
-                return BadRequest(ex.Message);
+                throw new NotFoundException("Failed to get Fitbit profile");
             }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error getting Fitbit profile");
-                return BadRequest("Failed to get profile");
-            }
+
+            return Ok(profile);
         }
 
         /// <summary>
@@ -168,29 +108,16 @@ namespace Orbit.Core.Controllers
         [HttpGet]
         public async Task<ActionResult<FitbitActivityResponse>> GetDailyActivity([FromQuery] DateTime? date)
         {
-            try
-            {
-                var userId = userContextHelper.GetUserId();
+            var userId = userContextHelper.GetUserId();
+            var targetDate = date ?? DateTime.Today;
+            var activity = await fitbitService.GetDailyActivity(userId, targetDate);
 
-                var targetDate = date ?? DateTime.Today;
-                var activity = await fitbitService.GetDailyActivity(userId, targetDate);
-
-                if (activity == null)
-                {
-                    return NotFound("Failed to get activity data");
-                }
-
-                return Ok(activity);
-            }
-            catch (InvalidOperationException ex)
+            if (activity == null)
             {
-                return BadRequest(ex.Message);
+                throw new NotFoundException("Failed to get activity data");
             }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error getting Fitbit daily activity");
-                return BadRequest("Failed to get activity data");
-            }
+
+            return Ok(activity);
         }
     }
 }

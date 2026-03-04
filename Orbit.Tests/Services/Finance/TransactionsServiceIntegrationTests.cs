@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.Finance.Transactions.Requests;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Services.Finance;
 using Orbit.Tests.Infrastructure;
 using Task = System.Threading.Tasks.Task;
@@ -92,7 +93,7 @@ namespace Orbit.Tests.Services.Finance
         }
 
         [Test]
-        public async Task UpdateTransaction_ShouldThrowKeyNotFoundException_WhenTransactionNotFound()
+        public async Task UpdateTransaction_ShouldThrowNotFoundException_WhenTransactionNotFound()
         {
             // Arrange
             var request = new UpdateTransactionRequest
@@ -102,14 +103,14 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _transactionsService.UpdateTransaction(request));
 
             Assert.That(exception.Message, Does.Contain("Transaction with ID non-existent-id not found"));
         }
 
         [Test]
-        public async Task UpdateTransaction_ShouldThrowKeyNotFoundException_WhenPotNotFound()
+        public async Task UpdateTransaction_ShouldThrowNotFoundException_WhenPotNotFound()
         {
             // Arrange
             var transaction = DbContext.Transactions.First();
@@ -120,7 +121,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _transactionsService.UpdateTransaction(request));
 
             Assert.That(exception.Message, Does.Contain("Spending pot with ID 99999 not found"));
@@ -253,7 +254,7 @@ namespace Orbit.Tests.Services.Finance
         }
 
         [Test]
-        public async Task AddAutomaticTransaction_ShouldThrowArgumentException_WhenMerchantNameIsEmpty()
+        public async Task AddAutomaticTransaction_ShouldThrowBadRequestException_WhenMerchantNameIsEmpty()
         {
             // Arrange
             var request = new AddAutomaticTransactionRequest
@@ -264,14 +265,14 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
+            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _transactionsService.AddAutomaticTransaction(request));
 
             Assert.That(exception.Message, Does.Contain("Invalid merchant name or pot ID"));
         }
 
         [Test]
-        public async Task AddAutomaticTransaction_ShouldThrowArgumentException_WhenPotIdIsInvalidAndNotSubscription()
+        public async Task AddAutomaticTransaction_ShouldThrowBadRequestException_WhenPotIdIsInvalidAndNotSubscription()
         {
             // Arrange
             var request = new AddAutomaticTransactionRequest
@@ -282,7 +283,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
+            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _transactionsService.AddAutomaticTransaction(request));
 
             Assert.That(exception.Message, Does.Contain("Invalid merchant name or pot ID"));
@@ -310,7 +311,7 @@ namespace Orbit.Tests.Services.Finance
         }
 
         [Test]
-        public async Task AddAutomaticTransaction_ShouldThrowKeyNotFoundException_WhenPotNotFound()
+        public async Task AddAutomaticTransaction_ShouldThrowNotFoundException_WhenPotNotFound()
         {
             // Arrange
             var request = new AddAutomaticTransactionRequest
@@ -321,14 +322,14 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _transactionsService.AddAutomaticTransaction(request));
 
             Assert.That(exception.Message, Does.Contain("Spending pot with ID 99999 not found"));
         }
 
         [Test]
-        public async Task AddAutomaticTransaction_ShouldThrowInvalidOperationException_WhenMerchantExists()
+        public async Task AddAutomaticTransaction_ShouldThrowConflictException_WhenMerchantExists()
         {
             // Arrange
             var request = new AddAutomaticTransactionRequest
@@ -339,7 +340,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            var exception = Assert.ThrowsAsync<ConflictException>(async () =>
                 await _transactionsService.AddAutomaticTransaction(request));
 
             Assert.That(exception.Message, Does.Contain("An automatic transaction for merchant 'Netflix' already exists"));
@@ -357,7 +358,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            var exception = Assert.ThrowsAsync<ConflictException>(async () =>
                 await _transactionsService.AddAutomaticTransaction(request));
 
             Assert.That(exception.Message, Does.Contain("already exists"));
@@ -425,13 +426,13 @@ namespace Orbit.Tests.Services.Finance
         }
 
         [Test]
-        public async Task MarkAsSubscription_ShouldThrowKeyNotFoundException_WhenTransactionNotFound()
+        public async Task MarkAsSubscription_ShouldThrowNotFoundException_WhenTransactionNotFound()
         {
             // Arrange
             var nonExistentId = "non-existent-txn-id";
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _transactionsService.MarkAsSubscription(nonExistentId));
 
             Assert.That(exception.Message, Does.Contain($"Transaction with ID {nonExistentId} not found"));
@@ -495,7 +496,7 @@ namespace Orbit.Tests.Services.Finance
         }
 
         [Test]
-        public async Task SplitTransaction_ShouldThrowKeyNotFoundException_WhenTransactionNotFound()
+        public async Task SplitTransaction_ShouldThrowNotFoundException_WhenTransactionNotFound()
         {
             // Arrange
             var request = new SplitTransactionRequest
@@ -507,14 +508,14 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _transactionsService.SplitTransaction(request));
 
             Assert.That(exception.Message, Does.Contain("Transaction with ID non-existent-id not found"));
         }
 
         [Test]
-        public async Task SplitTransaction_ShouldThrowArgumentException_WhenSplitAmountsDontMatchOriginal()
+        public async Task SplitTransaction_ShouldThrowBadRequestException_WhenSplitAmountsDontMatchOriginal()
         {
             // Arrange
             var transaction = DbContext.Transactions.First();
@@ -528,14 +529,14 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
+            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _transactionsService.SplitTransaction(request));
 
             Assert.That(exception.Message, Does.Contain("must equal the original transaction amount"));
         }
 
         [Test]
-        public async Task SplitTransaction_ShouldThrowKeyNotFoundException_WhenPotNotFound()
+        public async Task SplitTransaction_ShouldThrowNotFoundException_WhenPotNotFound()
         {
             // Arrange
             var transaction = DbContext.Transactions.First();
@@ -548,7 +549,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _transactionsService.SplitTransaction(request));
 
             Assert.That(exception.Message, Does.Contain("Spending pot with ID 99999 not found"));

@@ -33,7 +33,7 @@ namespace Orbit.Domain.Services.Finance
 
             if (historicData == null)
             {
-                throw new KeyNotFoundException("Historic month data not found.");
+                throw new Orbit.Domain.Exceptions.NotFoundException("Historic month data not found.");
             }
 
             var potSpendingBreakdown = new MonthlySpendingDataBreakdown

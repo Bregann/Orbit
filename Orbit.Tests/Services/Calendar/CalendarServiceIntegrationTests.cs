@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.DTOs.Calendar;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Services.Calendar;
 using Orbit.Tests.Infrastructure;
 
@@ -123,7 +124,7 @@ namespace Orbit.Tests.Services.Calendar
         }
 
         [Test]
-        public async Task AddCalendarEvent_WithInvalidDocumentId_ShouldThrowKeyNotFoundException()
+        public async Task AddCalendarEvent_WithInvalidDocumentId_ShouldThrowNotFoundException()
         {
             // Arrange
             var request = new AddCalendarEventRequest
@@ -140,7 +141,7 @@ namespace Orbit.Tests.Services.Calendar
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _calendarService.AddCalendarEvent(request));
 
             Assert.That(exception.Message, Does.Contain("Document with ID 99999 not found"));
@@ -233,7 +234,7 @@ namespace Orbit.Tests.Services.Calendar
         }
 
         [Test]
-        public async Task EditCalendarEvent_ShouldThrowKeyNotFoundException_WhenEventNotFound()
+        public async Task EditCalendarEvent_ShouldThrowNotFoundException_WhenEventNotFound()
         {
             // Arrange
             var request = new EditCalendarEventRequest
@@ -250,7 +251,7 @@ namespace Orbit.Tests.Services.Calendar
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _calendarService.EditCalendarEvent(request));
 
             Assert.That(exception.Message, Does.Contain("Calendar event with ID 99999 not found"));
@@ -311,7 +312,7 @@ namespace Orbit.Tests.Services.Calendar
         }
 
         [Test]
-        public async Task DeleteCalendarEvent_ShouldThrowKeyNotFoundException_WhenEventNotFound()
+        public async Task DeleteCalendarEvent_ShouldThrowNotFoundException_WhenEventNotFound()
         {
             // Arrange
             var request = new DeleteCalendarEventRequest
@@ -321,7 +322,7 @@ namespace Orbit.Tests.Services.Calendar
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _calendarService.DeleteCalendarEvent(request));
 
             Assert.That(exception.Message, Does.Contain("Calendar event with ID 99999 not found"));

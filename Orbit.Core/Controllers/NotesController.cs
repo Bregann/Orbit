@@ -19,14 +19,7 @@ namespace Orbit.Core.Controllers
         [HttpGet]
         public async Task<ActionResult<GetNotePageDetailsDto>> GetNotePageDetails([FromQuery] int notePageId)
         {
-            try
-            {
-                return await noteService.GetNotePageDetails(notePageId);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return await noteService.GetNotePageDetails(notePageId);
         }
 
         [HttpPost]
@@ -39,43 +32,22 @@ namespace Orbit.Core.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateNotePageContent([FromBody] UpdateNotePageContentRequest request)
         {
-            try
-            {
-                await noteService.UpdateNotePageContent(request);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await noteService.UpdateNotePageContent(request);
+            return Ok();
         }
 
         [HttpPut]
         public async Task<IActionResult> ToggleNotePageFavouriteStatus([FromQuery] int notePageId)
         {
-            try
-            {
-                await noteService.ToggleNotePageFavouriteStatus(notePageId);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await noteService.ToggleNotePageFavouriteStatus(notePageId);
+            return Ok();
         }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteNotePage([FromQuery] int notePageId)
         {
-            try
-            {
-                await noteService.DeleteNotePage(notePageId);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await noteService.DeleteNotePage(notePageId);
+            return Ok();
         }
 
         [HttpPost]
@@ -88,15 +60,8 @@ namespace Orbit.Core.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteNoteFolder([FromQuery] int noteFolderId)
         {
-            try
-            {
-                await noteService.DeleteNoteFolder(noteFolderId);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await noteService.DeleteNoteFolder(noteFolderId);
+            return Ok();
         }
     }
 }

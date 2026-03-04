@@ -2,6 +2,7 @@
 using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.Calendar;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.Calendar;
 using Serilog;
 using Task = System.Threading.Tasks.Task;
@@ -70,7 +71,7 @@ namespace Orbit.Domain.Services.Calendar
 
                 if (documentExists == null)
                 {
-                    throw new KeyNotFoundException($"Document with ID {request.DocumentId} not found.");
+                    throw new NotFoundException($"Document with ID {request.DocumentId} not found.");
                 }
             }
 
@@ -115,7 +116,7 @@ namespace Orbit.Domain.Services.Calendar
             if (calendarEvent == null)
             {
                 Log.Warning($"No calendar event found with ID {request.EventId} to delete");
-                throw new KeyNotFoundException($"Calendar event with ID {request.EventId} not found.");
+                throw new NotFoundException($"Calendar event with ID {request.EventId} not found.");
             }
 
             if (request.InstanceDate != null)
@@ -139,7 +140,7 @@ namespace Orbit.Domain.Services.Calendar
             if (rowsAffected == 0)
             {
                 Log.Warning($"No calendar event found with ID {request.EventId} to delete");
-                throw new KeyNotFoundException($"Calendar event with ID {request.EventId} not found.");
+                throw new NotFoundException($"Calendar event with ID {request.EventId} not found.");
             }
 
             Log.Information($"Deleted calendar event {request.EventId}, rows affected: {rowsAffected}");
@@ -153,7 +154,7 @@ namespace Orbit.Domain.Services.Calendar
             if (calendarEvent == null)
             {
                 Log.Warning($"No calendar event found with ID {request.EventId} to edit");
-                throw new KeyNotFoundException($"Calendar event with ID {request.EventId} not found.");
+                throw new NotFoundException($"Calendar event with ID {request.EventId} not found.");
             }
 
             calendarEvent.EventName = request.EventName;

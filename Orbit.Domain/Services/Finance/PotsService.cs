@@ -117,14 +117,14 @@ namespace Orbit.Domain.Services.Finance
         {
             if (string.IsNullOrWhiteSpace(request.PotName) || request.AmountToAdd <= 0)
             {
-                throw new ArgumentException("Invalid pot name or amount.");
+                throw new Orbit.Domain.Exceptions.BadRequestException("Invalid pot name or amount.");
             }
 
             if (request.IsSavingsPot)
             {
                 if (await context.SavingsPots.AnyAsync(p => p.PotName == request.PotName))
                 {
-                    throw new InvalidOperationException("A savings pot with this name already exists.");
+                    throw new Orbit.Domain.Exceptions.ConflictException("A savings pot with this name already exists.");
                 }
 
                 var pot = new SavingsPot
@@ -143,7 +143,7 @@ namespace Orbit.Domain.Services.Finance
             {
                 if (await context.SpendingPots.AnyAsync(p => p.PotName == request.PotName))
                 {
-                    throw new InvalidOperationException("A spending pot with this name already exists.");
+                    throw new Orbit.Domain.Exceptions.ConflictException("A spending pot with this name already exists.");
                 }
 
                 var pot = new SpendingPot

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.DTOs.Tasks;
 using Orbit.Domain.Enums;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Services.Tasks;
 using Orbit.Tests.Infrastructure;
 
@@ -81,13 +82,13 @@ namespace Orbit.Tests.Services.Tasks
         }
 
         [Test]
-        public async Task CompleteTask_ShouldThrowKeyNotFoundException_WhenTaskNotFound()
+        public async Task CompleteTask_ShouldThrowNotFoundException_WhenTaskNotFound()
         {
             // Arrange
             var nonExistentTaskId = 99999;
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _tasksService.CompleteTask(nonExistentTaskId));
 
             Assert.That(exception.Message, Does.Contain($"Task with ID {nonExistentTaskId} not found"));
@@ -117,13 +118,13 @@ namespace Orbit.Tests.Services.Tasks
         }
 
         [Test]
-        public async Task DeleteTask_ShouldThrowKeyNotFoundException_WhenTaskNotFound()
+        public async Task DeleteTask_ShouldThrowNotFoundException_WhenTaskNotFound()
         {
             // Arrange
             var nonExistentTaskId = 99999;
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _tasksService.DeleteTask(nonExistentTaskId));
 
             Assert.That(exception.Message, Does.Contain($"Task with ID {nonExistentTaskId} not found"));
@@ -161,7 +162,7 @@ namespace Orbit.Tests.Services.Tasks
         }
 
         [Test]
-        public async Task AddNewCategory_ShouldThrowInvalidOperationException_WhenCategoryAlreadyExists()
+        public async Task AddNewCategory_ShouldThrowConflictException_WhenCategoryAlreadyExists()
         {
             // Arrange
             var request = new AddNewCategoryRequest
@@ -170,7 +171,7 @@ namespace Orbit.Tests.Services.Tasks
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            var exception = Assert.ThrowsAsync<ConflictException>(async () =>
                 await _tasksService.AddNewCategory(request));
 
             Assert.That(exception.Message, Does.Contain("Category with name 'Test Work' already exists"));
@@ -200,13 +201,13 @@ namespace Orbit.Tests.Services.Tasks
         }
 
         [Test]
-        public async Task DeleteCategory_ShouldThrowKeyNotFoundException_WhenCategoryNotFound()
+        public async Task DeleteCategory_ShouldThrowNotFoundException_WhenCategoryNotFound()
         {
             // Arrange
             var nonExistentCategoryId = 99999;
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _tasksService.DeleteCategory(nonExistentCategoryId));
 
             Assert.That(exception.Message, Does.Contain($"Category with ID {nonExistentCategoryId} not found"));

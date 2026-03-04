@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.DTOs.Finance.Subscriptions;
 using Orbit.Domain.Enums;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Services.Finance;
 using Orbit.Tests.Infrastructure;
-using System.Data;
 
 namespace Orbit.Tests.Services.Finance
 {
@@ -66,7 +66,7 @@ namespace Orbit.Tests.Services.Finance
             var request = new AddSubscriptionRequest
             {
                 SubscriptionName = "New Monthly Sub",
-                SubscriptionAmount = 999, // £9.99 in pence
+                SubscriptionAmount = 999, // ï¿½9.99 in pence
                 BillingDay = 15,
                 BillingMonth = null,
                 BillingFrequency = SubscriptionBillingFrequencyType.Monthly
@@ -92,7 +92,7 @@ namespace Orbit.Tests.Services.Finance
             var request = new AddSubscriptionRequest
             {
                 SubscriptionName = "New Yearly Sub",
-                SubscriptionAmount = 12000, // £120 in pence
+                SubscriptionAmount = 12000, // ï¿½120 in pence
                 BillingDay = 1,
                 BillingMonth = 6,
                 BillingFrequency = SubscriptionBillingFrequencyType.Yearly
@@ -107,12 +107,12 @@ namespace Orbit.Tests.Services.Finance
 
             Assert.That(subscription, Is.Not.Null);
             Assert.That(subscription.SubscriptionAmount, Is.EqualTo(12000));
-            Assert.That(subscription.SubscriptionMonthlyAmount, Is.EqualTo(1000)); // £10 per month
+            Assert.That(subscription.SubscriptionMonthlyAmount, Is.EqualTo(1000)); // ï¿½10 per month
             Assert.That(subscription.BillingFrequency, Is.EqualTo(SubscriptionBillingFrequencyType.Yearly));
         }
 
         [Test]
-        public async Task AddSubscription_ShouldThrowDuplicateNameException_WhenNameExists()
+        public async Task AddSubscription_ShouldThrowBadRequestException_WhenNameExists()
         {
             // Arrange
             var request = new AddSubscriptionRequest
@@ -125,7 +125,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<DuplicateNameException>(async () =>
+            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _subscriptionService.AddSubscription(request));
 
             Assert.That(exception.Message, Does.Contain("Subscription with the same name already exists"));
@@ -157,7 +157,7 @@ namespace Orbit.Tests.Services.Finance
         }
 
         [Test]
-        public async Task UpdateSubscription_ShouldThrowKeyNotFoundException_WhenNotFound()
+        public async Task UpdateSubscription_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Arrange
             var request = new UpdateSubscriptionRequest
@@ -170,7 +170,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _subscriptionService.UpdateSubscription(request));
 
             Assert.That(exception.Message, Does.Contain("Subscription not found"));
@@ -201,10 +201,10 @@ namespace Orbit.Tests.Services.Finance
         }
 
         [Test]
-        public async Task DeleteSubscription_ShouldThrowKeyNotFoundException_WhenNotFound()
+        public async Task DeleteSubscription_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _subscriptionService.DeleteSubscription(99999));
 
             Assert.That(exception.Message, Does.Contain("Subscription not found"));

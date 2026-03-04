@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.Enums;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Services.MoodTracker;
 using Orbit.Tests.Infrastructure;
 
@@ -348,13 +349,13 @@ namespace Orbit.Tests.Services.MoodTracker
         }
 
         [Test]
-        public async Task RecordMoodForDate_ShouldThrowInvalidOperationException_ForFutureDate()
+        public async Task RecordMoodForDate_ShouldThrowBadRequestException_ForFutureDate()
         {
             // Arrange
             var futureDate = DateTime.UtcNow.AddDays(1);
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _moodTrackerService.RecordMoodForDate(MoodTrackerEnum.Good, futureDate));
 
             Assert.That(exception.Message, Does.Contain("Cannot record mood for future dates"));

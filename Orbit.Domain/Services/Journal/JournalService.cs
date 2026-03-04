@@ -2,6 +2,7 @@
 using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.Journal;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.Journal;
 using Serilog;
 using Task = System.Threading.Tasks.Task;
@@ -53,7 +54,7 @@ namespace Orbit.Domain.Services.Journal
 
             if (rowsAffected == 0)
             {
-                throw new KeyNotFoundException($"Journal entry with ID {id} not found.");
+                throw new NotFoundException($"Journal entry with ID {id} not found.");
             }
 
             Log.Information($"Deleted journal entry with ID {id}.");

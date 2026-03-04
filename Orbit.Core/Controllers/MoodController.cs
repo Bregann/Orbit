@@ -31,29 +31,15 @@ namespace Orbit.Core.Controllers
         [HttpPost]
         public async Task<IActionResult> RecordMood([FromBody] RecordMoodRequest request)
         {
-            try
-            {
-                await moodTrackerService.RecordMood(request.Mood);
-                return NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await moodTrackerService.RecordMood(request.Mood);
+            return NoContent();
         }
 
         [HttpPost]
         public async Task<IActionResult> RecordMoodForDate([FromBody] RecordMoodForDateRequest request)
         {
-            try
-            {
-                await moodTrackerService.RecordMoodForDate(request.Mood, request.Date);
-                return NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await moodTrackerService.RecordMoodForDate(request.Mood, request.Date);
+            return NoContent();
         }
     }
 }

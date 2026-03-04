@@ -38,19 +38,8 @@ namespace Orbit.Core.Controllers
         [HttpPost]
         public async Task<IActionResult> AddNewPot([FromBody] AddNewPotRequest request)
         {
-            try
-            {
-                var newPotId = await potsService.AddNewPot(request);
-                return Ok(newPotId);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
+            var newPotId = await potsService.AddNewPot(request);
+            return Ok(newPotId);
         }
     }
 }

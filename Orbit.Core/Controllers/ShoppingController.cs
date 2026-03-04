@@ -32,29 +32,15 @@ namespace Orbit.Core.Controllers
         [HttpPut]
         public async Task<IActionResult> MarkShoppingListItemAsPurchased([FromQuery] int itemId)
         {
-            try
-            {
-                await shoppingService.MarkShoppingListItemAsPurchased(itemId);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await shoppingService.MarkShoppingListItemAsPurchased(itemId);
+            return Ok();
         }
 
         [HttpDelete]
         public async Task<IActionResult> RemoveShoppingListItem([FromQuery] int itemId)
         {
-            try
-            {
-                await shoppingService.RemoveShoppingListItem(itemId);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await shoppingService.RemoveShoppingListItem(itemId);
+            return Ok();
         }
 
         [HttpPost]
@@ -67,15 +53,8 @@ namespace Orbit.Core.Controllers
         [HttpDelete]
         public async Task<IActionResult> RemoveShoppingListQuickAddItem([FromQuery] int itemId)
         {
-            try
-            {
-                await shoppingService.RemoveShoppingListQuickAddItem(itemId);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await shoppingService.RemoveShoppingListQuickAddItem(itemId);
+            return Ok();
         }
 
         [HttpDelete]

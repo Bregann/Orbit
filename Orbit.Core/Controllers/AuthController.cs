@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Orbit.Domain.DTOs.Auth.Requests;
 using Orbit.Domain.DTOs.Auth.Responses;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.Finance;
-using Serilog;
 
 namespace Orbit.Core.Controllers
 {
@@ -35,48 +35,30 @@ namespace Orbit.Core.Controllers
         [HttpPost]
         public async Task<ActionResult<LoginUserResponse>> LoginUser([FromBody] LoginUserRequest request)
         {
-            try
-            {
-                var loginData = await authService.LoginUser(request);
+            var loginData = await authService.LoginUser(request);
 
-                if (request.IsMobile)
-                {
-                    return Ok(loginData);
-                }
-
-                Response.Cookies.Append("accessToken", loginData.AccessToken, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Expires = DateTimeOffset.UtcNow.AddHours(1)
-                });
-
-                Response.Cookies.Append("refreshToken", loginData.RefreshToken, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Expires = DateTimeOffset.UtcNow.AddDays(30)
-                });
-
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
+            if (request.IsMobile)
             {
-                Log.Warning(ex, "Error attempting to login user");
-                return Unauthorized(ex.Message);
+                return Ok(loginData);
             }
-            catch (UnauthorizedAccessException ex)
+
+            Response.Cookies.Append("accessToken", loginData.AccessToken, new CookieOptions
             {
-                Log.Warning(ex, "Error attempting to login user");
-                return Unauthorized(ex.Message);
-            }
-            catch (Exception ex)
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddHours(1)
+            });
+
+            Response.Cookies.Append("refreshToken", loginData.RefreshToken, new CookieOptions
             {
-                Log.Fatal(ex, "Unknown error attempting to login user");
-                return BadRequest();
-            }
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(30)
+            });
+
+            return Ok();
         }
 
         [HttpPost]
@@ -88,7 +70,7 @@ namespace Orbit.Core.Controllers
             {
                 Response.Cookies.Delete("accessToken");
                 Response.Cookies.Delete("refreshToken");
-                return Unauthorized("No refresh token provided");
+                throw new UnauthorizedException("No refresh token provided");
             }
 
             try
@@ -103,32 +85,19 @@ namespace Orbit.Core.Controllers
                 });
                 return Ok();
             }
-            catch (Exception ex) when (ex is UnauthorizedAccessException || ex is KeyNotFoundException)
+            catch (UnauthorizedException)
             {
                 Response.Cookies.Delete("accessToken");
                 Response.Cookies.Delete("refreshToken");
-                return Unauthorized(ex.Message);
+                throw;
             }
         }
 
         [HttpPost]
         public async Task<ActionResult<LoginUserResponse>> RefreshAppToken([FromBody] RefreshTokenRequest request)
         {
-            try
-            {
-                var response = await authService.RefreshToken(request.RefreshToken);
-                return Ok(response);
-            }
-            catch (Exception ex) when (ex is UnauthorizedAccessException || ex is KeyNotFoundException)
-            {
-                Log.Warning(ex, "Authentication error attempting to refresh token");
-                return Unauthorized(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "Unknown error attempting to refresh token");
-                return BadRequest("Unknown error attempting to refresh token");
-            }
+            var response = await authService.RefreshToken(request.RefreshToken);
+            return Ok(response);
         }
     }
 }
