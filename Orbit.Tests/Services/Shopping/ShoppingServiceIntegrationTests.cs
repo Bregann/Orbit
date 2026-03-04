@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Services.Shopping;
 using Orbit.Tests.Infrastructure;
 
@@ -175,10 +176,10 @@ namespace Orbit.Tests.Services.Shopping
         }
 
         [Test]
-        public async Task MarkShoppingListItemAsPurchased_ShouldThrowKeyNotFoundException_WhenNotFound()
+        public async Task MarkShoppingListItemAsPurchased_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _shoppingService.MarkShoppingListItemAsPurchased(99999));
 
             Assert.That(exception!.Message, Does.Contain("Shopping list item with ID 99999 not found"));
@@ -208,10 +209,10 @@ namespace Orbit.Tests.Services.Shopping
         }
 
         [Test]
-        public async Task RemoveShoppingListItem_ShouldThrowKeyNotFoundException_WhenNotFound()
+        public async Task RemoveShoppingListItem_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _shoppingService.RemoveShoppingListItem(99999));
 
             Assert.That(exception!.Message, Does.Contain("Shopping list item with ID 99999 not found"));
@@ -269,10 +270,10 @@ namespace Orbit.Tests.Services.Shopping
         }
 
         [Test]
-        public async Task RemoveShoppingListQuickAddItem_ShouldThrowKeyNotFoundException_WhenNotFound()
+        public async Task RemoveShoppingListQuickAddItem_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _shoppingService.RemoveShoppingListQuickAddItem(99999));
 
             Assert.That(exception!.Message, Does.Contain("Shopping list quick add item with ID 99999 not found"));

@@ -2,6 +2,7 @@
 using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.Notes;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.Notes;
 using Task = System.Threading.Tasks.Task;
 
@@ -54,7 +55,7 @@ namespace Orbit.Domain.Services.Notes
 
             if (notePage == null)
             {
-                throw new KeyNotFoundException($"Note page with ID {notePageId} not found.");
+                throw new NotFoundException($"Note page with ID {notePageId} not found.");
             }
 
             return new GetNotePageDetailsDto
@@ -87,14 +88,14 @@ namespace Orbit.Domain.Services.Notes
                 );
             if (rowsAffected == 0)
             {
-                throw new KeyNotFoundException($"Note page with ID {request.NotePageId} not found.");
+                throw new NotFoundException($"Note page with ID {request.NotePageId} not found.");
             }
         }
 
         public async Task ToggleNotePageFavouriteStatus(int notePageId)
         {
             var notePage = await context.NotePages
-                .FirstOrDefaultAsync(np => np.Id == notePageId) ?? throw new KeyNotFoundException($"Note page with ID {notePageId} not found.");
+                .FirstOrDefaultAsync(np => np.Id == notePageId) ?? throw new NotFoundException($"Note page with ID {notePageId} not found.");
 
             notePage.IsFavourite = !notePage.IsFavourite;
             await context.SaveChangesAsync();
@@ -108,7 +109,7 @@ namespace Orbit.Domain.Services.Notes
 
             if (rowsAffected == 0)
             {
-                throw new KeyNotFoundException($"Note page with ID {notePageId} not found.");
+                throw new NotFoundException($"Note page with ID {notePageId} not found.");
             }
         }
 
@@ -136,7 +137,7 @@ namespace Orbit.Domain.Services.Notes
                 .ExecuteDeleteAsync();
             if (rowsAffected == 0)
             {
-                throw new KeyNotFoundException($"Note folder with ID {noteFolderId} not found.");
+                throw new NotFoundException($"Note folder with ID {noteFolderId} not found.");
             }
         }
     }

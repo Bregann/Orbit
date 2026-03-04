@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.Database.Context;
 using Orbit.Domain.DTOs.Tasks;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.Tasks;
 
 namespace Orbit.Domain.Services.Tasks
@@ -56,7 +57,7 @@ namespace Orbit.Domain.Services.Tasks
 
             if (changes == 0)
             {
-                throw new KeyNotFoundException($"Task with ID {taskId} not found.");
+                throw new NotFoundException($"Task with ID {taskId} not found.");
             }
         }
 
@@ -68,7 +69,7 @@ namespace Orbit.Domain.Services.Tasks
 
             if (changes == 0)
             {
-                throw new KeyNotFoundException($"Task with ID {taskId} not found.");
+                throw new NotFoundException($"Task with ID {taskId} not found.");
             }
         }
 
@@ -95,7 +96,7 @@ namespace Orbit.Domain.Services.Tasks
 
             if (existingCategory)
             {
-                throw new InvalidOperationException($"Category with name '{request.Name}' already exists.");
+                throw new ConflictException($"Category with name '{request.Name}' already exists.");
             }
 
             var newCategory = new Database.Models.TaskCategory
@@ -117,7 +118,7 @@ namespace Orbit.Domain.Services.Tasks
 
             if (changes == 0)
             {
-                throw new KeyNotFoundException($"Category with ID {categoryId} not found.");
+                throw new NotFoundException($"Category with ID {categoryId} not found.");
             }
         }
     }

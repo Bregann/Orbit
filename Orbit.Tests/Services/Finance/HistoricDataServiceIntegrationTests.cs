@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Services.Finance;
 using Orbit.Tests.Infrastructure;
 
@@ -104,10 +105,10 @@ namespace Orbit.Tests.Services.Finance
         }
 
         [Test]
-        public async Task GetHistoricMonthData_ShouldThrowKeyNotFoundException_WhenNotFound()
+        public async Task GetHistoricMonthData_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _historicDataService.GetHistoricMonthData(99999));
 
             Assert.That(exception.Message, Does.Contain("Historic month data not found"));

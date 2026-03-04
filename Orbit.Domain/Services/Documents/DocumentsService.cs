@@ -2,6 +2,7 @@
 using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.Documents;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.Documents;
 using Serilog;
 using Task = System.Threading.Tasks.Task;
@@ -54,14 +55,14 @@ namespace Orbit.Domain.Services.Documents
 
         public async Task<byte[]> DownloadDocument(int documentId)
         {
-            var document = await context.Documents.FindAsync(documentId) ?? throw new KeyNotFoundException("Document not found");
+            var document = await context.Documents.FindAsync(documentId) ?? throw new NotFoundException("Document not found");
 
             var currentPath = Directory.GetCurrentDirectory();
             var documentPath = Path.Combine(currentPath, document.DocumentPath);
 
             if (!File.Exists(documentPath))
             {
-                throw new FileNotFoundException("Document file not found in storage");
+                throw new NotFoundException("Document file not found in storage");
             }
 
             return await File.ReadAllBytesAsync(documentPath);
@@ -73,7 +74,7 @@ namespace Orbit.Domain.Services.Documents
 
             if (document == null)
             {
-                throw new KeyNotFoundException("Document not found");
+                throw new NotFoundException("Document not found");
             }
 
             // delete from database
@@ -129,7 +130,7 @@ namespace Orbit.Domain.Services.Documents
             var category = await context.DocumentCategories.FindAsync(categoryId);
             if (category == null)
             {
-                throw new KeyNotFoundException("Document category not found");
+                throw new NotFoundException("Document category not found");
             }
 
             // check if any documents are associated with this category,  if so, prevent deletion
@@ -137,7 +138,7 @@ namespace Orbit.Domain.Services.Documents
 
             if (hasAssociatedDocuments)
             {
-                throw new InvalidOperationException("Cannot delete category with associated documents");
+                throw new ConflictException("Cannot delete category with associated documents");
             }
 
             context.DocumentCategories.Remove(category);

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.DTOs.Journal;
 using Orbit.Domain.Enums;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Services.Journal;
 using Orbit.Tests.Infrastructure;
 
@@ -193,10 +194,10 @@ namespace Orbit.Tests.Services.Journal
         }
 
         [Test]
-        public async Task DeleteJournalEntry_ShouldThrowKeyNotFoundException_WhenEntryNotFound()
+        public async Task DeleteJournalEntry_ShouldThrowNotFoundException_WhenEntryNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _journalService.DeleteJournalEntry(99999));
 
             Assert.That(exception!.Message, Does.Contain("Journal entry with ID 99999 not found"));

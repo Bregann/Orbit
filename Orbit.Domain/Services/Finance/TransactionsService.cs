@@ -3,6 +3,7 @@ using Orbit.Domain.Database.Context;
 using Orbit.Domain.DTOs.Finance.Transactions;
 using Orbit.Domain.DTOs.Finance.Transactions.Requests;
 using Orbit.Domain.DTOs.Finance.Transactions.Responses;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Extensions;
 using Orbit.Domain.Interfaces.Api.Finance;
 
@@ -16,7 +17,7 @@ namespace Orbit.Domain.Services.Finance
 
             if (transaction == null)
             {
-                throw new KeyNotFoundException($"Transaction with ID {request.TransactionId} not found.");
+                throw new NotFoundException($"Transaction with ID {request.TransactionId} not found.");
             }
 
             if (request.PotId.HasValue)
@@ -25,7 +26,7 @@ namespace Orbit.Domain.Services.Finance
 
                 if (pot == null)
                 {
-                    throw new KeyNotFoundException($"Spending pot with ID {request.PotId.Value} not found.");
+                    throw new NotFoundException($"Spending pot with ID {request.PotId.Value} not found.");
                 }
 
                 // check if the transaction already had a pot assigned as we need to update the pot amounts
@@ -131,7 +132,7 @@ namespace Orbit.Domain.Services.Finance
         {
             if (string.IsNullOrWhiteSpace(request.MerchantName) || request.PotId <= 0)
             {
-                throw new ArgumentException("Invalid merchant name or pot ID.");
+                throw new BadRequestException("Invalid merchant name or pot ID.");
             }
 
             // check if an automatic transaction with the same merchant name already exists
@@ -140,7 +141,7 @@ namespace Orbit.Domain.Services.Finance
 
             if (existing)
             {
-                throw new InvalidOperationException($"An automatic transaction for merchant '{request.MerchantName}' already exists.");
+                throw new ConflictException($"An automatic transaction for merchant '{request.MerchantName}' already exists.");
             }
 
             if (request.PotId == null && request.IsSubscription)
@@ -163,7 +164,7 @@ namespace Orbit.Domain.Services.Finance
 
                 if (pot == null)
                 {
-                    throw new KeyNotFoundException($"Spending pot with ID {request.PotId} not found.");
+                    throw new NotFoundException($"Spending pot with ID {request.PotId} not found.");
                 }
 
                 var automaticTransaction = new Database.Models.AutomaticTransaction
@@ -191,7 +192,7 @@ namespace Orbit.Domain.Services.Finance
 
             if (rows == 0)
             {
-                throw new KeyNotFoundException($"Transaction with ID {transactionId} not found.");
+                throw new NotFoundException($"Transaction with ID {transactionId} not found.");
             }
         }
 
@@ -202,7 +203,7 @@ namespace Orbit.Domain.Services.Finance
 
             if (originalTransaction == null)
             {
-                throw new KeyNotFoundException($"Transaction with ID {request.TransactionId} not found.");
+                throw new NotFoundException($"Transaction with ID {request.TransactionId} not found.");
             }
 
             // Filter out splits with potId == -1 (these amounts are discarded)
@@ -212,7 +213,7 @@ namespace Orbit.Domain.Services.Finance
             var totalSplitAmount = request.Splits.Sum(s => s.Amount);
             if (totalSplitAmount != originalTransaction.TransactionAmount)
             {
-                throw new ArgumentException($"Split amounts ({totalSplitAmount}) must equal the original transaction amount ({originalTransaction.TransactionAmount}).");
+                throw new BadRequestException($"Split amounts ({totalSplitAmount}) must equal the original transaction amount ({originalTransaction.TransactionAmount}).");
             }
 
             // If original transaction had a pot assigned, revert those amounts
@@ -236,7 +237,7 @@ namespace Orbit.Domain.Services.Finance
 
                 if (pot == null)
                 {
-                    throw new KeyNotFoundException($"Spending pot with ID {split.PotId} not found.");
+                    throw new NotFoundException($"Spending pot with ID {split.PotId} not found.");
                 }
 
                 originalTransaction.TransactionAmount = split.Amount;
@@ -260,7 +261,7 @@ namespace Orbit.Domain.Services.Finance
 
                     if (pot == null)
                     {
-                        throw new KeyNotFoundException($"Spending pot with ID {split.PotId} not found.");
+                        throw new NotFoundException($"Spending pot with ID {split.PotId} not found.");
                     }
 
                     var newTransaction = new Database.Models.Transactions

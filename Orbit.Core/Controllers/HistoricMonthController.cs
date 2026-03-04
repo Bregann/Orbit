@@ -19,14 +19,7 @@ namespace Orbit.Core.Controllers
         [HttpGet]
         public async Task<ActionResult<GetHistoricMonthDataDto>> GetHistoricMonthData([FromQuery] int monthId)
         {
-            try
-            {
-                return await historicDataService.GetHistoricMonthData(monthId);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return await historicDataService.GetHistoricMonthData(monthId);
         }
 
         [HttpGet]

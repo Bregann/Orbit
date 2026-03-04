@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.DTOs.Notes;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Services.Notes;
 using Orbit.Tests.Infrastructure;
 
@@ -91,10 +92,10 @@ namespace Orbit.Tests.Services.Notes
         }
 
         [Test]
-        public async Task GetNotePageDetails_ShouldThrowKeyNotFoundException_WhenNotFound()
+        public async Task GetNotePageDetails_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _notesService.GetNotePageDetails(99999));
 
             Assert.That(exception!.Message, Does.Contain("Note page with ID 99999 not found"));
@@ -230,7 +231,7 @@ namespace Orbit.Tests.Services.Notes
         }
 
         [Test]
-        public async Task UpdateNotePageContent_ShouldThrowKeyNotFoundException_WhenNotFound()
+        public async Task UpdateNotePageContent_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Arrange
             var request = new UpdateNotePageContentRequest
@@ -240,7 +241,7 @@ namespace Orbit.Tests.Services.Notes
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _notesService.UpdateNotePageContent(request));
 
             Assert.That(exception!.Message, Does.Contain("Note page with ID 99999 not found"));
@@ -321,10 +322,10 @@ namespace Orbit.Tests.Services.Notes
         }
 
         [Test]
-        public async Task ToggleNotePageFavouriteStatus_ShouldThrowKeyNotFoundException_WhenNotFound()
+        public async Task ToggleNotePageFavouriteStatus_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _notesService.ToggleNotePageFavouriteStatus(99999));
 
             Assert.That(exception!.Message, Does.Contain("Note page with ID 99999 not found"));
@@ -354,10 +355,10 @@ namespace Orbit.Tests.Services.Notes
         }
 
         [Test]
-        public async Task DeleteNotePage_ShouldThrowKeyNotFoundException_WhenNotFound()
+        public async Task DeleteNotePage_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _notesService.DeleteNotePage(99999));
 
             Assert.That(exception!.Message, Does.Contain("Note page with ID 99999 not found"));
@@ -458,10 +459,10 @@ namespace Orbit.Tests.Services.Notes
         }
 
         [Test]
-        public async Task DeleteNoteFolder_ShouldThrowKeyNotFoundException_WhenNotFound()
+        public async Task DeleteNoteFolder_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _notesService.DeleteNoteFolder(99999));
 
             Assert.That(exception!.Message, Does.Contain("Note folder with ID 99999 not found"));

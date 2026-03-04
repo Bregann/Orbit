@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Orbit.Domain.DTOs.Documents;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.Documents;
 
 namespace Orbit.Core.Controllers
@@ -20,60 +21,31 @@ namespace Orbit.Core.Controllers
         [HttpPost]
         public async Task<ActionResult> UploadDocument([FromForm] UploadDocumentRequest request, IFormFile file)
         {
-            try
+            if (file == null || file.Length == 0)
             {
-                if (file == null || file.Length == 0)
-                {
-                    return BadRequest("No file provided");
-                }
+                throw new BadRequestException("No file provided");
+            }
 
-                using (var stream = file.OpenReadStream())
-                {
-                    await documentsService.UploadDocument(request, stream, Path.GetExtension(file.FileName));
-                }
+            using (var stream = file.OpenReadStream())
+            {
+                await documentsService.UploadDocument(request, stream, Path.GetExtension(file.FileName));
+            }
 
-                return Ok();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
+            return Ok();
         }
 
         [HttpGet]
         public async Task<ActionResult> DownloadDocument([FromQuery] int documentId)
         {
-            try
-            {
-                var fileBytes = await documentsService.DownloadDocument(documentId);
-                return File(fileBytes, "application/octet-stream");
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (FileNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var fileBytes = await documentsService.DownloadDocument(documentId);
+            return File(fileBytes, "application/octet-stream");
         }
 
         [HttpDelete]
         public async Task<ActionResult> DeleteDocument([FromQuery] int documentId)
         {
-            try
-            {
-                await documentsService.DeleteDocument(documentId);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await documentsService.DeleteDocument(documentId);
+            return Ok();
         }
 
         [HttpGet]
@@ -86,33 +58,15 @@ namespace Orbit.Core.Controllers
         [HttpPost]
         public async Task<ActionResult> AddDocumentCategory([FromQuery] string categoryName)
         {
-            try
-            {
-                await documentsService.AddDocumentCategory(categoryName);
-                return Ok();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await documentsService.AddDocumentCategory(categoryName);
+            return Ok();
         }
 
         [HttpDelete]
         public async Task<ActionResult> DeleteCategory([FromQuery] int categoryId)
         {
-            try
-            {
-                await documentsService.DeleteCategory(categoryId);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
+            await documentsService.DeleteCategory(categoryId);
+            return Ok();
         }
     }
 }

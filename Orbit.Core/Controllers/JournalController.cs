@@ -26,15 +26,8 @@ namespace Orbit.Core.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteJournalEntry([FromQuery] int id)
         {
-            try
-            {
-                await journalService.DeleteJournalEntry(id);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await journalService.DeleteJournalEntry(id);
+            return Ok();
         }
     }
 }

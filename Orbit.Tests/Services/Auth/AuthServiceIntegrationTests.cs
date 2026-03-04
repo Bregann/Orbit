@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.DTOs.Auth.Requests;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Services;
 using Orbit.Tests.Infrastructure;
 using System.Data;
@@ -188,7 +189,7 @@ namespace Orbit.Tests.Services.Auth
         }
 
         [Test]
-        public async Task LoginUser_ShouldThrowKeyNotFoundException_WhenUserDoesNotExist()
+        public async Task LoginUser_ShouldThrowUnauthorizedException_WhenUserDoesNotExist()
         {
             // Arrange
             var request = new LoginUserRequest
@@ -198,14 +199,14 @@ namespace Orbit.Tests.Services.Auth
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<UnauthorizedException>(async () =>
                 await _authService.LoginUser(request));
 
             Assert.That(exception.Message, Does.Contain("User not found"));
         }
 
         [Test]
-        public async Task LoginUser_ShouldThrowUnauthorizedAccessException_WhenPasswordIsInvalid()
+        public async Task LoginUser_ShouldThrowUnauthorizedException_WhenPasswordIsInvalid()
         {
             // Arrange
             await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
@@ -217,7 +218,7 @@ namespace Orbit.Tests.Services.Auth
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<UnauthorizedAccessException>(async () =>
+            var exception = Assert.ThrowsAsync<UnauthorizedException>(async () =>
                 await _authService.LoginUser(request));
 
             Assert.That(exception.Message, Does.Contain("Invalid password"));
@@ -305,20 +306,20 @@ namespace Orbit.Tests.Services.Auth
         }
 
         [Test]
-        public async Task RefreshToken_ShouldThrowKeyNotFoundException_WhenTokenDoesNotExist()
+        public async Task RefreshToken_ShouldThrowUnauthorizedException_WhenTokenDoesNotExist()
         {
             // Arrange
             var invalidToken = "InvalidTokenThatDoesNotExist";
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            var exception = Assert.ThrowsAsync<UnauthorizedException>(async () =>
                 await _authService.RefreshToken(invalidToken));
 
             Assert.That(exception.Message, Does.Contain("Token not found"));
         }
 
         [Test]
-        public async Task RefreshToken_ShouldThrowUnauthorizedAccessException_WhenTokenIsExpired()
+        public async Task RefreshToken_ShouldThrowUnauthorizedException_WhenTokenIsExpired()
         {
             // Arrange
             var user = await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
@@ -335,14 +336,14 @@ namespace Orbit.Tests.Services.Auth
             await DbContext.SaveChangesAsync();
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<UnauthorizedAccessException>(async () =>
+            var exception = Assert.ThrowsAsync<UnauthorizedException>(async () =>
                 await _authService.RefreshToken(expiredToken.Token));
 
             Assert.That(exception.Message, Does.Contain("Refresh token expired"));
         }
 
         [Test]
-        public async Task RefreshToken_ShouldThrowUnauthorizedAccessException_WhenTokenIsRevoked()
+        public async Task RefreshToken_ShouldThrowUnauthorizedException_WhenTokenIsRevoked()
         {
             // Arrange
             await TestDatabaseSeedHelper.SeedTestUser(DbContext, "testuser", "Password123!");
@@ -359,7 +360,7 @@ namespace Orbit.Tests.Services.Auth
             await _authService.RefreshToken(loginResult.RefreshToken);
 
             // Act & Assert - Try to use the same (now revoked) token again
-            var exception = Assert.ThrowsAsync<UnauthorizedAccessException>(async () =>
+            var exception = Assert.ThrowsAsync<UnauthorizedException>(async () =>
                 await _authService.RefreshToken(loginResult.RefreshToken));
 
             Assert.That(exception.Message, Does.Contain("revoked"));

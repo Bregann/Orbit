@@ -3,6 +3,7 @@ using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.Finance.Subscriptions;
 using Orbit.Domain.Enums;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.Finance;
 using Serilog;
 using System.Data;
@@ -39,7 +40,7 @@ namespace Orbit.Domain.Services.Finance
 
             if (existingSubscription)
             {
-                throw new DuplicateNameException("Subscription with the same name already exists.");
+                throw new BadRequestException("Subscription with the same name already exists.");
             }
 
             var subscription = new Subscription
@@ -69,7 +70,7 @@ namespace Orbit.Domain.Services.Finance
 
             if (subscription == null)
             {
-                throw new KeyNotFoundException("Subscription not found.");
+                throw new NotFoundException("Subscription not found.");
             }
 
             subscription.SubscriptionName = request.SubscriptionName;
@@ -89,7 +90,7 @@ namespace Orbit.Domain.Services.Finance
 
             if (rowsAffected == 0)
             {
-                throw new KeyNotFoundException("Subscription not found.");
+                throw new NotFoundException("Subscription not found.");
             }
 
             Log.Information($"Deleted subscription with ID: {id}");

@@ -3,6 +3,7 @@ using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.MoodTracker;
 using Orbit.Domain.Enums;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.MoodTracker;
 using Task = System.Threading.Tasks.Task;
 
@@ -98,7 +99,7 @@ namespace Orbit.Domain.Services.MoodTracker
         {
             if (date.Date > DateTime.UtcNow.Date)
             {
-                throw new InvalidOperationException("Cannot record mood for future dates.");
+                throw new BadRequestException("Cannot record mood for future dates.");
             }
 
             var targetDate = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);

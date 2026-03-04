@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Orbit.Domain.DTOs.Finance.Subscriptions;
 using Orbit.Domain.Interfaces.Api.Finance;
-using System.Data;
 
 namespace Orbit.Core.Controllers
 {
@@ -21,43 +20,22 @@ namespace Orbit.Core.Controllers
         [HttpPost]
         public async Task<ActionResult> AddSubscription([FromBody] AddSubscriptionRequest request)
         {
-            try
-            {
-                await subscriptionService.AddSubscription(request);
-                return Ok();
-            }
-            catch (DuplicateNameException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await subscriptionService.AddSubscription(request);
+            return Ok();
         }
 
         [HttpPut]
         public async Task<ActionResult> UpdateSubscription([FromBody] UpdateSubscriptionRequest request)
         {
-            try
-            {
-                await subscriptionService.UpdateSubscription(request);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await subscriptionService.UpdateSubscription(request);
+            return Ok();
         }
 
         [HttpDelete]
         public async Task<ActionResult> DeleteSubscription([FromQuery] int id)
         {
-            try
-            {
-                await subscriptionService.DeleteSubscription(id);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await subscriptionService.DeleteSubscription(id);
+            return Ok();
         }
     }
 }

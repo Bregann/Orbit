@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.DTOs.Finance.Pots.Request;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Services.Finance;
 using Orbit.Tests.Infrastructure;
 
@@ -112,7 +113,7 @@ namespace Orbit.Tests.Services.Finance
             var pot = await DbContext.SpendingPots.FindAsync(potId);
             Assert.That(pot, Is.Not.Null);
             Assert.That(pot.PotName, Is.EqualTo("New Spending Pot"));
-            Assert.That(pot.AmountToAdd, Is.EqualTo(15000)); // £150 in pence
+            Assert.That(pot.AmountToAdd, Is.EqualTo(15000)); // ï¿½150 in pence
             Assert.That(pot.RolloverDefaultChecked, Is.True);
         }
 
@@ -135,12 +136,12 @@ namespace Orbit.Tests.Services.Finance
             var pot = await DbContext.SavingsPots.FindAsync(potId);
             Assert.That(pot, Is.Not.Null);
             Assert.That(pot.PotName, Is.EqualTo("New Savings Pot"));
-            Assert.That(pot.AmountToAdd, Is.EqualTo(50000)); // £500 in pence
+            Assert.That(pot.AmountToAdd, Is.EqualTo(50000)); // ï¿½500 in pence
             Assert.That(pot.PotAmount, Is.EqualTo(0));
         }
 
         [Test]
-        public async Task AddNewPot_ShouldThrowArgumentException_WhenPotNameIsEmpty()
+        public async Task AddNewPot_ShouldThrowBadRequestException_WhenPotNameIsEmpty()
         {
             // Arrange
             var request = new AddNewPotRequest
@@ -152,14 +153,14 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
+            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _potsService.AddNewPot(request));
 
             Assert.That(exception.Message, Does.Contain("Invalid pot name or amount"));
         }
 
         [Test]
-        public async Task AddNewPot_ShouldThrowArgumentException_WhenAmountIsZeroOrNegative()
+        public async Task AddNewPot_ShouldThrowBadRequestException_WhenAmountIsZeroOrNegative()
         {
             // Arrange
             var request = new AddNewPotRequest
@@ -171,14 +172,14 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
+            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _potsService.AddNewPot(request));
 
             Assert.That(exception.Message, Does.Contain("Invalid pot name or amount"));
         }
 
         [Test]
-        public async Task AddNewPot_ShouldThrowInvalidOperationException_WhenSpendingPotNameExists()
+        public async Task AddNewPot_ShouldThrowConflictException_WhenSpendingPotNameExists()
         {
             // Arrange
             var request = new AddNewPotRequest
@@ -190,14 +191,14 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            var exception = Assert.ThrowsAsync<ConflictException>(async () =>
                 await _potsService.AddNewPot(request));
 
             Assert.That(exception.Message, Does.Contain("A spending pot with this name already exists"));
         }
 
         [Test]
-        public async Task AddNewPot_ShouldThrowInvalidOperationException_WhenSavingsPotNameExists()
+        public async Task AddNewPot_ShouldThrowConflictException_WhenSavingsPotNameExists()
         {
             // Arrange
             var request = new AddNewPotRequest
@@ -209,7 +210,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            var exception = Assert.ThrowsAsync<ConflictException>(async () =>
                 await _potsService.AddNewPot(request));
 
             Assert.That(exception.Message, Does.Contain("A savings pot with this name already exists"));

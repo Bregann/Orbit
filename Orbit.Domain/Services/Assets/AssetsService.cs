@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.Assets;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.Assets;
 using Serilog;
 using Task = System.Threading.Tasks.Task;
@@ -71,7 +72,7 @@ namespace Orbit.Domain.Services.Assets
 
             if (asset == null)
             {
-                throw new KeyNotFoundException($"Asset with ID {request.AssetId} not found");
+                throw new NotFoundException($"Asset with ID {request.AssetId} not found");
             }
 
             asset.AssetName = request.AssetName;
@@ -96,7 +97,7 @@ namespace Orbit.Domain.Services.Assets
 
             if (asset == null)
             {
-                throw new KeyNotFoundException($"Asset with ID {assetId} not found");
+                throw new NotFoundException($"Asset with ID {assetId} not found");
             }
 
             // Delete associated files
@@ -159,12 +160,12 @@ namespace Orbit.Domain.Services.Assets
 
             if (category == null)
             {
-                throw new KeyNotFoundException($"Category with ID {categoryId} not found");
+                throw new NotFoundException($"Category with ID {categoryId} not found");
             }
 
             if (category.Assets.Any())
             {
-                throw new InvalidOperationException("Cannot delete category that has assets. Please reassign or delete the assets first.");
+                throw new BadRequestException("Cannot delete category that has assets. Please reassign or delete the assets first.");
             }
 
             context.AssetCategories.Remove(category);
@@ -177,7 +178,7 @@ namespace Orbit.Domain.Services.Assets
 
             if (asset == null)
             {
-                throw new KeyNotFoundException($"Asset with ID {request.AssetId} not found");
+                throw new NotFoundException($"Asset with ID {request.AssetId} not found");
             }
 
             // Create AssetsStorage directory if it doesn't exist
@@ -238,21 +239,21 @@ namespace Orbit.Domain.Services.Assets
 
             if (asset == null)
             {
-                throw new KeyNotFoundException($"Asset with ID {assetId} not found");
+                throw new NotFoundException($"Asset with ID {assetId} not found");
             }
 
             string? documentPath = documentType == "Receipt" ? asset.ReceiptPath : asset.ManualPath;
 
             if (string.IsNullOrEmpty(documentPath))
             {
-                throw new InvalidOperationException($"{documentType} not found for this asset");
+                throw new NotFoundException($"{documentType} not found for this asset");
             }
 
             var fullPath = Path.Combine(Directory.GetCurrentDirectory(), documentPath);
 
             if (!File.Exists(fullPath))
             {
-                throw new FileNotFoundException($"{documentType} file not found at {fullPath}");
+                throw new NotFoundException($"{documentType} file not found at {fullPath}");
             }
 
             var fileBytes = await File.ReadAllBytesAsync(fullPath);
@@ -267,7 +268,7 @@ namespace Orbit.Domain.Services.Assets
 
             if (asset == null)
             {
-                throw new KeyNotFoundException($"Asset with ID {assetId} not found");
+                throw new NotFoundException($"Asset with ID {assetId} not found");
             }
 
             string? documentPath = documentType == "Receipt" ? asset.ReceiptPath : asset.ManualPath;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.Database.Context;
 using Orbit.Domain.DTOs.Shopping;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.Shopping;
 using Serilog;
 
@@ -67,7 +68,7 @@ namespace Orbit.Domain.Services.Shopping
 
             if (rowsAffected == 0)
             {
-                throw new KeyNotFoundException($"Shopping list item with ID {itemId} not found.");
+                throw new NotFoundException($"Shopping list item with ID {itemId} not found.");
             }
 
             Log.Information($"Marked shopping list item with ID {itemId} as purchased.");
@@ -81,7 +82,7 @@ namespace Orbit.Domain.Services.Shopping
 
             if (rowsAffected == 0)
             {
-                throw new KeyNotFoundException($"Shopping list item with ID {itemId} not found.");
+                throw new NotFoundException($"Shopping list item with ID {itemId} not found.");
             }
 
             Log.Information($"Removed shopping list item with ID {itemId}.");
@@ -108,7 +109,7 @@ namespace Orbit.Domain.Services.Shopping
 
             if (rowsAffected == 0)
             {
-                throw new KeyNotFoundException($"Shopping list quick add item with ID {itemId} not found.");
+                throw new NotFoundException($"Shopping list quick add item with ID {itemId} not found.");
             }
 
             Log.Information($"Removed shopping list quick add item with ID {itemId}.");

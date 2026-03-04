@@ -33,6 +33,7 @@ using Orbit.Domain.Interfaces.Api.Fitbit;
 using Orbit.Domain.Services.Fitbit;
 using Orbit.Domain.Interfaces.Api.Assets;
 using Orbit.Domain.Services.Assets;
+using Orbit.Core;
 
 #if DEBUG
 using Hangfire.MemoryStorage;
@@ -71,6 +72,9 @@ builder.Services.AddHttpClient<IFitbitApiHelper, FitbitApiHelper>();
 builder.Services.AddAuthorization();
 
 // add in controller data services
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITransactionsService, TransactionsService>();
 builder.Services.AddScoped<IStatsService, StatsService>();
@@ -198,6 +202,8 @@ var environmentalSettingHelper = app.Services.GetService<IEnvironmentalSettingHe
 await environmentalSettingHelper.LoadEnvironmentalSettings();
 
 // Configure the HTTP request pipeline.
+app.UseExceptionHandler();
+
 app.UseSwagger();
 app.UseSwaggerUI();
 

@@ -19,43 +19,22 @@ namespace Orbit.Core.Controllers
         [HttpPost]
         public async Task<IActionResult> AddNewTask([FromBody] AddTaskRequest request)
         {
-            try
-            {
-                var newTaskId = await tasksService.AddNewTask(request);
-                return Ok(newTaskId);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var newTaskId = await tasksService.AddNewTask(request);
+            return Ok(newTaskId);
         }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteTask([FromQuery] int taskId)
         {
-            try
-            {
-                await tasksService.DeleteTask(taskId);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await tasksService.DeleteTask(taskId);
+            return Ok();
         }
 
         [HttpPatch]
         public async Task<IActionResult> CompleteTask([FromQuery] int taskId)
         {
-            try
-            {
-                await tasksService.CompleteTask(taskId);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await tasksService.CompleteTask(taskId);
+            return Ok();
         }
 
         [HttpGet]
@@ -67,29 +46,15 @@ namespace Orbit.Core.Controllers
         [HttpPost]
         public async Task<IActionResult> AddNewCategory([FromBody] AddNewCategoryRequest request)
         {
-            try
-            {
-                var newCategoryId = await tasksService.AddNewCategory(request);
-                return Ok(newCategoryId);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
+            var newCategoryId = await tasksService.AddNewCategory(request);
+            return Ok(newCategoryId);
         }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteCategory([FromQuery] int categoryId)
         {
-            try
-            {
-                await tasksService.DeleteCategory(categoryId);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await tasksService.DeleteCategory(categoryId);
+            return Ok();
         }
     }
 }

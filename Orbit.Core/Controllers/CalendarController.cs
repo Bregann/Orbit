@@ -27,15 +27,8 @@ namespace Orbit.Core.Controllers
         [HttpPost]
         public async Task<ActionResult> AddCalendarEvent([FromBody] AddCalendarEventRequest request)
         {
-            try
-            {
-                await calendarService.AddCalendarEvent(request);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await calendarService.AddCalendarEvent(request);
+            return Ok();
         }
 
         [HttpPost]
@@ -48,29 +41,15 @@ namespace Orbit.Core.Controllers
         [HttpDelete]
         public async Task<ActionResult> DeleteCalendarEvent([FromBody] DeleteCalendarEventRequest request)
         {
-            try
-            {
-                await calendarService.DeleteCalendarEvent(request);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await calendarService.DeleteCalendarEvent(request);
+            return Ok();
         }
 
         [HttpPut]
         public async Task<ActionResult> EditCalendarEvent([FromBody] EditCalendarEventRequest request)
         {
-            try
-            {
-                await calendarService.EditCalendarEvent(request);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await calendarService.EditCalendarEvent(request);
+            return Ok();
         }
     }
 }

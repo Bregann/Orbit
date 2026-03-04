@@ -5,6 +5,7 @@ using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.Auth.Requests;
 using Orbit.Domain.DTOs.Auth.Responses;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.Finance;
 using Serilog;
 using System.Data;
@@ -55,13 +56,13 @@ namespace Orbit.Domain.Services
             if (user == null)
             {
                 Log.Information($"User not found {request.Email}");
-                throw new KeyNotFoundException("User not found");
+                throw new UnauthorizedException("User not found");
             }
 
             if (_passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
             {
                 Log.Information($"Invalid password for user {request.Email}");
-                throw new UnauthorizedAccessException("Invalid password");
+                throw new UnauthorizedException("Invalid password");
             }
 
             var token = GenerateJwtToken(user);
@@ -86,19 +87,19 @@ namespace Orbit.Domain.Services
             if (refreshToken == null)
             {
                 Log.Information($"Token not found for refresh token {userRefreshToken}");
-                throw new KeyNotFoundException("Token not found");
+                throw new UnauthorizedException("Token not found");
             }
 
             if (refreshToken.IsRevoked)
             {
                 Log.Information($"Token has been revoked for user {refreshToken.UserId}");
-                throw new UnauthorizedAccessException("Refresh token has been revoked");
+                throw new UnauthorizedException("Refresh token has been revoked");
             }
 
             if (refreshToken.ExpiresAt < DateTime.UtcNow)
             {
                 Log.Information($"Token expired for user {refreshToken.UserId}");
-                throw new UnauthorizedAccessException("Refresh token expired");
+                throw new UnauthorizedException("Refresh token expired");
             }
 
             var user = await context.Users.FirstOrDefaultAsync(u => u.Id == refreshToken.UserId);
@@ -106,7 +107,7 @@ namespace Orbit.Domain.Services
             if (user == null)
             {
                 Log.Information($"User not found for token {refreshToken.UserId}");
-                throw new KeyNotFoundException("User not found");
+                throw new UnauthorizedException("User not found");
             }
 
             var token = GenerateJwtToken(user);

@@ -17,6 +17,12 @@ export interface FetchResponse<T> {
   statusMessage?: string
 }
 
+interface ProblemDetails {
+  status?: number
+  title?: string
+  detail?: string
+}
+
 interface RequestOptions {
   headers?: HeadersInit
   body?: unknown
@@ -96,10 +102,17 @@ async function doRequest<T>(
       let data: T | undefined = undefined
       let statusMessage: string | undefined = undefined
 
-      // if response is not 200, get the status message
-      if (res.status !== 200) {
-        const text = await res.text()
-        statusMessage = text
+      // if response is not ok, attempt to parse ProblemDetails JSON
+      if (!res.ok) {
+        try {
+          const text = await res.text()
+          if (text) {
+            const problemDetails: ProblemDetails = JSON.parse(text)
+            statusMessage = problemDetails.detail || problemDetails.title || text
+          }
+        } catch {
+          // Response was not JSON, use raw text as fallback
+        }
       } else {
         try {
           const text = await res.text()
@@ -218,7 +231,14 @@ export async function doGetBlob(endpoint: string, options?: RequestOptions): Pro
 
       if (!res.ok) {
         const text = await res.text()
-        throw new Error(text || 'Failed to download file')
+        let errorMessage = text || 'Failed to download file'
+        try {
+          const problemDetails: ProblemDetails = JSON.parse(text)
+          errorMessage = problemDetails.detail || problemDetails.title || errorMessage
+        } catch {
+          // Response was not JSON
+        }
+        throw new Error(errorMessage)
       }
 
       return await res.blob()
@@ -302,9 +322,16 @@ export async function doPostFormData<T>(
       let data: T | undefined = undefined
       let statusMessage: string | undefined = undefined
 
-      if (res.status !== 200) {
-        const text = await res.text()
-        statusMessage = text
+      if (!res.ok) {
+        try {
+          const text = await res.text()
+          if (text) {
+            const problemDetails: ProblemDetails = JSON.parse(text)
+            statusMessage = problemDetails.detail || problemDetails.title || text
+          }
+        } catch {
+          // Response was not JSON
+        }
       } else {
         try {
           const text = await res.text()

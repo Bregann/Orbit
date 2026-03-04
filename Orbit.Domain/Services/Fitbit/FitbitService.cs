@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.Fitbit;
+using Orbit.Domain.Exceptions;
 using Orbit.Domain.Interfaces.Api.Fitbit;
 using Orbit.Domain.Interfaces.Helpers;
 using Serilog;
@@ -30,7 +31,7 @@ namespace Orbit.Domain.Services.Fitbit
             if (user == null)
             {
                 Log.Error($"User not found: {userId}");
-                throw new KeyNotFoundException("User not found");
+                throw new NotFoundException("User not found");
             }
 
             user.FitbitAccessToken = tokens.AccessToken;
@@ -51,7 +52,7 @@ namespace Orbit.Domain.Services.Fitbit
 
             if (user == null)
             {
-                throw new KeyNotFoundException("User not found");
+                throw new NotFoundException("User not found");
             }
 
             return new FitbitConnectionStatus
@@ -66,7 +67,7 @@ namespace Orbit.Domain.Services.Fitbit
         {
             Log.Information($"Disconnecting Fitbit for user {userId}");
 
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new KeyNotFoundException("User not found");
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new NotFoundException("User not found");
 
             if (!string.IsNullOrEmpty(user.FitbitAccessToken))
             {
@@ -94,11 +95,11 @@ namespace Orbit.Domain.Services.Fitbit
         {
             Log.Information($"Refreshing Fitbit access token for user {userId}");
 
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new KeyNotFoundException("User not found");
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new NotFoundException("User not found");
 
             if (string.IsNullOrEmpty(user.FitbitRefreshToken))
             {
-                throw new InvalidOperationException("No Fitbit refresh token available");
+                throw new BadRequestException("No Fitbit refresh token available");
             }
 
             var tokens = await fitbitApiHelper.RefreshAccessToken(user.FitbitRefreshToken);
@@ -192,11 +193,11 @@ namespace Orbit.Domain.Services.Fitbit
 
         private async Task<string> GetValidAccessToken(string userId)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new KeyNotFoundException("User not found");
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new NotFoundException("User not found");
 
             if (string.IsNullOrEmpty(user.FitbitAccessToken))
             {
-                throw new InvalidOperationException("Fitbit is not connected");
+                throw new BadRequestException("Fitbit is not connected");
             }
 
             // Check if token is expired or about to expire (within 5 minutes)
