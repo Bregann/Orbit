@@ -365,7 +365,7 @@ export default function AddEventModal({ opened, onClose, initialDate }: AddEvent
           />
         </Group>
 
-        <Collapse in={showRecurrence}>
+        <Collapse expanded={showRecurrence}>
           <Stack gap="md">
             <Select
               label="Repeat"

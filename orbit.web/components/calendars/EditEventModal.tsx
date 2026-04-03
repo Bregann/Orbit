@@ -267,7 +267,7 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
           onChange={(e) => setEventIsAllDay(e.currentTarget.checked)}
         />
 
-        <Collapse in={!eventIsAllDay}>
+        <Collapse expanded={!eventIsAllDay}>
           <Grid>
             <Grid.Col span={6}>
               <TextInput
@@ -306,7 +306,7 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
           onChange={(e) => setShowRecurrence(e.currentTarget.checked)}
         />
 
-        <Collapse in={showRecurrence}>
+        <Collapse expanded={showRecurrence}>
           <Stack gap="md">
             <Grid>
               <Grid.Col span={8}>
@@ -359,7 +359,7 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
               onChange={(e) => setUseEndDate(e.currentTarget.checked)}
             />
 
-            <Collapse in={useEndDate}>
+            <Collapse expanded={useEndDate}>
               <TextInput
                 label="End Date"
                 type="date"
@@ -368,7 +368,7 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
               />
             </Collapse>
 
-            <Collapse in={!useEndDate}>
+            <Collapse expanded={!useEndDate}>
               <NumberInput
                 label="Number of Occurrences (optional)"
                 placeholder="Leave empty for no limit"
