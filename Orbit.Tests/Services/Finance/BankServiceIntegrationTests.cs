@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Orbit.Domain.DTOs.Finance.Banking;
 using Orbit.Domain.Helpers;
+using Orbit.Domain.Interfaces.Api.Finance;
 using Orbit.Domain.Interfaces.Helpers;
 using Orbit.Domain.Services.Finance;
 using Orbit.Tests.Infrastructure;
@@ -15,6 +16,7 @@ namespace Orbit.Tests.Services.Finance
         private Mock<IBankApiHelper> _mockBankApiHelper = null!;
         private Mock<IEnvironmentalSettingHelper> _mockEnvironmentalSettingHelper = null!;
         private Mock<ICommsSenderClient> _mockCommsSenderClient = null!;
+        private Mock<IGoCardlessService> _mockGoCardlessService = null!;
 
         protected override async Task CustomSetUp()
         {
@@ -25,11 +27,14 @@ namespace Orbit.Tests.Services.Finance
             _mockBankApiHelper = Infrastructure.MockFactory.CreateBankApiHelper();
             _mockEnvironmentalSettingHelper = Infrastructure.MockFactory.CreateEnvironmentalSettingHelper();
             _mockCommsSenderClient = Infrastructure.MockFactory.CreateCommsSenderClient();
+            _mockGoCardlessService = new Mock<IGoCardlessService>();
+            _mockGoCardlessService.Setup(x => x.GetActiveAccountIds()).ReturnsAsync(new List<string>());
 
             _bankService = new BankService(
                 _mockBankApiHelper.Object,
                 _mockEnvironmentalSettingHelper.Object,
                 _mockCommsSenderClient.Object,
+                _mockGoCardlessService.Object,
                 DbContext);
         }
 
@@ -59,7 +64,7 @@ namespace Orbit.Tests.Services.Finance
                 new Transaction
                 {
                     Id = "monzo-txn-001",
-                    Amount = -1500, // £15 debit
+                    Amount = -1500, // ï¿½15 debit
                     Created = DateTimeOffset.UtcNow,
                     Merchant = new Merchant { Name = "Test Store", Logo = "https://logo.url" }
                 }
@@ -331,7 +336,7 @@ namespace Orbit.Tests.Services.Finance
             var savedTransaction = await DbContext.Transactions.FindAsync("gocardless-txn-001");
             Assert.That(savedTransaction, Is.Not.Null);
             Assert.That(savedTransaction.MerchantName, Is.EqualTo("Test Payment"));
-            Assert.That(savedTransaction.TransactionAmount, Is.EqualTo(2550)); // £25.50 in pence
+            Assert.That(savedTransaction.TransactionAmount, Is.EqualTo(2550)); // ï¿½25.50 in pence
         }
 
         [Test]

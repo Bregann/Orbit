@@ -16,6 +16,7 @@
         CommsSenderApiKey,
         FitbitClientId,
         FitbitClientSecret,
-        FitbitRedirectUri
+        FitbitRedirectUri,
+        GoCardlessRedirectUri
     }
 }

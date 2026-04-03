@@ -5,7 +5,7 @@ namespace Orbit.Domain.Interfaces.Helpers
     public interface IEnvironmentalSettingHelper
     {
         Task LoadEnvironmentalSettings();
-        string GetEnviromentalSettingValue(EnvironmentalSettingEnum key);
-        Task<bool> UpdateEnviromentalSettingValue(EnvironmentalSettingEnum key, string newValue);
+        string GetEnvironmentalSettingValue(EnvironmentalSettingEnum key);
+        Task<bool> UpdateEnvironmentalSettingValue(EnvironmentalSettingEnum key, string newValue);
     }
 }

@@ -3,13 +3,14 @@ using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.Helpers;
 using Orbit.Domain.Interfaces;
+using Orbit.Domain.Interfaces.Api.Finance;
 using Orbit.Domain.Interfaces.Helpers;
 using Serilog;
 using Task = System.Threading.Tasks.Task;
 
 namespace Orbit.Domain.Services.Finance
 {
-    public class BankService(IBankApiHelper bankApiHelper, IEnvironmentalSettingHelper environmentalSettingHelper, ICommsSenderClient commonsSender, AppDbContext context) : IBankService
+    public class BankService(IBankApiHelper bankApiHelper, IEnvironmentalSettingHelper environmentalSettingHelper, ICommsSenderClient commonsSender, IGoCardlessService goCardlessService, AppDbContext context) : IBankService
     {
         public async Task GetMonzoTransactionsAndAddToDatabase()
         {
@@ -79,27 +80,88 @@ namespace Orbit.Domain.Services.Finance
                 return;
             }
 
-            var openBankingTransactions = await bankApiHelper.GetGoCardlessBankingDataTransactions(accessToken, environmentalSettingHelper.GetEnviromentalSettingValue(Enums.EnvironmentalSettingEnum.MainBankAccountId));
+            // Get active account IDs from tracked connections
+            var activeAccountIds = await goCardlessService.GetActiveAccountIds();
 
-            if (openBankingTransactions == null || openBankingTransactions.Transactions.Booked.Length == 0)
+            // Fall back to environmental settings if no tracked connections exist
+            if (activeAccountIds.Count == 0)
             {
-                Log.Information("[Open Banking Transactions Job] No new transactions found");
+                Log.Warning("[Open Banking Transactions Job] No active GoCardless connections found, falling back to environmental settings");
+
+                try
+                {
+                    var mainAccountId = environmentalSettingHelper.GetEnvironmentalSettingValue(Enums.EnvironmentalSettingEnum.MainBankAccountId);
+                    if (!string.IsNullOrEmpty(mainAccountId))
+                    {
+                        activeAccountIds.Add(mainAccountId);
+                    }
+                }
+                catch (KeyNotFoundException) { }
+
+                try
+                {
+                    var creditCardId = environmentalSettingHelper.GetEnvironmentalSettingValue(Enums.EnvironmentalSettingEnum.CreditCardAccountId);
+                    if (!string.IsNullOrEmpty(creditCardId))
+                    {
+                        activeAccountIds.Add(creditCardId);
+                    }
+                }
+                catch (KeyNotFoundException) { }
+
+                if (activeAccountIds.Count == 0)
+                {
+                    Log.Warning("[Open Banking Transactions Job] No account IDs available. Bank connection may have expired.");
+                    return;
+                }
+            }
+
+            var allBookedTransactions = new List<DTOs.Finance.Banking.Booked>();
+
+            foreach (var accountId in activeAccountIds)
+            {
+                try
+                {
+                    var transactions = await bankApiHelper.GetGoCardlessBankingDataTransactions(accessToken, accountId);
+
+                    if (transactions?.Transactions?.Booked != null && transactions.Transactions.Booked.Length > 0)
+                    {
+                        allBookedTransactions.AddRange(transactions.Transactions.Booked);
+
+                        // Update last successful sync on the connection
+                        var connection = await context.GoCardlessBankConnections
+                            .FirstOrDefaultAsync(c => c.AccountId == accountId);
+
+                        if (connection != null)
+                        {
+                            connection.LastSuccessfulSync = DateTime.UtcNow;
+                            connection.LastSyncError = null;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, $"[Open Banking Transactions Job] Failed to fetch transactions for account {accountId}");
+
+                    // Record the error on the connection
+                    var connection = await context.GoCardlessBankConnections
+                        .FirstOrDefaultAsync(c => c.AccountId == accountId);
+
+                    if (connection != null)
+                    {
+                        connection.LastSyncError = ex.Message;
+                    }
+                }
+            }
+
+            await context.SaveChangesAsync();
+
+            if (allBookedTransactions.Count == 0)
+            {
+                Log.Information("[Open Banking Transactions Job] No new transactions found across all accounts");
                 return;
             }
 
-            // grab the credit card transactions too and add to the list
-            var creditCardTransactions = await bankApiHelper.GetGoCardlessBankingDataTransactions(accessToken, environmentalSettingHelper.GetEnviromentalSettingValue(Enums.EnvironmentalSettingEnum.CreditCardAccountId));
-
-            if (creditCardTransactions == null || creditCardTransactions.Transactions.Booked.Length == 0)
-            {
-                Log.Information("[Open Banking Transactions Job] No new credit card transactions found");
-            }
-            else if (creditCardTransactions != null)
-            {
-                openBankingTransactions.Transactions.Booked = openBankingTransactions.Transactions.Booked.Concat(creditCardTransactions.Transactions.Booked).ToArray();
-            }
-
-            foreach (var transaction in openBankingTransactions.Transactions.Booked)
+            foreach (var transaction in allBookedTransactions)
             {
                 //Convert the amount to a positive
                 var positiveTransactionAmount = Math.Abs((int)(decimal.Parse(transaction.TransactionAmount.Amount) * 100));

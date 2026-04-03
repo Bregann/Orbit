@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { doQueryGet } from '@/helpers/apiClient'
 import type { FitbitConnectionStatus } from '@/interfaces/api/fitbit/FitbitTypes'
+import type { GoCardlessConnectionStatus } from '@/interfaces/api/gocardless/GoCardlessTypes'
 import { QueryKeys } from '@/helpers/QueryKeys'
 
 export const metadata: Metadata = {
@@ -23,6 +24,15 @@ export default async function SettingsPage() {
     queryKey: [QueryKeys.FitbitConnectionStatus],
     queryFn: async () =>
       await doQueryGet<FitbitConnectionStatus>('/api/fitbit/GetConnectionStatus', {
+        cookieHeader
+      })
+  })
+
+  // Prefetch GoCardless connection status
+  await queryClient.prefetchQuery({
+    queryKey: [QueryKeys.GoCardlessConnectionStatus],
+    queryFn: async () =>
+      await doQueryGet<GoCardlessConnectionStatus>('/api/gocardless/GetConnectionStatus', {
         cookieHeader
       })
   })

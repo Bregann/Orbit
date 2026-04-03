@@ -13,9 +13,9 @@ namespace Orbit.Domain.Helpers
         public async Task RefreshMonzoToken()
         {
             //Create the request
-            var monzoClientId = envSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.MonzoClientId);
-            var monzoClientSecret = envSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.MonzoClientSecret);
-            var monzoRefreshToken = envSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.MonzoRefreshToken);
+            var monzoClientId = envSettingHelper.GetEnvironmentalSettingValue(EnvironmentalSettingEnum.MonzoClientId);
+            var monzoClientSecret = envSettingHelper.GetEnvironmentalSettingValue(EnvironmentalSettingEnum.MonzoClientSecret);
+            var monzoRefreshToken = envSettingHelper.GetEnvironmentalSettingValue(EnvironmentalSettingEnum.MonzoRefreshToken);
 
             var client = new RestClient("https://api.monzo.com/");
             var request = new RestRequest($"/oauth2/token", Method.Post);
@@ -40,17 +40,17 @@ namespace Orbit.Domain.Helpers
                 return;
             }
 
-            await envSettingHelper.UpdateEnviromentalSettingValue(EnvironmentalSettingEnum.MonzoClientId, refreshResult.ClientId);
-            await envSettingHelper.UpdateEnviromentalSettingValue(EnvironmentalSettingEnum.MonzoRefreshToken, refreshResult.RefreshToken);
-            await envSettingHelper.UpdateEnviromentalSettingValue(EnvironmentalSettingEnum.MonzoAccessToken, refreshResult.AccessToken);
+            await envSettingHelper.UpdateEnvironmentalSettingValue(EnvironmentalSettingEnum.MonzoClientId, refreshResult.ClientId);
+            await envSettingHelper.UpdateEnvironmentalSettingValue(EnvironmentalSettingEnum.MonzoRefreshToken, refreshResult.RefreshToken);
+            await envSettingHelper.UpdateEnvironmentalSettingValue(EnvironmentalSettingEnum.MonzoAccessToken, refreshResult.AccessToken);
 
             Log.Information("[Monzo Refresh Job] Monzo Refreshed");
         }
 
         public async Task<List<Transaction>?> GetMonzoTransactions()
         {
-            var monzoAccessToken = envSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.MonzoAccessToken);
-            var monzoAccountId = envSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.MonzoAccountId);
+            var monzoAccessToken = envSettingHelper.GetEnvironmentalSettingValue(EnvironmentalSettingEnum.MonzoAccessToken);
+            var monzoAccountId = envSettingHelper.GetEnvironmentalSettingValue(EnvironmentalSettingEnum.MonzoAccountId);
 
             //Create the request
             var clientOptions = new RestClientOptions("https://api.monzo.com/")
@@ -84,8 +84,8 @@ namespace Orbit.Domain.Helpers
         public async Task<string?> GetGoCardlessBankingDataAccessToken()
         {
             //Create the request
-            var secretId = envSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.BankAccountDataSecretId);
-            var secretKey = envSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.BankAccountDataSecretKey);
+            var secretId = envSettingHelper.GetEnvironmentalSettingValue(EnvironmentalSettingEnum.BankAccountDataSecretId);
+            var secretKey = envSettingHelper.GetEnvironmentalSettingValue(EnvironmentalSettingEnum.BankAccountDataSecretKey);
 
             var client = new RestClient("https://bankaccountdata.gocardless.com");
             var request = new RestRequest("api/v2/token/new/", Method.Post);
@@ -145,6 +145,126 @@ namespace Orbit.Domain.Helpers
             }
 
             return transactionsResult;
+        }
+
+        public async Task<List<GoCardlessInstitution>?> GetGoCardlessInstitutions(string accessToken, string country)
+        {
+            var clientOptions = new RestClientOptions("https://bankaccountdata.gocardless.com")
+            {
+                Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(accessToken, "Bearer")
+            };
+
+            var client = new RestClient(clientOptions);
+            var request = new RestRequest($"api/v2/institutions/?country={country}", Method.Get);
+
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == null || response.Content == "" || !response.IsSuccessStatusCode)
+            {
+                Log.Warning($"[GoCardless] Failed to get institutions - response {response.StatusCode}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<List<GoCardlessInstitution>>(response.Content);
+        }
+
+        public async Task<GoCardlessAgreementResponse?> CreateEndUserAgreement(string accessToken, string institutionId, int accessValidForDays = 90)
+        {
+            var clientOptions = new RestClientOptions("https://bankaccountdata.gocardless.com")
+            {
+                Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(accessToken, "Bearer")
+            };
+
+            var client = new RestClient(clientOptions);
+            var request = new RestRequest("api/v2/agreements/enduser/", Method.Post);
+            request.AddHeader("Content-Type", "application/json");
+            request.AddJsonBody(new
+            {
+                institution_id = institutionId,
+                max_historical_days = 90,
+                access_valid_for_days = accessValidForDays,
+                access_scope = new[] { "balances", "details", "transactions" }
+            });
+
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == null || response.Content == "" || !response.IsSuccessStatusCode)
+            {
+                Log.Warning($"[GoCardless] Failed to create end user agreement - response {response.StatusCode} - {response.Content}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<GoCardlessAgreementResponse>(response.Content);
+        }
+
+        public async Task<GoCardlessRequisitionResponse?> CreateRequisition(string accessToken, string agreementId, string institutionId, string redirectUrl)
+        {
+            var clientOptions = new RestClientOptions("https://bankaccountdata.gocardless.com")
+            {
+                Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(accessToken, "Bearer")
+            };
+
+            var client = new RestClient(clientOptions);
+            var request = new RestRequest("api/v2/requisitions/", Method.Post);
+            request.AddHeader("Content-Type", "application/json");
+            request.AddJsonBody(new
+            {
+                redirect = redirectUrl,
+                institution_id = institutionId,
+                agreement = agreementId
+            });
+
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == null || response.Content == "" || !response.IsSuccessStatusCode)
+            {
+                Log.Warning($"[GoCardless] Failed to create requisition - response {response.StatusCode} - {response.Content}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<GoCardlessRequisitionResponse>(response.Content);
+        }
+
+        public async Task<GoCardlessRequisitionResponse?> GetRequisition(string accessToken, string requisitionId)
+        {
+            var clientOptions = new RestClientOptions("https://bankaccountdata.gocardless.com")
+            {
+                Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(accessToken, "Bearer")
+            };
+
+            var client = new RestClient(clientOptions);
+            var request = new RestRequest($"api/v2/requisitions/{requisitionId}/", Method.Get);
+
+            var response = await client.ExecuteAsync(request);
+
+            if (response.Content == null || response.Content == "" || !response.IsSuccessStatusCode)
+            {
+                Log.Warning($"[GoCardless] Failed to get requisition - response {response.StatusCode}");
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<GoCardlessRequisitionResponse>(response.Content);
+        }
+
+        public async Task<bool> DeleteRequisition(string accessToken, string requisitionId)
+        {
+            var clientOptions = new RestClientOptions("https://bankaccountdata.gocardless.com")
+            {
+                Authenticator = new OAuth2AuthorizationRequestHeaderAuthenticator(accessToken, "Bearer")
+            };
+
+            var client = new RestClient(clientOptions);
+            var request = new RestRequest($"api/v2/requisitions/{requisitionId}/", Method.Delete);
+
+            var response = await client.ExecuteAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Log.Warning($"[GoCardless] Failed to delete requisition - response {response.StatusCode}");
+                return false;
+            }
+
+            return true;
         }
     }
 }

@@ -15,9 +15,9 @@ namespace Orbit.Domain.Helpers
         private static readonly string FitbitTokenUrl = "https://api.fitbit.com/oauth2/token";
         private static readonly string FitbitApiBaseUrl = "https://api.fitbit.com";
 
-        private string ClientId => environmentalSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.FitbitClientId);
-        private string ClientSecret => environmentalSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.FitbitClientSecret);
-        private string RedirectUri => environmentalSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.FitbitRedirectUri);
+        private string ClientId => environmentalSettingHelper.GetEnvironmentalSettingValue(EnvironmentalSettingEnum.FitbitClientId);
+        private string ClientSecret => environmentalSettingHelper.GetEnvironmentalSettingValue(EnvironmentalSettingEnum.FitbitClientSecret);
+        private string RedirectUri => environmentalSettingHelper.GetEnvironmentalSettingValue(EnvironmentalSettingEnum.FitbitRedirectUri);
 
         private const string Scopes = "activity heartrate profile sleep weight";
 
