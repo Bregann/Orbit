@@ -15,6 +15,7 @@ import {
 } from '@mantine/core'
 import TransactionsTable from '@/components/TransactionsTable'
 import StatCard from '@/components/finance/StatCard'
+import BankConnectionWarning from '@/components/gocardless/BankConnectionWarning'
 import { doQueryGet } from '@/helpers/apiClient'
 import { useQuery } from '@tanstack/react-query'
 import { GetHomepageStatsDto } from '@/interfaces/api/stats/GetHomepageStatsDto'
@@ -70,6 +71,9 @@ export default function HomeComponent() {
   return (
     <Container size="xl" px={{ base: 'xs', sm: 'md' }}>
       <Stack gap="xl">
+        {/* Bank Connection Warning */}
+        <BankConnectionWarning />
+
         {/* Page Header */}
         <div>
           <Title order={1} mb="xs">

@@ -58,7 +58,7 @@ namespace Orbit.Tests.Infrastructure
             var mock = new Mock<IEnvironmentalSettingHelper>();
 
             // Setup common environmental settings
-            mock.Setup(x => x.GetEnviromentalSettingValue(It.IsAny<Orbit.Domain.Enums.EnvironmentalSettingEnum>()))
+            mock.Setup(x => x.GetEnvironmentalSettingValue(It.IsAny<Orbit.Domain.Enums.EnvironmentalSettingEnum>()))
                 .Returns("test-value");
 
             mock.Setup(x => x.LoadEnvironmentalSettings())

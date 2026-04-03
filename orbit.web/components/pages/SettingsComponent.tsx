@@ -1,6 +1,7 @@
 'use client'
 
 import FitbitIntegration from '@/components/fitbit/FitbitIntegration'
+import GoCardlessIntegration from '@/components/gocardless/GoCardlessIntegration'
 import {
   Container,
   Title,
@@ -36,6 +37,7 @@ export default function SettingsComponent() {
 
           <Tabs.Panel value="integrations" pt="md">
             <Stack gap="lg">
+              <GoCardlessIntegration />
               <FitbitIntegration />
             </Stack>
           </Tabs.Panel>

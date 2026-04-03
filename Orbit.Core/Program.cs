@@ -92,6 +92,7 @@ builder.Services.AddScoped<IMoodTrackerService, MoodTrackerService>();
 builder.Services.AddScoped<INoteService, NotesService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddScoped<IFitbitService, FitbitService>();
+builder.Services.AddScoped<IGoCardlessService, GoCardlessService>();
 builder.Services.AddScoped<IAssetsService, AssetsService>();
 builder.Services.AddHttpClient<ICommsSenderClient, CommsSenderClient>();
 
@@ -223,8 +224,8 @@ var auth = new[] { new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFi
     {
         new BasicAuthAuthorizationUser
         {
-            Login = environmentalSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.HangfireUsername),
-            PasswordClear = environmentalSettingHelper.GetEnviromentalSettingValue(EnvironmentalSettingEnum.HangfirePassword)
+            Login = environmentalSettingHelper.GetEnvironmentalSettingValue(EnvironmentalSettingEnum.HangfireUsername),
+            PasswordClear = environmentalSettingHelper.GetEnvironmentalSettingValue(EnvironmentalSettingEnum.HangfirePassword)
         }
     }
 })};

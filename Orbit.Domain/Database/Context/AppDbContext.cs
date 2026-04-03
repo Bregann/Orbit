@@ -42,5 +42,7 @@ namespace Orbit.Domain.Database.Context
 
         public DbSet<Asset> Assets { get; set; } = null!;
         public DbSet<AssetCategory> AssetCategories { get; set; } = null!;
+
+        public DbSet<GoCardlessBankConnection> GoCardlessBankConnections { get; set; } = null!;
     }
 }

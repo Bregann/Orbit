@@ -22,7 +22,7 @@ namespace Orbit.Domain.Helpers
             }
         }
 
-        public string GetEnviromentalSettingValue(EnvironmentalSettingEnum key)
+        public string GetEnvironmentalSettingValue(EnvironmentalSettingEnum key)
         {
             if (_environmentalSettings.TryGetValue(key, out var value))
             {
@@ -32,7 +32,7 @@ namespace Orbit.Domain.Helpers
             throw new KeyNotFoundException($"Environmental setting for key '{key}' was not found.");
         }
 
-        public async Task<bool> UpdateEnviromentalSettingValue(EnvironmentalSettingEnum key, string newValue)
+        public async Task<bool> UpdateEnvironmentalSettingValue(EnvironmentalSettingEnum key, string newValue)
         {
             if (!_environmentalSettings.ContainsKey(key))
             {
