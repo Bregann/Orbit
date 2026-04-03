@@ -165,7 +165,7 @@ export default function DashboardComponent() {
       <Stack gap="lg" mb="xl">
         <Title order={2} size="h3">At a Glance</Title>
 
-        <Grid gutter="md">
+        <Grid>
           {/* Money Left */}
           <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
             <Card shadow="sm" padding="md" radius="md" withBorder h="100%">
@@ -242,7 +242,7 @@ export default function DashboardComponent() {
       </Stack>
 
       {/* Today's Tasks & Upcoming Events */}
-      <Grid gutter="md" mb="xl">
+      <Grid mb="xl">
         <Grid.Col span={{ base: 12, md: 6 }}>
           <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
             <Stack gap="md">

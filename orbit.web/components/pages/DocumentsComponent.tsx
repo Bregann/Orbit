@@ -224,7 +224,7 @@ export default function DocumentsComponent() {
         </Card>
 
         {/* Documents List */}
-        <Grid gutter="md">
+        <Grid>
           <Grid.Col span={{ base: 12, md: 8 }}>
             <DocumentsListCard
               documents={filteredDocuments}

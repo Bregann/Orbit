@@ -239,7 +239,7 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
           minRows={3}
         />
 
-        <Grid gutter="md">
+        <Grid>
           <Grid.Col span={6}>
             <TextInput
               label="Date"
@@ -268,7 +268,7 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
         />
 
         <Collapse in={!eventIsAllDay}>
-          <Grid gutter="md">
+          <Grid>
             <Grid.Col span={6}>
               <TextInput
                 label="Start Time"
@@ -308,7 +308,7 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
 
         <Collapse in={showRecurrence}>
           <Stack gap="md">
-            <Grid gutter="md">
+            <Grid>
               <Grid.Col span={8}>
                 <Select
                   label="Repeat"

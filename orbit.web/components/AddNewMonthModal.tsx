@@ -160,7 +160,7 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
 
           <div>
             <Title order={4} mb="sm">Spending Pots</Title>
-            <Grid gutter="sm">
+            <Grid>
               {data.spendingPots.map((pot) => (
                 <Grid.Col span={6} key={pot.potId}>
                   <Paper withBorder p="md" radius="md" ta="center">
@@ -207,7 +207,7 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
           {/* Savings Pots */}
           <div>
             <Title order={4} mb="sm">Savings Pots</Title>
-            <Grid gutter="sm">
+            <Grid>
               {data.savingsPots.map((pot) => (
                 <Grid.Col span={6} key={pot.potId}>
                   <Paper withBorder p="md" radius="md" ta="center">

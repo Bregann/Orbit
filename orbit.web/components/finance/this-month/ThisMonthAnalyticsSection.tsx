@@ -43,7 +43,7 @@ export default function ThisMonthAnalyticsSection() {
             </Title>
           </Group>
         </Group>
-        <Grid gutter="md">
+        <Grid>
           <Grid.Col span={{ base: 12, md: 6 }}>
             <StatsPlaceholder title="Emergency Fund - 12 Month Trend" icon={<IconTrendingUp size="1.5rem" />} />
           </Grid.Col>
@@ -68,7 +68,7 @@ export default function ThisMonthAnalyticsSection() {
             </Title>
           </Group>
         </Group>
-        <Grid gutter="md">
+        <Grid>
           <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
             <StatsPlaceholder title="Spent Per Pot" icon={<IconChartBar size="1.5rem" />} />
           </Grid.Col>
@@ -81,7 +81,7 @@ export default function ThisMonthAnalyticsSection() {
         </Grid>
       </div>
 
-      <Grid gutter="md">
+      <Grid>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <StatsPlaceholder title="Weekly Spending Trend" icon={<IconTrendingUp size="1.5rem" />} />
         </Grid.Col>

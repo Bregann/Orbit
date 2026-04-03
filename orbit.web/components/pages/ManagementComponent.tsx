@@ -88,7 +88,7 @@ export default function ManagementComponent() {
           </Text>
         </div>
 
-        <Grid gutter="lg">
+        <Grid>
           {/* Pots Management Section */}
           <Grid.Col span={{ base: 12, lg: 6 }}>
             <PotsManagement onDeletePot={handleDeletePot} />

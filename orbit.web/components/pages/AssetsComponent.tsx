@@ -324,7 +324,7 @@ export default function AssetsComponent() {
         </Card>
 
         {/* Assets List */}
-        <Grid gutter="md">
+        <Grid>
           <Grid.Col span={{ base: 12, md: 8 }}>
             <AssetsListCard
               assets={filteredAssets}

@@ -25,7 +25,7 @@ export default function ThisMonthSavingsSection({ savingsPots }: ThisMonthSaving
           {savingsPots.length} pots
         </Badge>
       </Group>
-      <Grid gutter="md">
+      <Grid>
         {savingsPots.map((pot) => (
           <Grid.Col span={{ base: 12, sm: 6, md: savingsPots.length > 3 ? 3 : 4 }} key={pot.potId}>
             <SavingsPotCard data={pot} />

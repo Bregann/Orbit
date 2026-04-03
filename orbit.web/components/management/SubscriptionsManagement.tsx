@@ -149,7 +149,7 @@ export default function SubscriptionsManagement({ onDeleteSubscription }: Subscr
               </ThemeIcon>
               <Text fw={600} size="sm">Add New Subscription</Text>
             </Group>
-            <Grid gutter="sm">
+            <Grid>
               <Grid.Col span={{ base: 12, md: 4 }}>
                 <Input
                   value={addPaymentName}

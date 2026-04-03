@@ -119,7 +119,7 @@ export default function MoodTrackerComponent() {
         </Group>
 
         {/* Today's Mood Widget */}
-        <Grid gutter="md">
+        <Grid>
           <Grid.Col span={{ base: 12, md: 8 }}>
             <MoodSelector
               currentMood={todaysMoodData?.mood || null}

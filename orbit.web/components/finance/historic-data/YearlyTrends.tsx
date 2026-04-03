@@ -57,7 +57,7 @@ export default function YearlyTrends({ yearlyData }: YearlyTrendsProps) {
           </div>
         </Group>
       </Group>
-      <Grid gutter="md">
+      <Grid>
         {combinedMonthlyData.length > 0 && (
           <>
             <Grid.Col span={{ base: 12, lg: 6 }}>

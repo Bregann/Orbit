@@ -116,7 +116,7 @@ export default function AutomaticTransactionsManagement({
               </ThemeIcon>
               <Text fw={600} size="sm">Add New Rule</Text>
             </Group>
-            <Grid gutter="sm">
+            <Grid>
               <Grid.Col span={{ base: 12, xs: 6 }}>
                 <Input
                   value={addMerchantName}

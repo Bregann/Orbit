@@ -25,7 +25,7 @@ export default function ThisMonthBudgetSection({ spendingPots }: ThisMonthBudget
           {spendingPots.length} pots
         </Badge>
       </Group>
-      <Grid gutter="md">
+      <Grid>
         {spendingPots.map((pot) => (
           <Grid.Col span={{ base: 12, sm: 6, md: spendingPots.length > 3 ? 3 : 4 }} key={pot.potId}>
             <SpendingPotCard data={pot} />

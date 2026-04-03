@@ -18,7 +18,7 @@ export default function DocumentsStatsCard({ documents, categories }: DocumentsS
   }).length
 
   return (
-    <Grid gutter="md">
+    <Grid>
       <Grid.Col span={{ base: 12, xs: 6, md: 4 }}>
         <Card withBorder p="lg" radius="md" shadow="sm">
           <Group justify="space-between" mb="xs">

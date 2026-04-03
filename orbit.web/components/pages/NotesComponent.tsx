@@ -70,7 +70,7 @@ export default function NotesComponent() {
         <NotesStatsCards pages={pages} folders={folders} />
 
         {/* Main Content */}
-        <Grid gutter="md">
+        <Grid>
           {/* Sidebar */}
           <Grid.Col span={{ base: 12, md: 3 }}>
             <NotesSidebar

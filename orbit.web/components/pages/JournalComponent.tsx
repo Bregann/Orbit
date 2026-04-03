@@ -76,7 +76,7 @@ export default function JournalComponent() {
         <JournalStatsCards entries={entries} />
 
         {/* Entries List */}
-        <Grid gutter="md">
+        <Grid>
           <Grid.Col span={{ base: 12, md: 8 }}>
             <JournalEntriesList entries={entries} onEntryClick={handleViewEntry} />
           </Grid.Col>

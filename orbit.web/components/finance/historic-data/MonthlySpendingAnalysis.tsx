@@ -21,7 +21,7 @@ export default function MonthlySpendingAnalysis({ potSpendings }: MonthlySpendin
 
   return (
     <Card withBorder p="lg" radius="md" shadow="sm">
-      <Grid gutter="lg" align="center">
+      <Grid align="center">
         <Grid.Col span={{ base: 12, md: 6 }}>
           <Group justify="center">
             <div>

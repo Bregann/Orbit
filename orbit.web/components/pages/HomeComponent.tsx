@@ -89,7 +89,7 @@ export default function HomeComponent() {
           <Title order={2} size="h3" mb="md" ta="center">
             Current Month Summary
           </Title>
-          <Grid gutter="md" justify="center">
+          <Grid justify="center">
             <Grid.Col span={{ base: 12, xs: 6, sm: 6, md: 2.4 }}>
               <StatCard title="Money In" amount={statsData.moneyIn} />
             </Grid.Col>

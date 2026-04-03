@@ -132,7 +132,7 @@ export default function PotsManagement({ onDeletePot }: PotsManagementProps) {
               </ThemeIcon>
               <Text fw={600} size="sm">Add New Pot</Text>
             </Group>
-            <Grid gutter="sm">
+            <Grid>
               <Grid.Col span={{ base: 12, xs: 5 }}>
                 <Input
                   value={addPotName}

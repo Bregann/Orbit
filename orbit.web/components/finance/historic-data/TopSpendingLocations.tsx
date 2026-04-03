@@ -17,7 +17,7 @@ export default function TopSpendingLocations({ topMerchants }: TopSpendingLocati
 
   return (
     <Card withBorder p="lg" radius="md" shadow="sm">
-      <Grid gutter="lg">
+      <Grid>
         <Grid.Col span={{ base: 12, md: 6 }}>
           <Text fw={600} size="lg" mb="md">
             Top Places Money Spent
