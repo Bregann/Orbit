@@ -546,6 +546,126 @@ namespace Orbit.Tests.Infrastructure
             await context.SaveChangesAsync();
         }
 
+        public static async Task SeedTestMealPlannerData(AppDbContext context)
+        {
+            await context.Recipes.AddRangeAsync(new List<Recipe>
+            {
+                new Recipe
+                {
+                    Name = "Spaghetti Bolognese",
+                    Description = "Classic Italian pasta dish",
+                    Ingredients = new List<RecipeIngredient>
+                    {
+                        new() { Name = "Spaghetti", Quantity = "400g" },
+                        new() { Name = "Minced beef", Quantity = "500g" },
+                        new() { Name = "Tomato sauce", Quantity = "1 jar" },
+                        new() { Name = "Onion", Quantity = "1" },
+                        new() { Name = "Garlic", Quantity = "2 cloves" }
+                    },
+                    Steps = new List<RecipeStep>
+                    {
+                        new() { StepNumber = 1, Instruction = "Cook pasta" },
+                        new() { StepNumber = 2, Instruction = "Brown mince" },
+                        new() { StepNumber = 3, Instruction = "Add sauce" },
+                        new() { StepNumber = 4, Instruction = "Combine" }
+                    },
+                    PrepTimeMinutes = 10,
+                    CookTimeMinutes = 30,
+                    Servings = 4,
+                    CreatedAt = DateTime.UtcNow.AddDays(-10)
+                },
+                new Recipe
+                {
+                    Name = "Chicken Stir Fry",
+                    Description = "Quick and healthy stir fry",
+                    Ingredients = new List<RecipeIngredient>
+                    {
+                        new() { Name = "Chicken breast", Quantity = "2" },
+                        new() { Name = "Mixed vegetables", Quantity = "300g" },
+                        new() { Name = "Soy sauce", Quantity = "2 tbsp" },
+                        new() { Name = "Rice", Quantity = "200g" }
+                    },
+                    Steps = new List<RecipeStep>
+                    {
+                        new() { StepNumber = 1, Instruction = "Cook rice" },
+                        new() { StepNumber = 2, Instruction = "Stir fry chicken" },
+                        new() { StepNumber = 3, Instruction = "Add veg" },
+                        new() { StepNumber = 4, Instruction = "Season" }
+                    },
+                    PrepTimeMinutes = 15,
+                    CookTimeMinutes = 20,
+                    Servings = 2,
+                    CreatedAt = DateTime.UtcNow.AddDays(-5)
+                },
+                new Recipe
+                {
+                    Name = "Cheese Omelette",
+                    Description = "Simple breakfast omelette",
+                    Ingredients = new List<RecipeIngredient>
+                    {
+                        new() { Name = "Eggs", Quantity = "3" },
+                        new() { Name = "Cheese", Quantity = "50g" },
+                        new() { Name = "Butter", Quantity = "10g" },
+                        new() { Name = "Salt" },
+                        new() { Name = "Pepper" }
+                    },
+                    Steps = new List<RecipeStep>
+                    {
+                        new() { StepNumber = 1, Instruction = "Beat eggs" },
+                        new() { StepNumber = 2, Instruction = "Melt butter" },
+                        new() { StepNumber = 3, Instruction = "Pour eggs" },
+                        new() { StepNumber = 4, Instruction = "Add cheese" },
+                        new() { StepNumber = 5, Instruction = "Fold" }
+                    },
+                    PrepTimeMinutes = 5,
+                    CookTimeMinutes = 5,
+                    Servings = 1,
+                    CreatedAt = DateTime.UtcNow.AddDays(-3)
+                }
+            });
+
+            await context.SaveChangesAsync();
+
+            var recipes = context.Recipes.ToList();
+
+            await context.MealPlanEntries.AddRangeAsync(new List<MealPlanEntry>
+            {
+                new MealPlanEntry
+                {
+                    Date = DateTime.UtcNow.Date,
+                    MealType = "Dinner",
+                    RecipeId = recipes[0].Id
+                },
+                new MealPlanEntry
+                {
+                    Date = DateTime.UtcNow.Date.AddDays(1),
+                    MealType = "Lunch",
+                    RecipeId = recipes[1].Id
+                }
+            });
+
+            await context.RecipeCookHistory.AddRangeAsync(new List<RecipeCookHistory>
+            {
+                new RecipeCookHistory
+                {
+                    RecipeId = recipes[0].Id,
+                    CookedAt = DateTime.UtcNow.AddDays(-7)
+                },
+                new RecipeCookHistory
+                {
+                    RecipeId = recipes[0].Id,
+                    CookedAt = DateTime.UtcNow.AddDays(-3)
+                },
+                new RecipeCookHistory
+                {
+                    RecipeId = recipes[1].Id,
+                    CookedAt = DateTime.UtcNow.AddDays(-2)
+                }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
         public static async Task SeedMinimalData(AppDbContext context)
         {
             await SeedTestUser(context);
@@ -574,6 +694,9 @@ namespace Orbit.Tests.Infrastructure
             context.RemoveRange(context.AssetCategories);
             context.RemoveRange(context.ShoppingListItems);
             context.RemoveRange(context.ShoppingListQuickAddItems);
+            context.RemoveRange(context.RecipeCookHistory);
+            context.RemoveRange(context.MealPlanEntries);
+            context.RemoveRange(context.Recipes);
             context.RemoveRange(context.JournalEntries);
             context.RemoveRange(context.NotePages);
             context.RemoveRange(context.NoteFolders);

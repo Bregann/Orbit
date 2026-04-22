@@ -909,6 +909,155 @@ namespace Orbit.Domain.Helpers
                         });
 
             await context.SaveChangesAsync();
+
+            // Seed meal planner recipes
+            var monday = DateTime.UtcNow.Date.AddDays(-(((int)DateTime.UtcNow.DayOfWeek + 6) % 7));
+
+            var spagBol = new Recipe
+            {
+                Name = "Spaghetti Bolognese",
+                Description = "Classic Italian meat sauce with spaghetti",
+                PrepTimeMinutes = 15,
+                CookTimeMinutes = 45,
+                Servings = 4,
+                CreatedAt = DateTime.UtcNow.AddDays(-30),
+                LastUpdatedAt = DateTime.UtcNow.AddDays(-30),
+                Ingredients = new List<RecipeIngredient>
+                {
+                    new RecipeIngredient { Name = "Spaghetti", Quantity = "400g" },
+                    new RecipeIngredient { Name = "Beef mince", Quantity = "500g" },
+                    new RecipeIngredient { Name = "Chopped tomatoes", Quantity = "2 tins" },
+                    new RecipeIngredient { Name = "Onion", Quantity = "1 large" },
+                    new RecipeIngredient { Name = "Garlic cloves", Quantity = "3" },
+                    new RecipeIngredient { Name = "Tomato puree", Quantity = "2 tbsp" },
+                    new RecipeIngredient { Name = "Olive oil", Quantity = "2 tbsp" },
+                    new RecipeIngredient { Name = "Parmesan", Quantity = "to serve" }
+                },
+                Steps = new List<RecipeStep>
+                {
+                    new RecipeStep { StepNumber = 1, Instruction = "Dice the onion and crush the garlic. Heat olive oil in a large pan over medium heat." },
+                    new RecipeStep { StepNumber = 2, Instruction = "Fry the onion for 5 minutes until softened, then add garlic and cook for 1 minute." },
+                    new RecipeStep { StepNumber = 3, Instruction = "Add the beef mince and brown all over, breaking it up with a spoon." },
+                    new RecipeStep { StepNumber = 4, Instruction = "Stir in the tomato puree, then add the chopped tomatoes. Season well." },
+                    new RecipeStep { StepNumber = 5, Instruction = "Simmer on low heat for 30 minutes, stirring occasionally." },
+                    new RecipeStep { StepNumber = 6, Instruction = "Cook spaghetti according to packet instructions. Serve topped with parmesan." }
+                },
+                CookHistory = new List<RecipeCookHistory>
+                {
+                    new RecipeCookHistory { CookedAt = DateTime.UtcNow.AddDays(-14) },
+                    new RecipeCookHistory { CookedAt = DateTime.UtcNow.AddDays(-7) }
+                }
+            };
+
+            var chickenCurry = new Recipe
+            {
+                Name = "Chicken Tikka Masala",
+                Description = "Creamy, aromatic curry with tender chicken in a spiced tomato sauce",
+                PrepTimeMinutes = 20,
+                CookTimeMinutes = 35,
+                Servings = 4,
+                CreatedAt = DateTime.UtcNow.AddDays(-20),
+                LastUpdatedAt = DateTime.UtcNow.AddDays(-20),
+                Ingredients = new List<RecipeIngredient>
+                {
+                    new RecipeIngredient { Name = "Chicken breast", Quantity = "600g" },
+                    new RecipeIngredient { Name = "Double cream", Quantity = "150ml" },
+                    new RecipeIngredient { Name = "Chopped tomatoes", Quantity = "1 tin" },
+                    new RecipeIngredient { Name = "Onion", Quantity = "1 large" },
+                    new RecipeIngredient { Name = "Garlic cloves", Quantity = "4" },
+                    new RecipeIngredient { Name = "Fresh ginger", Quantity = "2cm piece" },
+                    new RecipeIngredient { Name = "Tikka masala paste", Quantity = "3 tbsp" },
+                    new RecipeIngredient { Name = "Natural yoghurt", Quantity = "150ml" },
+                    new RecipeIngredient { Name = "Basmati rice", Quantity = "300g" },
+                    new RecipeIngredient { Name = "Fresh coriander", Quantity = "handful" }
+                },
+                Steps = new List<RecipeStep>
+                {
+                    new RecipeStep { StepNumber = 1, Instruction = "Cut chicken into chunks and marinate in yoghurt and 1 tbsp tikka paste for at least 30 minutes." },
+                    new RecipeStep { StepNumber = 2, Instruction = "Grill or pan-fry the marinated chicken until charred and cooked through. Set aside." },
+                    new RecipeStep { StepNumber = 3, Instruction = "Fry the diced onion in oil for 8 minutes. Add garlic and ginger, cook for 2 more minutes." },
+                    new RecipeStep { StepNumber = 4, Instruction = "Add remaining tikka paste and cook for 1 minute until fragrant." },
+                    new RecipeStep { StepNumber = 5, Instruction = "Add chopped tomatoes and simmer for 10 minutes. Stir in double cream." },
+                    new RecipeStep { StepNumber = 6, Instruction = "Add the cooked chicken, simmer for 5 minutes. Serve over basmati rice, garnished with coriander." }
+                },
+                CookHistory = new List<RecipeCookHistory>
+                {
+                    new RecipeCookHistory { CookedAt = DateTime.UtcNow.AddDays(-10) }
+                }
+            };
+
+            var avocadoToast = new Recipe
+            {
+                Name = "Smashed Avocado Toast",
+                Description = "Quick and healthy breakfast with creamy avocado on sourdough",
+                PrepTimeMinutes = 5,
+                CookTimeMinutes = 5,
+                Servings = 2,
+                CreatedAt = DateTime.UtcNow.AddDays(-10),
+                LastUpdatedAt = DateTime.UtcNow.AddDays(-10),
+                Ingredients = new List<RecipeIngredient>
+                {
+                    new RecipeIngredient { Name = "Sourdough bread", Quantity = "2 thick slices" },
+                    new RecipeIngredient { Name = "Ripe avocado", Quantity = "1 large" },
+                    new RecipeIngredient { Name = "Lemon juice", Quantity = "1 tbsp" },
+                    new RecipeIngredient { Name = "Chilli flakes", Quantity = "pinch" },
+                    new RecipeIngredient { Name = "Eggs", Quantity = "2" },
+                    new RecipeIngredient { Name = "Feta cheese", Quantity = "30g" },
+                    new RecipeIngredient { Name = "Salt and pepper", Quantity = "to taste" }
+                },
+                Steps = new List<RecipeStep>
+                {
+                    new RecipeStep { StepNumber = 1, Instruction = "Toast the sourdough slices until golden and crisp." },
+                    new RecipeStep { StepNumber = 2, Instruction = "Halve and stone the avocado. Scoop into a bowl, add lemon juice, salt and pepper, and mash roughly." },
+                    new RecipeStep { StepNumber = 3, Instruction = "Poach the eggs in simmering water with a splash of vinegar for 3 minutes." },
+                    new RecipeStep { StepNumber = 4, Instruction = "Spread avocado over the toast. Top with a poached egg, crumbled feta and chilli flakes." }
+                }
+            };
+
+            var salmonPasta = new Recipe
+            {
+                Name = "Lemon Garlic Salmon Pasta",
+                Description = "Light and fresh pasta with pan-seared salmon and a zesty lemon butter sauce",
+                PrepTimeMinutes = 10,
+                CookTimeMinutes = 20,
+                Servings = 2,
+                CreatedAt = DateTime.UtcNow.AddDays(-5),
+                LastUpdatedAt = DateTime.UtcNow.AddDays(-5),
+                Ingredients = new List<RecipeIngredient>
+                {
+                    new RecipeIngredient { Name = "Salmon fillets", Quantity = "2" },
+                    new RecipeIngredient { Name = "Linguine", Quantity = "200g" },
+                    new RecipeIngredient { Name = "Butter", Quantity = "30g" },
+                    new RecipeIngredient { Name = "Garlic cloves", Quantity = "3" },
+                    new RecipeIngredient { Name = "Lemon", Quantity = "1" },
+                    new RecipeIngredient { Name = "Capers", Quantity = "1 tbsp" },
+                    new RecipeIngredient { Name = "Fresh dill", Quantity = "small bunch" },
+                    new RecipeIngredient { Name = "Parmesan", Quantity = "40g" }
+                },
+                Steps = new List<RecipeStep>
+                {
+                    new RecipeStep { StepNumber = 1, Instruction = "Cook linguine according to packet instructions. Reserve a cup of pasta water before draining." },
+                    new RecipeStep { StepNumber = 2, Instruction = "Season salmon with salt and pepper. Pan-fry skin-side down in olive oil for 4 minutes, flip and cook for 2 more minutes. Rest and flake." },
+                    new RecipeStep { StepNumber = 3, Instruction = "In the same pan, melt butter and gently fry sliced garlic for 1 minute." },
+                    new RecipeStep { StepNumber = 4, Instruction = "Add lemon zest, juice, capers and a splash of pasta water. Toss through the linguine." },
+                    new RecipeStep { StepNumber = 5, Instruction = "Fold in the flaked salmon. Serve topped with fresh dill and grated parmesan." }
+                }
+            };
+
+            await context.Recipes.AddRangeAsync(spagBol, chickenCurry, avocadoToast, salmonPasta);
+            await context.SaveChangesAsync();
+
+            // Meal plan entries for the current week (Mon-Sun)
+            await context.MealPlanEntries.AddRangeAsync(
+                new MealPlanEntry { RecipeId = spagBol.Id, MealType = "Dinner", Date = monday.AddDays(1) },
+                new MealPlanEntry { RecipeId = avocadoToast.Id, MealType = "Breakfast", Date = monday.AddDays(2) },
+                new MealPlanEntry { RecipeId = chickenCurry.Id, MealType = "Dinner", Date = monday.AddDays(2) },
+                new MealPlanEntry { RecipeId = salmonPasta.Id, MealType = "Dinner", Date = monday.AddDays(3) },
+                new MealPlanEntry { RecipeId = spagBol.Id, MealType = "Lunch", Date = monday.AddDays(4) },
+                new MealPlanEntry { RecipeId = chickenCurry.Id, MealType = "Dinner", Date = monday.AddDays(6) }
+            );
+
+            await context.SaveChangesAsync();
         }
     }
 }
