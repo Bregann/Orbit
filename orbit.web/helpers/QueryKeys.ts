@@ -36,5 +36,8 @@ export enum QueryKeys {
   Assets = 'assets',
   AssetCategories = 'assetCategories',
   GoCardlessConnectionStatus = 'goCardlessConnectionStatus',
-  GoCardlessInstitutions = 'goCardlessInstitutions'
+  GoCardlessInstitutions = 'goCardlessInstitutions',
+  Recipes = 'recipes',
+  MealPlan = 'mealPlan',
+  CookHistory = 'cookHistory'
 }

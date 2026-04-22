@@ -31,6 +31,7 @@ import {
   IconApps,
   IconNotebook,
   IconDeviceLaptop,
+  IconToolsKitchen2,
 } from '@tabler/icons-react'
 import { useRouter, usePathname } from 'next/navigation'
 import classes from '@/css/navigation.module.css'
@@ -65,6 +66,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
     { label: 'Documents', icon: IconFiles, href: '/documents' },
     { label: 'Assets', icon: IconDeviceLaptop, href: '/assets' },
     { label: 'Shopping', icon: IconShoppingCart, href: '/shopping' },
+    { label: 'Meal Planner', icon: IconToolsKitchen2, href: '/meal-planner' },
     { label: 'Journal', icon: IconNotebook, href: '/journal' },
     { label: 'Mood Tracker', icon: IconMoodSmile, href: '/mood' },
     { label: 'Calendar', icon: IconCalendarEvent, href: '/calendar' },

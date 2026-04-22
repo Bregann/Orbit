@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Orbit.Domain.DTOs.Finance.Pots.Request;
 using Orbit.Domain.Exceptions;
 using Orbit.Domain.Services.Finance;

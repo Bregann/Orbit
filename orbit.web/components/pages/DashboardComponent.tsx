@@ -25,7 +25,8 @@ import {
   IconTrendingDown,
   IconMoodSmile,
   IconNotebook,
-  IconDeviceLaptop
+  IconDeviceLaptop,
+  IconToolsKitchen2
 } from '@tabler/icons-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -130,6 +131,13 @@ export default function DashboardComponent() {
       icon: IconCalendar,
       color: 'cyan',
       href: '/calendar'
+    },
+    {
+      title: 'Meal Planner',
+      description: 'Recipes & meal plans',
+      icon: IconToolsKitchen2,
+      color: 'red',
+      href: '/meal-planner'
     },
     {
       title: 'Notes',

@@ -228,6 +228,11 @@ export default function DashboardScreen() {
               onPress={() => router.push('/(stack)/tasks')}
             />
             <QuickActionButton
+              icon="fork.knife"
+              label="Meals"
+              onPress={() => router.push('/(stack)/meal-planner')}
+            />
+            <QuickActionButton
               icon="gearshape.fill"
               label="Settings"
               onPress={() => router.push('/(stack)/settings')}
