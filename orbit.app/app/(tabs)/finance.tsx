@@ -4,6 +4,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { authApiClient } from '@/helpers/apiClient';
 import { useMutationPatch } from '@/helpers/mutations/useMutationPatch';
+import { QueryKeys } from '@/helpers/QueryKeys';
 import { GetAllPotDataDto } from '@/interfaces/api/finance/GetAllPotDataDto';
 import { GetSpendingPotDropdownOptionsDto } from '@/interfaces/api/finance/GetSpendingPotDropdownOptionsDto';
 import { GetUnprocessedTransactionsDto, TransactionsTableRow } from '@/interfaces/api/finance/GetUnprocessedTransactionsDto';
@@ -28,7 +29,7 @@ export default function FinanceScreen() {
 
   // Fetch pot dropdown options
   const { data: potOptionsData, isLoading: isLoadingPots } = useQuery({
-    queryKey: ['pot-options'],
+    queryKey: [QueryKeys.PotOptions],
     queryFn: async () => {
       const response = await authApiClient.get<GetSpendingPotDropdownOptionsDto>('/api/Pots/GetSpendingPotDropdownOptions');
       return response.data;
@@ -37,7 +38,7 @@ export default function FinanceScreen() {
 
   // Fetch all pot data
   const { data: allPotData, isLoading: isLoadingAllPots } = useQuery({
-    queryKey: ['all-pot-data'],
+    queryKey: [QueryKeys.AllPotData],
     queryFn: async () => {
       const response = await authApiClient.get<GetAllPotDataDto>('/api/Pots/GetAllPotData');
       return response.data;
@@ -46,7 +47,7 @@ export default function FinanceScreen() {
 
   // Fetch unprocessed transactions
   const { data: transactionsData, isLoading: isLoadingTransactions } = useQuery({
-    queryKey: ['unprocessed-transactions'],
+    queryKey: [QueryKeys.UnprocessedTransactions],
     queryFn: async () => {
       const response = await authApiClient.get<GetUnprocessedTransactionsDto>('/api/Transactions/GetUnprocessedTransactions');
       return response.data;
@@ -56,10 +57,10 @@ export default function FinanceScreen() {
   // Update transaction mutation
   const updateTransactionMutation = useMutationPatch<UpdateTransactionRequest, void>({
     url: '/api/Transactions/UpdateTransaction',
-    queryKey: ['unprocessed-transactions'],
+    queryKey: [QueryKeys.UnprocessedTransactions],
     invalidateQuery: true,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['all-pot-data'] });
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.AllPotData] });
     },
     onError: () => {
       Alert.alert('Error', 'Failed to update transaction');

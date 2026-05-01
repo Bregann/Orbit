@@ -5,6 +5,7 @@ import { Colors } from '@/constants/theme';
 import { authApiClient } from '@/helpers/apiClient';
 import { useMutationPatch } from '@/helpers/mutations/useMutationPatch';
 import { useMutationPost } from '@/helpers/mutations/useMutationPost';
+import { QueryKeys } from '@/helpers/QueryKeys';
 import { AddTaskRequest } from '@/interfaces/api/tasks/AddTaskRequest';
 import { GetTaskCategoriesResponse } from '@/interfaces/api/tasks/GetTaskCategoriesResponse';
 import { GetTasksResponse } from '@/interfaces/api/tasks/GetTasksResponse';
@@ -34,7 +35,7 @@ export default function TasksScreen() {
 
   // Fetch tasks
   const { data: tasksData, isLoading: isLoadingTasks } = useQuery({
-    queryKey: ['tasks'],
+    queryKey: [QueryKeys.Tasks],
     queryFn: async () => {
       const response = await authApiClient.get<GetTasksResponse>('/api/Tasks/GetTasks');
       return response.data;
@@ -43,7 +44,7 @@ export default function TasksScreen() {
 
   // Fetch categories
   const { data: categoriesData, isLoading: isLoadingCategories } = useQuery({
-    queryKey: ['task-categories'],
+    queryKey: [QueryKeys.TaskCategories],
     queryFn: async () => {
       const response = await authApiClient.get<GetTaskCategoriesResponse>('/api/Tasks/GetTaskCategories');
       return response.data;
@@ -53,7 +54,7 @@ export default function TasksScreen() {
   // Add task mutation
   const addTaskMutation = useMutationPost<AddTaskRequest, void>({
     url: '/api/Tasks/AddNewTask',
-    queryKey: ['tasks'],
+    queryKey: [QueryKeys.Tasks],
     invalidateQuery: true,
     onSuccess: () => {
       setShowAddModal(false);
@@ -71,7 +72,7 @@ export default function TasksScreen() {
   // Complete task mutation
   const completeTaskMutation = useMutationPatch<number, void>({
     url: (taskId: number) => `/api/Tasks/CompleteTask?taskId=${taskId}`,
-    queryKey: ['tasks'],
+    queryKey: [QueryKeys.Tasks],
     invalidateQuery: true,
     onError: () => {
       Alert.alert('Error', 'Failed to update task');

@@ -81,4 +81,27 @@ export const calendarStyles = StyleSheet.create({
     fontSize: 15,
     opacity: 0.6,
   },
+
+  // FAB (Floating Action Button) for adding events
+  fab: {
+    position: 'absolute',
+    bottom: 84,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+  },
+  fabText: {
+    color: '#000000',
+    fontSize: 28,
+    fontWeight: '300',
+    lineHeight: 30,
+  },
 });

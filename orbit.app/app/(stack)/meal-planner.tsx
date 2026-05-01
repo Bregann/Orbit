@@ -6,6 +6,7 @@ import { authApiClient } from '@/helpers/apiClient';
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete';
 import { useMutationPost } from '@/helpers/mutations/useMutationPost';
 import { useMutationPut } from '@/helpers/mutations/useMutationPut';
+import { QueryKeys } from '@/helpers/QueryKeys';
 import { AddRecipeRequest, RecipeIngredient, RecipeStep } from '@/interfaces/api/meal-planner/AddRecipeRequest';
 import { UpdateRecipeRequest } from '@/interfaces/api/meal-planner/UpdateRecipeRequest';
 import { AddMealPlanEntryRequest } from '@/interfaces/api/meal-planner/AddMealPlanEntryRequest';
@@ -48,7 +49,6 @@ export default function MealPlannerScreen() {
   const [showAddMealModal, setShowAddMealModal] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<RecipeItem | null>(null);
   const [selectedMealDate, setSelectedMealDate] = useState('');
-  const [selectedMealType, setSelectedMealType] = useState('');
 
   // Add recipe form
   const [recipeName, setRecipeName] = useState('');
@@ -68,7 +68,7 @@ export default function MealPlannerScreen() {
   const endDate = weekDates[6].dateStr;
 
   const { data: recipesData, isLoading: isLoadingRecipes } = useQuery({
-    queryKey: ['recipes'],
+    queryKey: [QueryKeys.Recipes],
     queryFn: async () => {
       const response = await authApiClient.get<GetRecipesResponse>('/api/MealPlanner/GetRecipes');
       return response.data;
@@ -76,7 +76,7 @@ export default function MealPlannerScreen() {
   });
 
   const { data: mealPlanData, isLoading: isLoadingMealPlan } = useQuery({
-    queryKey: ['meal-plan', startDate, endDate],
+    queryKey: [QueryKeys.MealPlan, startDate, endDate],
     queryFn: async () => {
       const response = await authApiClient.get<GetMealPlanResponse>(`/api/MealPlanner/GetMealPlan?startDate=${startDate}&endDate=${endDate}`);
       return response.data;
@@ -88,7 +88,7 @@ export default function MealPlannerScreen() {
 
   const addRecipeMutation = useMutationPost<AddRecipeRequest, number>({
     url: '/api/MealPlanner/AddRecipe',
-    queryKey: ['recipes'],
+    queryKey: [QueryKeys.Recipes],
     invalidateQuery: true,
     onSuccess: () => {
       setShowAddRecipeModal(false);
@@ -101,7 +101,7 @@ export default function MealPlannerScreen() {
 
   const updateRecipeMutation = useMutationPut<UpdateRecipeRequest, void>({
     url: '/api/MealPlanner/UpdateRecipe',
-    queryKey: ['recipes'],
+    queryKey: [QueryKeys.Recipes],
     invalidateQuery: true,
     onSuccess: () => {
       setShowEditRecipeModal(false);
@@ -115,7 +115,7 @@ export default function MealPlannerScreen() {
 
   const deleteRecipeMutation = useMutationDelete<number, void>({
     url: (recipeId: number) => `/api/MealPlanner/DeleteRecipe?recipeId=${recipeId}`,
-    queryKey: ['recipes'],
+    queryKey: [QueryKeys.Recipes],
     invalidateQuery: true,
     onError: () => {
       Alert.alert('Error', 'Failed to delete recipe');
@@ -124,7 +124,7 @@ export default function MealPlannerScreen() {
 
   const addMealEntryMutation = useMutationPost<AddMealPlanEntryRequest, number>({
     url: '/api/MealPlanner/AddMealPlanEntry',
-    queryKey: ['meal-plan', startDate, endDate],
+    queryKey: [QueryKeys.MealPlan, startDate, endDate],
     invalidateQuery: true,
     onSuccess: () => {
       setShowAddMealModal(false);
@@ -138,7 +138,7 @@ export default function MealPlannerScreen() {
 
   const deleteMealEntryMutation = useMutationDelete<number, void>({
     url: (entryId: number) => `/api/MealPlanner/DeleteMealPlanEntry?entryId=${entryId}`,
-    queryKey: ['meal-plan', startDate, endDate],
+    queryKey: [QueryKeys.MealPlan, startDate, endDate],
     invalidateQuery: true,
     onError: () => {
       Alert.alert('Error', 'Failed to remove meal');
@@ -147,7 +147,7 @@ export default function MealPlannerScreen() {
 
   const logCookMutation = useMutationPost<number, number>({
     url: (recipeId: number) => `/api/MealPlanner/LogCook?recipeId=${recipeId}`,
-    queryKey: ['recipes'],
+    queryKey: [QueryKeys.Recipes],
     invalidateQuery: true,
     onError: () => {
       Alert.alert('Error', 'Failed to log cook');
@@ -224,7 +224,6 @@ export default function MealPlannerScreen() {
 
   const handleAddMeal = (dateStr: string, mealType: string) => {
     setSelectedMealDate(dateStr);
-    setSelectedMealType(mealType);
     setAddMealType(mealType);
     setAddMealSelectedRecipe(null);
     setShowAddMealModal(true);

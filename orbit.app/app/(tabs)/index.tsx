@@ -8,6 +8,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { authApiClient } from '@/helpers/apiClient';
 import { useMutationPost } from '@/helpers/mutations/useMutationPost';
+import { QueryKeys } from '@/helpers/QueryKeys';
 import { GetDashboardOverviewDataDto } from '@/interfaces/api/dashboard/GetDashboardOverviewDataDto';
 import { GetTodaysMoodResponse } from '@/interfaces/api/mood/GetTodaysMoodResponse';
 import { MoodType } from '@/interfaces/api/mood/MoodType';
@@ -28,7 +29,7 @@ export default function DashboardScreen() {
   const router = useRouter();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['dashboard'],
+    queryKey: [QueryKeys.DashboardOverview],
     queryFn: async () => {
       const response = await authApiClient.get<GetDashboardOverviewDataDto>('/api/Dashboard/GetDashboardOverviewData');
       return response.data;
@@ -36,7 +37,7 @@ export default function DashboardScreen() {
   });
 
   const { data: moodData, isLoading: isLoadingMood } = useQuery({
-    queryKey: ['todays-mood'],
+    queryKey: [QueryKeys.TodaysMood],
     queryFn: async () => {
       const response = await authApiClient.get<GetTodaysMoodResponse>('/api/Mood/GetTodaysMood');
       return response.data;
@@ -45,7 +46,7 @@ export default function DashboardScreen() {
 
   const recordMoodMutation = useMutationPost<RecordMoodRequest, void>({
     url: '/api/Mood/RecordMood',
-    queryKey: ['todays-mood'],
+    queryKey: [QueryKeys.TodaysMood],
     invalidateQuery: true,
     onError: () => {
       Alert.alert('Error', 'Failed to record mood');

@@ -1,12 +1,14 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { IngredientPickerModal } from '@/components/meal-planner/IngredientPickerModal';
 import { Colors } from '@/constants/theme';
 import { authApiClient } from '@/helpers/apiClient';
 import { useMutationPost } from '@/helpers/mutations/useMutationPost';
+import { QueryKeys } from '@/helpers/QueryKeys';
 import { RecipeItem } from '@/interfaces/api/meal-planner/GetRecipesResponse';
 import { createCommonStyles } from '@/styles/commonStyles';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, TouchableOpacity, useColorScheme, View } from 'react-native';
@@ -19,39 +21,55 @@ export default function RecipeDetailScreen() {
   const styles = createCommonStyles(colorScheme ?? 'light');
   const isDark = colorScheme === 'dark';
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [showIngredientPicker, setShowIngredientPicker] = useState(false);
 
   const toggleStep = (stepNumber: number) => {
     setCompletedSteps(prev => {
       const next = new Set<number>(prev);
-      next.has(stepNumber) ? next.delete(stepNumber) : next.add(stepNumber);
+      if (next.has(stepNumber)) {
+        next.delete(stepNumber);
+      } else {
+        next.add(stepNumber);
+      }
       return next;
     });
   };
 
   const { data: recipe, isLoading } = useQuery({
-    queryKey: ['recipe', id],
+    queryKey: [QueryKeys.RecipeDetail, id],
     queryFn: async () => {
       const response = await authApiClient.get<RecipeItem>(`/api/MealPlanner/GetRecipe?recipeId=${id}`);
       return response.data;
     },
   });
 
-  const logCookMutation = useMutationPost<number, number>({
+  const logCookMutation = useMutationPost<number, void>({
     url: (recipeId: number) => `/api/MealPlanner/LogCook?recipeId=${recipeId}`,
-    queryKey: ['recipe', id],
+    queryKey: [QueryKeys.RecipeDetail, id],
     invalidateQuery: true,
     onSuccess: () => Alert.alert('Success', 'Cook logged!'),
     onError: () => Alert.alert('Error', 'Failed to log cook'),
   });
 
-  const addToShoppingMutation = useMutationPost<number, void>({
-    url: (recipeId: number) => `/api/MealPlanner/AddRecipeIngredientsToShoppingList?recipeId=${recipeId}`,
-    queryKey: ['recipe', id],
-    invalidateQuery: false,
-    onSuccess: () => Alert.alert('Success', 'Ingredients added to shopping list'),
-    onError: () => Alert.alert('Error', 'Failed to add to shopping list'),
+  const addSingleIngredientMutation = useMutationPost<string, void>({
+    url: (name: string) => `/api/Shopping/AddShoppingListItem?name=${encodeURIComponent(name)}`,
+    queryKey: [QueryKeys.ShoppingListItems],
+    invalidateQuery: true,
   });
+
+  const handleAddIngredients = async (names: string[]) => {
+    try {
+      const promises = names.map(name => addSingleIngredientMutation.mutateAsync(name));
+      await Promise.all(promises);
+      queryClient.invalidateQueries({ queryKey: [QueryKeys.ShoppingListItems] });
+      setShowIngredientPicker(false);
+      Alert.alert('Done', `${names.length} ingredient(s) added to shopping list`);
+    } catch {
+      Alert.alert('Error', 'Failed to add some ingredients');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -114,24 +132,30 @@ export default function RecipeDetailScreen() {
           {/* Action buttons */}
           <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
             <TouchableOpacity
-              style={{ flex: 1, backgroundColor: '#F59E0B', borderRadius: 8, paddingVertical: 12, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}
+              style={{ flex: 1, backgroundColor: '#F59E0B', borderRadius: 8, paddingVertical: 12, alignItems: 'center', justifyContent: 'center', gap: 4 }}
               onPress={() => {
-                if (recipe.ingredients && recipe.ingredients.length > 0) {
-                  addToShoppingMutation.mutate(recipe.id);
-                } else {
+                if (!recipe?.ingredients || recipe.ingredients.length === 0) {
                   Alert.alert('No ingredients', 'This recipe has no ingredients to add.');
+                  return;
                 }
+                setShowIngredientPicker(true);
               }}
+              disabled={addSingleIngredientMutation.isPending}
             >
               <IconSymbol name="cart" size={18} color="#000" />
-              <ThemedText style={{ color: '#000', fontWeight: '600' }}>Add to Shopping List</ThemedText>
+              <ThemedText style={{ color: '#000', fontWeight: '600', fontSize: 13 }} numberOfLines={1}>
+                Add to Cart
+              </ThemedText>
             </TouchableOpacity>
             <TouchableOpacity
-              style={{ flex: 1, backgroundColor: '#10B981', borderRadius: 8, paddingVertical: 12, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}
-              onPress={() => logCookMutation.mutate(recipe.id)}
+              style={{ flex: 1, backgroundColor: '#10B981', borderRadius: 8, paddingVertical: 12, alignItems: 'center', justifyContent: 'center', gap: 4 }}
+              onPress={() => logCookMutation.mutate(recipe!.id)}
+              disabled={logCookMutation.isPending}
             >
               <IconSymbol name="flame" size={18} color="#000" />
-              <ThemedText style={{ color: '#000', fontWeight: '600' }}>Log Cook</ThemedText>
+              <ThemedText style={{ color: '#000', fontWeight: '600', fontSize: 13 }} numberOfLines={1}>
+                Log Cook
+              </ThemedText>
             </TouchableOpacity>
           </View>
 
@@ -205,6 +229,13 @@ export default function RecipeDetailScreen() {
             )}
           </View>
         </ScrollView>
+
+        <IngredientPickerModal
+          visible={showIngredientPicker}
+          onClose={() => setShowIngredientPicker(false)}
+          ingredients={recipe.ingredients ?? []}
+          onAdd={handleAddIngredients}
+        />
       </ThemedView>
     </SafeAreaView>
   );
