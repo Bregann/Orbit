@@ -6,6 +6,7 @@ import { authApiClient } from '@/helpers/apiClient';
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete';
 import { useMutationPost } from '@/helpers/mutations/useMutationPost';
 import { useMutationPut } from '@/helpers/mutations/useMutationPut';
+import { QueryKeys } from '@/helpers/QueryKeys';
 import { GetShoppingListItemsResponse } from '@/interfaces/api/shopping/GetShoppingListItemsResponse';
 import { GetShoppingListQuickAddItemsResponse } from '@/interfaces/api/shopping/GetShoppingListQuickAddItemsResponse';
 import { createCommonStyles } from '@/styles/commonStyles';
@@ -26,7 +27,7 @@ export default function ShoppingScreen() {
 
   // Fetch shopping list items
   const { data: shoppingData, isLoading: isLoadingItems } = useQuery({
-    queryKey: ['shopping-items'],
+    queryKey: [QueryKeys.ShoppingListItems],
     queryFn: async () => {
       const response = await authApiClient.get<GetShoppingListItemsResponse>('/api/Shopping/GetShoppingListItems');
       return response.data;
@@ -35,7 +36,7 @@ export default function ShoppingScreen() {
 
   // Fetch quick add items
   const { data: quickAddData, isLoading: isLoadingQuickAdd } = useQuery({
-    queryKey: ['shopping-quick-add'],
+    queryKey: [QueryKeys.ShoppingListQuickAdd],
     queryFn: async () => {
       const response = await authApiClient.get<GetShoppingListQuickAddItemsResponse>('/api/Shopping/GetShoppingListQuickAddItems');
       return response.data;
@@ -45,7 +46,7 @@ export default function ShoppingScreen() {
   // Add item mutation
   const addItemMutation = useMutationPost<string, void>({
     url: (name: string) => `/api/Shopping/AddShoppingListItem?name=${encodeURIComponent(name)}`,
-    queryKey: ['shopping-items'],
+    queryKey: [QueryKeys.ShoppingListItems],
     invalidateQuery: true,
     onSuccess: () => {
       setQuickAddText('');
@@ -58,7 +59,7 @@ export default function ShoppingScreen() {
   // Mark as purchased mutation
   const markAsPurchasedMutation = useMutationPut<number, void>({
     url: (itemId: number) => `/api/Shopping/MarkShoppingListItemAsPurchased?itemId=${itemId}`,
-    queryKey: ['shopping-items'],
+    queryKey: [QueryKeys.ShoppingListItems],
     invalidateQuery: true,
     onError: () => {
       Alert.alert('Error', 'Failed to update item');
@@ -68,7 +69,7 @@ export default function ShoppingScreen() {
   // Remove item mutation
   const removeItemMutation = useMutationDelete<number, void>({
     url: (itemId: number) => `/api/Shopping/RemoveShoppingListItem?itemId=${itemId}`,
-    queryKey: ['shopping-items'],
+    queryKey: [QueryKeys.ShoppingListItems],
     invalidateQuery: true,
     onError: () => {
       Alert.alert('Error', 'Failed to remove item');

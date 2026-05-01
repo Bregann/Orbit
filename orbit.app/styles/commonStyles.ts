@@ -16,7 +16,7 @@ export const MantineColors = {
   ],
 };
 
-export const createCommonStyles = (colorScheme: 'light' | 'dark') => {
+export const createCommonStyles = (colorScheme: string) => {
   const isDark = colorScheme === 'dark';
   const cardLight = isDark ? MantineColors.dark[7] : '#f9fafb';
   const cardAlt = isDark ? MantineColors.dark[6] : '#f3f4f6';

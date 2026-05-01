@@ -3,6 +3,7 @@ import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { authApiClient } from '@/helpers/apiClient';
+import { QueryKeys } from '@/helpers/QueryKeys';
 import { GetAllDocumentCategoriesDto } from '@/interfaces/api/documents/GetAllDocumentCategoriesDto';
 import { GetAllDocumentsDto } from '@/interfaces/api/documents/GetAllDocumentsDto';
 import { createCommonStyles } from '@/styles/commonStyles';
@@ -84,7 +85,7 @@ export default function DocumentsScreen() {
 
   // Fetch documents
   const { data: documentsData, isLoading: isLoadingDocuments } = useQuery({
-    queryKey: ['documents'],
+    queryKey: [QueryKeys.Documents],
     queryFn: async () => {
       const response = await authApiClient.get<GetAllDocumentsDto>('/api/Documents/GetAllDocuments');
       return response.data;
@@ -93,7 +94,7 @@ export default function DocumentsScreen() {
 
   // Fetch categories
   const { data: categoriesData, isLoading: isLoadingCategories } = useQuery({
-    queryKey: ['document-categories'],
+    queryKey: [QueryKeys.DocumentCategories],
     queryFn: async () => {
       const response = await authApiClient.get<GetAllDocumentCategoriesDto>('/api/Documents/GetAllDocumentCategories');
       return response.data;

@@ -9,10 +9,12 @@ import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import moment from 'moment';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, Platform, ScrollView, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RRule } from 'rrule';
+import AddEventModal from '@/components/calendar/AddEventModal';
+import { QueryKeys } from '@/helpers/QueryKeys';
 
 interface ProcessedEvent extends EventEntry {
   displayDate: string; // The actual date this event occurs on (for recurring events)
@@ -24,10 +26,11 @@ export default function CalendarScreen() {
   const commonStyles = createCommonStyles(colorScheme ?? 'light');
   const isDark = colorScheme === 'dark';
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Fetch calendar events
   const { data: calendarData, isLoading } = useQuery({
-    queryKey: ['calendar-events'],
+    queryKey: [QueryKeys.CalendarEvents],
     queryFn: async () => {
       const response = await authApiClient.get<GetCalendarEventsDto>('/api/Calendar/GetCalendarEvents');
       return response.data;
@@ -338,6 +341,31 @@ export default function CalendarScreen() {
             )}
           </View>
         </ScrollView>
+
+        {/* FAB - Add Event Button */}
+        <TouchableOpacity
+          style={[
+            styles.fab,
+            {
+              bottom: Platform.OS === 'ios' ? 100 : 84,
+              backgroundColor: '#FFFFFF',
+            },
+          ]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            setShowAddModal(true);
+          }}
+          activeOpacity={0.8}
+        >
+          <ThemedText style={styles.fabText}>+</ThemedText>
+        </TouchableOpacity>
+
+        {/* Add Event Modal */}
+        <AddEventModal
+          visible={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          initialDate={selectedDate}
+        />
       </ThemedView>
     </SafeAreaView>
   );

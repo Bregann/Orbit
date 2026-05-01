@@ -3,6 +3,7 @@ import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { authApiClient } from '@/helpers/apiClient';
+import { QueryKeys } from '@/helpers/QueryKeys';
 import { GetAllAssetCategoriesDto } from '@/interfaces/api/assets/GetAllAssetCategoriesDto';
 import { GetAllAssetsDto } from '@/interfaces/api/assets/GetAllAssetsDto';
 import { assetsStyles as styles } from '@/styles/assetsStyles';
@@ -87,7 +88,7 @@ export default function AssetsScreen() {
 
   // Fetch assets
   const { data: assetsData, isLoading: isLoadingAssets } = useQuery({
-    queryKey: ['assets'],
+    queryKey: [QueryKeys.Assets],
     queryFn: async () => {
       const response = await authApiClient.get<GetAllAssetsDto>('/api/Assets/GetAllAssets');
       return response.data;
@@ -96,7 +97,7 @@ export default function AssetsScreen() {
 
   // Fetch categories
   const { data: categoriesData, isLoading: isLoadingCategories } = useQuery({
-    queryKey: ['asset-categories'],
+    queryKey: [QueryKeys.AssetCategories],
     queryFn: async () => {
       const response = await authApiClient.get<GetAllAssetCategoriesDto>('/api/Assets/GetAllAssetCategories');
       return response.data;

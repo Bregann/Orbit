@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-export function createIndexStyles(colorScheme: 'light' | 'dark') {
+export function createIndexStyles(colorScheme: string) {
   return StyleSheet.create({
     warningBanner: {
       flexDirection: 'row',

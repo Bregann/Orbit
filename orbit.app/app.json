@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "orbitapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
@@ -16,9 +15,9 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#E6F4FE"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.bregan.orbit"
+      "package": "com.bregan.orbit",
+      "versionCode": 7
     },
     "plugins": [
       "expo-router",
@@ -36,7 +35,8 @@
       ],
       "expo-secure-store",
       "expo-font",
-      "expo-sharing"
+      "expo-sharing",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,
