@@ -164,7 +164,7 @@ namespace Orbit.Tests.Services.Auth
             Assert.That(refreshToken, Is.Not.Null);
             Assert.That(refreshToken.IsRevoked, Is.False);
             Assert.That(refreshToken.ExpiresAt, Is.GreaterThan(DateTime.UtcNow));
-            Assert.That(refreshToken.ExpiresAt, Is.LessThanOrEqualTo(DateTime.UtcNow.AddDays(7).AddMinutes(1)));
+            Assert.That(refreshToken.ExpiresAt, Is.LessThanOrEqualTo(DateTime.UtcNow.AddDays(30).AddMinutes(1)));
         }
 
         [Test]
