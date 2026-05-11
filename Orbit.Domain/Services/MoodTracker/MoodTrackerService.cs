@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.MoodTracker;
@@ -98,18 +97,7 @@ namespace Orbit.Domain.Services.MoodTracker
                 await context.MoodTrackerEntries.AddAsync(newEntry);
             }
 
-            try
-            {
-                await context.SaveChangesAsync();
-            }
-            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
-            {
-                // Duplicate key — another request beat us, update instead
-                var existingEntry = await context.MoodTrackerEntries
-                    .FirstAsync(me => me.DateRecorded.Date == targetDate);
-                existingEntry.MoodType = mood;
-                await context.SaveChangesAsync();
-            }
+            await context.SaveChangesAsync();
         }
 
         public async Task RecordMoodForDate(MoodTrackerEnum mood, DateTime date)
@@ -139,18 +127,7 @@ namespace Orbit.Domain.Services.MoodTracker
                 await context.MoodTrackerEntries.AddAsync(newEntry);
             }
 
-            try
-            {
-                await context.SaveChangesAsync();
-            }
-            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
-            {
-                // Duplicate key — another request beat us, update instead
-                var existingEntry = await context.MoodTrackerEntries
-                    .FirstAsync(me => me.DateRecorded.Date == targetDate);
-                existingEntry.MoodType = mood;
-                await context.SaveChangesAsync();
-            }
+            await context.SaveChangesAsync();
         }
     }
 }
