@@ -68,9 +68,10 @@ namespace Orbit.Tests.Services.MoodTracker
         {
             // Arrange
             var initialCount = await DbContext.MoodTrackerEntries.CountAsync();
+            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
 
             // Act
-            await _moodTrackerService.RecordMood(MoodTrackerEnum.Excellent);
+            await _moodTrackerService.RecordMood(MoodTrackerEnum.Excellent, today);
 
             // Assert
             var finalCount = await DbContext.MoodTrackerEntries.CountAsync();
@@ -82,9 +83,10 @@ namespace Orbit.Tests.Services.MoodTracker
         {
             // Arrange
             var mood = MoodTrackerEnum.Good;
+            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
 
             // Act
-            await _moodTrackerService.RecordMood(mood);
+            await _moodTrackerService.RecordMood(mood, today);
 
             // Assert
             var entry = await DbContext.MoodTrackerEntries
@@ -95,22 +97,21 @@ namespace Orbit.Tests.Services.MoodTracker
         }
 
         [Test]
-        public async Task RecordMood_ShouldSetDateRecordedToUtcNow()
+        public async Task RecordMood_ShouldSetDateRecordedToUtcMidnight()
         {
             // Arrange
-            var beforeRecording = DateTime.UtcNow.AddSeconds(-1);
+            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            var expectedDate = new DateTime(today.Year, today.Month, today.Day, 0, 0, 0, DateTimeKind.Utc);
 
             // Act
-            await _moodTrackerService.RecordMood(MoodTrackerEnum.Neutral);
-            var afterRecording = DateTime.UtcNow.AddSeconds(1);
+            await _moodTrackerService.RecordMood(MoodTrackerEnum.Neutral, today);
 
             // Assert
             var entry = await DbContext.MoodTrackerEntries
                 .OrderByDescending(e => e.DateRecorded)
                 .FirstAsync();
 
-            Assert.That(entry.DateRecorded, Is.GreaterThan(beforeRecording));
-            Assert.That(entry.DateRecorded, Is.LessThan(afterRecording));
+            Assert.That(entry.DateRecorded, Is.EqualTo(expectedDate));
             Assert.That(entry.DateRecorded.Kind, Is.EqualTo(DateTimeKind.Utc));
         }
 
@@ -121,8 +122,11 @@ namespace Orbit.Tests.Services.MoodTracker
         [TestCase(MoodTrackerEnum.Difficult)]
         public async Task RecordMood_ShouldHandleAllMoodTypes(MoodTrackerEnum mood)
         {
+            // Arrange
+            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+
             // Act
-            await _moodTrackerService.RecordMood(mood);
+            await _moodTrackerService.RecordMood(mood, today);
 
             // Assert
             var entry = await DbContext.MoodTrackerEntries
@@ -136,13 +140,14 @@ namespace Orbit.Tests.Services.MoodTracker
         public async Task RecordMood_ShouldUpdateExistingEntry_WhenMoodAlreadyRecordedToday()
         {
             // Arrange
-            await _moodTrackerService.RecordMood(MoodTrackerEnum.Good);
+            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            await _moodTrackerService.RecordMood(MoodTrackerEnum.Good, today);
             var initialCount = await DbContext.MoodTrackerEntries
                 .Where(e => e.DateRecorded.Date == DateTime.UtcNow.Date)
                 .CountAsync();
 
             // Act
-            await _moodTrackerService.RecordMood(MoodTrackerEnum.Excellent);
+            await _moodTrackerService.RecordMood(MoodTrackerEnum.Excellent, today);
 
             // Assert
             var finalCount = await DbContext.MoodTrackerEntries

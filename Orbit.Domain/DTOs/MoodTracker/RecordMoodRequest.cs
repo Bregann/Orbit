@@ -5,5 +5,6 @@ namespace Orbit.Domain.DTOs.MoodTracker
     public class RecordMoodRequest
     {
         public required MoodTrackerEnum Mood { get; set; }
+        public required DateOnly Date { get; set; }
     }
 }
