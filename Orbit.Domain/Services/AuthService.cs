@@ -159,7 +159,7 @@ namespace Orbit.Domain.Services
             {
                 Token = token,
                 UserId = userId,
-                ExpiresAt = DateTime.UtcNow.AddDays(7)
+                ExpiresAt = DateTime.UtcNow.AddDays(30)
             };
 
             context.UserRefreshTokens.Add(refreshToken);

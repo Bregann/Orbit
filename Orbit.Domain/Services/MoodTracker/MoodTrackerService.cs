@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Orbit.Domain.Database.Context;
 using Orbit.Domain.Database.Models;
 using Orbit.Domain.DTOs.MoodTracker;
@@ -13,7 +14,7 @@ namespace Orbit.Domain.Services.MoodTracker
     {
         public async Task<GetTodaysMoodResponse> GetTodaysMood()
         {
-            var today = DateTime.UtcNow.Date;
+            var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
 
             var moodEntry = await context.MoodTrackerEntries
                 .Where(me => me.DateRecorded.Date == today)
@@ -21,7 +22,7 @@ namespace Orbit.Domain.Services.MoodTracker
                 {
                     Mood = me.MoodType,
                     HasMoodToday = true,
-                    RecordedAt = me.DateRecorded
+                    RecordedAt = DateTime.SpecifyKind(me.DateRecorded, DateTimeKind.Utc)
                 })
                 .FirstOrDefaultAsync();
 
@@ -38,9 +39,9 @@ namespace Orbit.Domain.Services.MoodTracker
                 .OrderBy(me => me.DateRecorded)
                 .Select(me => new MoodEntryDto
                 {
-                    Date = me.DateRecorded.Date,
+                    Date = DateTime.SpecifyKind(me.DateRecorded.Date, DateTimeKind.Utc),
                     Mood = me.MoodType,
-                    RecordedAt = me.DateRecorded
+                    RecordedAt = DateTime.SpecifyKind(me.DateRecorded, DateTimeKind.Utc)
                 })
                 .ToListAsync();
 
@@ -70,29 +71,45 @@ namespace Orbit.Domain.Services.MoodTracker
             };
         }
 
-        public async Task RecordMood(MoodTrackerEnum mood)
+        public async Task RecordMood(MoodTrackerEnum mood, DateOnly date)
         {
-            var today = DateTime.UtcNow.Date;
+            if (date > DateOnly.FromDateTime(DateTime.UtcNow.Date))
+            {
+                throw new BadRequestException("Cannot record mood for future dates.");
+            }
+
+            var targetDate = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0, DateTimeKind.Utc);
+
             var existingEntry = await context.MoodTrackerEntries
-                .FirstOrDefaultAsync(me => me.DateRecorded.Date == today);
+                .FirstOrDefaultAsync(me => me.DateRecorded.Date == targetDate);
 
             if (existingEntry != null)
             {
                 existingEntry.MoodType = mood;
-                existingEntry.DateRecorded = DateTime.UtcNow;
             }
             else
             {
                 var newEntry = new MoodTrackerEntry
                 {
                     MoodType = mood,
-                    DateRecorded = DateTime.UtcNow
+                    DateRecorded = targetDate
                 };
 
                 await context.MoodTrackerEntries.AddAsync(newEntry);
             }
 
-            await context.SaveChangesAsync();
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
+            {
+                // Duplicate key — another request beat us, update instead
+                var existingEntry = await context.MoodTrackerEntries
+                    .FirstAsync(me => me.DateRecorded.Date == targetDate);
+                existingEntry.MoodType = mood;
+                await context.SaveChangesAsync();
+            }
         }
 
         public async Task RecordMoodForDate(MoodTrackerEnum mood, DateTime date)
@@ -103,26 +120,37 @@ namespace Orbit.Domain.Services.MoodTracker
             }
 
             var targetDate = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
+
             var existingEntry = await context.MoodTrackerEntries
-                .FirstOrDefaultAsync(me => me.DateRecorded.Date == targetDate.Date);
+                .FirstOrDefaultAsync(me => me.DateRecorded.Date == targetDate);
 
             if (existingEntry != null)
             {
                 existingEntry.MoodType = mood;
-                existingEntry.DateRecorded = DateTime.UtcNow;
             }
             else
             {
                 var newEntry = new MoodTrackerEntry
                 {
                     MoodType = mood,
-                    DateRecorded = DateTime.SpecifyKind(date, DateTimeKind.Utc)
+                    DateRecorded = targetDate
                 };
 
                 await context.MoodTrackerEntries.AddAsync(newEntry);
             }
 
-            await context.SaveChangesAsync();
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
+            {
+                // Duplicate key — another request beat us, update instead
+                var existingEntry = await context.MoodTrackerEntries
+                    .FirstAsync(me => me.DateRecorded.Date == targetDate);
+                existingEntry.MoodType = mood;
+                await context.SaveChangesAsync();
+            }
         }
     }
 }

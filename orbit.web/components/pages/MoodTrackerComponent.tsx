@@ -53,12 +53,16 @@ export default function MoodTrackerComponent() {
 
   const entries = yearlyMoodData?.entries ?? []
 
-  // Create a map for quick lookup
+  // Create a map for quick lookup — use first 10 chars of date string to avoid timezone conversion
   const moodMap = useMemo(() => {
     const map = new Map<string, MoodEntry>()
     entries.forEach(entry => {
-      const date = new Date(entry.date).toISOString().split('T')[0]
-      map.set(date, entry)
+      // entry.date is an ISO string like "2026-05-11T00:00:00Z" or "2026-05-11T00:00:00"
+      // Take just the YYYY-MM-DD portion to avoid any timezone conversion
+      const dateKey = typeof entry.date === 'string'
+        ? (entry.date as string).substring(0, 10)
+        : new Date(entry.date).toISOString().substring(0, 10)
+      map.set(dateKey, entry)
     })
     return map
   }, [entries])

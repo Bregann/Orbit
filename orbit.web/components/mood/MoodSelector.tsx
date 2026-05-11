@@ -48,7 +48,9 @@ export default function MoodSelector({ currentMood, hasMoodToday }: MoodSelector
 
   const handleConfirm = () => {
     if (selectedMood !== null) {
-      recordMood({ mood: selectedMood })
+      // Send the user's local today date as YYYY-MM-DD
+      const todayStr = new Date().toISOString().split('T')[0]
+      recordMood({ mood: selectedMood, date: todayStr })
     }
   }
 

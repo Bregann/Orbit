@@ -31,7 +31,7 @@ namespace Orbit.Core.Controllers
         [HttpPost]
         public async Task<IActionResult> RecordMood([FromBody] RecordMoodRequest request)
         {
-            await moodTrackerService.RecordMood(request.Mood);
+            await moodTrackerService.RecordMood(request.Mood, request.Date);
             return NoContent();
         }
 

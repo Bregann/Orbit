@@ -8,7 +8,7 @@ namespace Orbit.Domain.Interfaces.Api.MoodTracker
         Task<GetTodaysMoodResponse> GetTodaysMood();
         Task<GetYearlyMoodResponse> GetYearlyMood(int year);
         Task<GetAvailableYearsResponse> GetAvailableYears();
-        Task RecordMood(MoodTrackerEnum mood);
+        Task RecordMood(MoodTrackerEnum mood, DateOnly date);
         Task RecordMoodForDate(MoodTrackerEnum mood, DateTime date);
     }
 }

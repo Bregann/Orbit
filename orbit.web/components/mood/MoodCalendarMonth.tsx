@@ -37,11 +37,12 @@ export default function MoodCalendarMonth({ monthIndex, year, moodMap, onDayClic
 
   // Add cells for each day of the month
   for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, monthIndex, day)
-    const dateStr = date.toISOString().split('T')[0]
+    // Build date string manually to avoid timezone issues with toISOString()
+    const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     const moodEntry = moodMap.get(dateStr)
-    const isToday = dateStr === new Date().toISOString().split('T')[0]
-    const isFuture = date > new Date()
+    const todayStr = new Date().toISOString().split('T')[0]
+    const isToday = dateStr === todayStr
+    const isFuture = new Date(year, monthIndex, day) > new Date()
 
     days.push(
       <Tooltip

@@ -44,7 +44,7 @@ namespace Orbit.Core.Controllers
 
             Response.Cookies.Append("accessToken", loginData.AccessToken, new CookieOptions
             {
-                HttpOnly = true,
+                HttpOnly = false,
                 Secure = true,
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddHours(1)
@@ -75,13 +75,20 @@ namespace Orbit.Core.Controllers
 
             try
             {
-                var newAccessToken = await authService.RefreshToken(refreshToken);
-                Response.Cookies.Append("accessToken", newAccessToken.AccessToken, new CookieOptions
+                var newTokens = await authService.RefreshToken(refreshToken);
+                Response.Cookies.Append("accessToken", newTokens.AccessToken, new CookieOptions
                 {
                     HttpOnly = false,
                     Secure = true,
                     SameSite = SameSiteMode.None,
                     Expires = DateTimeOffset.UtcNow.AddHours(1)
+                });
+                Response.Cookies.Append("refreshToken", newTokens.RefreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTimeOffset.UtcNow.AddDays(30)
                 });
                 return Ok();
             }
