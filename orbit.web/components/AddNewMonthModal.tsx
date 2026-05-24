@@ -317,27 +317,37 @@ const AddNewMonthModal = (props: AddNewMonthModalProps) => {
               <Divider />
 
               <Group justify="space-between">
-                <Text fw={600} size="lg">Spare Money:</Text>
-                <Text
-                  fw={700}
-                  size="lg"
-                  c={(() => {
-                    const potAllocations = data.spendingPots.reduce((acc, pot) => acc + pot.amountToAdd, 0) + data.savingsPots.reduce((acc, pot) => acc + pot.amountToAdd, 0)
-                    const subscriptionTotal = subscriptionsData
-                      ? subscriptionsData.subscriptions.reduce((acc: number, s: SubscriptionItem) => acc + s.monthlyAmount, 0)
-                      : 0
-                    return (Number(incomeForMonth) - potAllocations - subscriptionTotal) >= 0 ? 'green' : 'red'
-                  })()}
-                >
+                <Text fw={600}>Savings to Move:</Text>
+                <Text fw={600} c="blue">
                   {(() => {
-                    const potAllocations = data.spendingPots.reduce((acc, pot) => acc + pot.amountToAdd, 0) + data.savingsPots.reduce((acc, pot) => acc + pot.amountToAdd, 0)
-                    const subscriptionTotal = subscriptionsData
-                      ? subscriptionsData.subscriptions.reduce((acc: number, s: SubscriptionItem) => acc + s.monthlyAmount, 0)
+                    const rolloverTotal = data.spendingPots
+                      .filter(pot => potRollovers[pot.potId] === true)
+                      .reduce((acc, pot) => acc + (pot.amountToAdd || 0), 0)
+                    const yearlySubscriptionTotal = subscriptionsData
+                      ? subscriptionsData.subscriptions
+                        .filter((s: SubscriptionItem) => s.billingFrequency === BillingFrequency.Yearly)
+                        .reduce((acc: number, s: SubscriptionItem) => acc + s.monthlyAmount, 0)
                       : 0
-                    return `£${(Number(incomeForMonth) - potAllocations - subscriptionTotal).toFixed(2)}`
+                    return `£${(rolloverTotal + yearlySubscriptionTotal).toFixed(2)}`
                   })()}
                 </Text>
               </Group>
+
+              {(() => {
+                const potAllocations = data.spendingPots.reduce((acc, pot) => acc + pot.amountToAdd, 0) + data.savingsPots.reduce((acc, pot) => acc + pot.amountToAdd, 0)
+                const monthlySubscriptionTotal = subscriptionsData
+                  ? subscriptionsData.subscriptions.reduce((acc: number, s: SubscriptionItem) => acc + s.monthlyAmount, 0)
+                  : 0
+                const spareMoney = Number(incomeForMonth) - potAllocations - monthlySubscriptionTotal
+                return (
+                  <Group justify="space-between">
+                    <Text fw={600} size="lg">Spare Money:</Text>
+                    <Text fw={700} size="lg" c={spareMoney >= 0 ? 'green' : 'red'}>
+                      £{spareMoney.toFixed(2)}
+                    </Text>
+                  </Group>
+                )
+              })()}
             </Stack>
           </Paper>
 
