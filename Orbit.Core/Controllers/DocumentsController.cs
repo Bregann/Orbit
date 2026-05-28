@@ -37,8 +37,21 @@ namespace Orbit.Core.Controllers
         [HttpGet]
         public async Task<ActionResult> DownloadDocument([FromQuery] int documentId)
         {
-            var fileBytes = await documentsService.DownloadDocument(documentId);
-            return File(fileBytes, "application/octet-stream");
+            var (fileBytes, fileName) = await documentsService.DownloadDocument(documentId);
+
+            var contentType = Path.GetExtension(fileName).ToLower() switch
+            {
+                ".pdf" => "application/pdf",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".bmp" => "image/bmp",
+                ".doc" or ".docx" => "application/msword",
+                ".xls" or ".xlsx" => "application/vnd.ms-excel",
+                _ => "application/octet-stream"
+            };
+
+            return File(fileBytes, contentType, fileName);
         }
 
         [HttpDelete]

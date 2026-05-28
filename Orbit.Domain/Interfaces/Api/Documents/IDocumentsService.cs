@@ -7,7 +7,7 @@ namespace Orbit.Domain.Interfaces.Api.Documents
         Task AddDocumentCategory(string categoryName);
         Task DeleteCategory(int categoryId);
         Task DeleteDocument(int documentId);
-        Task<byte[]> DownloadDocument(int documentId);
+        Task<(byte[] fileBytes, string fileName)> DownloadDocument(int documentId);
         Task<GetAllDocumentCategoriesDto> GetAllDocumentCategories();
         Task<GetAllDocumentsDto> GetAllDocuments();
         Task UploadDocument(UploadDocumentRequest request, Stream documentStream, string fileExtension);

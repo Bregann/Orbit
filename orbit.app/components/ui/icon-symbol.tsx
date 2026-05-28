@@ -40,6 +40,12 @@ const MAPPING: Record<string, MaterialIconName> = {
   'shippingbox.fill': 'local-shipping',
   'fork.knife': 'restaurant',
   'flame': 'local-fire-department',
+  'star': 'star-border',
+  'star.fill': 'star',
+  'folder.fill': 'folder',
+  'folder.open': 'folder-open',
+  'folder.plus': 'create-new-folder',
+  'doc.plus': 'note-add',
 };
 
 /**
