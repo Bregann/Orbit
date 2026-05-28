@@ -39,4 +39,9 @@ export enum QueryKeys {
   Recipes = 'recipes',
   MealPlan = 'mealPlan',
   RecipeDetail = 'recipeDetail',
+
+  // ── Notes ──
+  NotePages = 'notePages',
+  NotePageDetails = 'notePageDetails',
+  GetNotePagesAndFolders = 'getNotePagesAndFolders',
 }

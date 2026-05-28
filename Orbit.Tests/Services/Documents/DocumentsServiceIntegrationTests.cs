@@ -155,11 +155,12 @@ namespace Orbit.Tests.Services.Documents
             await DbContext.SaveChangesAsync();
 
             // Act
-            var result = await _documentsService.DownloadDocument(document.Id);
+            var (fileBytes, resultFileName) = await _documentsService.DownloadDocument(document.Id);
 
             // Assert
-            Assert.That(result, Is.Not.Null);
-            var content = System.Text.Encoding.UTF8.GetString(result);
+            Assert.That(fileBytes, Is.Not.Null);
+            Assert.That(resultFileName, Is.EqualTo(fileName));
+            var content = System.Text.Encoding.UTF8.GetString(fileBytes);
             Assert.That(content, Is.EqualTo(testContent));
         }
 

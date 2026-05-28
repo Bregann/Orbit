@@ -181,8 +181,8 @@ namespace Orbit.Domain.Services.Assets
                 throw new NotFoundException($"Asset with ID {request.AssetId} not found");
             }
 
-            // Create AssetsStorage directory if it doesn't exist
-            var storagePath = Path.Combine(Directory.GetCurrentDirectory(), "AssetsStorage");
+            // Create DocumentsStorage directory if it doesn't exist
+            var storagePath = Path.Combine(Directory.GetCurrentDirectory(), "DocumentsStorage");
             if (!Directory.Exists(storagePath))
             {
                 Directory.CreateDirectory(storagePath);
@@ -190,7 +190,7 @@ namespace Orbit.Domain.Services.Assets
 
             // Generate filename
             var fileName = $"{asset.Id}-{request.DocumentType}{fileExtension}";
-            var relativePath = Path.Combine("AssetsStorage", fileName);
+            var relativePath = Path.Combine("DocumentsStorage", fileName);
             var fullPath = Path.Combine(Directory.GetCurrentDirectory(), relativePath);
 
             // Delete old file if exists

@@ -20,7 +20,7 @@ namespace Orbit.Tests.Services.Assets
 
             _assetsService = new AssetsService(DbContext);
 
-            _testAssetsPath = Path.Combine(Directory.GetCurrentDirectory(), "AssetsStorage");
+            _testAssetsPath = Path.Combine(Directory.GetCurrentDirectory(), "DocumentsStorage");
             if (!Directory.Exists(_testAssetsPath))
             {
                 Directory.CreateDirectory(_testAssetsPath);
@@ -291,8 +291,8 @@ namespace Orbit.Tests.Services.Assets
             {
                 AssetName = "Delete Test Asset",
                 Brand = "Test Brand",
-                ReceiptPath = Path.Combine("AssetsStorage", receiptFileName),
-                ManualPath = Path.Combine("AssetsStorage", manualFileName),
+                ReceiptPath = Path.Combine("DocumentsStorage", receiptFileName),
+                ManualPath = Path.Combine("DocumentsStorage", manualFileName),
                 Status = "Active",
                 AssetCategoryId = 1,
                 CreatedAt = DateTime.UtcNow,
@@ -317,8 +317,8 @@ namespace Orbit.Tests.Services.Assets
             {
                 AssetName = "No Files Test",
                 Brand = "Test Brand",
-                ReceiptPath = Path.Combine("AssetsStorage", "NonExistent-Receipt.pdf"),
-                ManualPath = Path.Combine("AssetsStorage", "NonExistent-Manual.pdf"),
+                ReceiptPath = Path.Combine("DocumentsStorage", "NonExistent-Receipt.pdf"),
+                ManualPath = Path.Combine("DocumentsStorage", "NonExistent-Manual.pdf"),
                 Status = "Active",
                 AssetCategoryId = 1,
                 CreatedAt = DateTime.UtcNow,
@@ -412,7 +412,7 @@ namespace Orbit.Tests.Services.Assets
             var oldFilePath = Path.Combine(_testAssetsPath, oldFileName);
             await File.WriteAllTextAsync(oldFilePath, "Old content");
 
-            asset.ReceiptPath = Path.Combine("AssetsStorage", oldFileName);
+            asset.ReceiptPath = Path.Combine("DocumentsStorage", oldFileName);
             await DbContext.SaveChangesAsync();
 
             var request = new UploadAssetDocumentRequest
@@ -462,7 +462,7 @@ namespace Orbit.Tests.Services.Assets
             var filePath = Path.Combine(_testAssetsPath, fileName);
             await File.WriteAllTextAsync(filePath, testContent);
 
-            asset.ReceiptPath = Path.Combine("AssetsStorage", fileName);
+            asset.ReceiptPath = Path.Combine("DocumentsStorage", fileName);
             await DbContext.SaveChangesAsync();
 
             // Act
@@ -486,7 +486,7 @@ namespace Orbit.Tests.Services.Assets
             var filePath = Path.Combine(_testAssetsPath, fileName);
             await File.WriteAllTextAsync(filePath, testContent);
 
-            asset.ManualPath = Path.Combine("AssetsStorage", fileName);
+            asset.ManualPath = Path.Combine("DocumentsStorage", fileName);
             await DbContext.SaveChangesAsync();
 
             // Act
@@ -530,7 +530,7 @@ namespace Orbit.Tests.Services.Assets
         {
             // Arrange
             var asset = DbContext.Assets.First();
-            asset.ReceiptPath = Path.Combine("AssetsStorage", "NonExistent.pdf");
+            asset.ReceiptPath = Path.Combine("DocumentsStorage", "NonExistent.pdf");
             await DbContext.SaveChangesAsync();
 
             // Act & Assert
@@ -549,7 +549,7 @@ namespace Orbit.Tests.Services.Assets
             var filePath = Path.Combine(_testAssetsPath, fileName);
             await File.WriteAllTextAsync(filePath, "Receipt content");
 
-            asset.ReceiptPath = Path.Combine("AssetsStorage", fileName);
+            asset.ReceiptPath = Path.Combine("DocumentsStorage", fileName);
             await DbContext.SaveChangesAsync();
 
             // Act
@@ -573,7 +573,7 @@ namespace Orbit.Tests.Services.Assets
             var filePath = Path.Combine(_testAssetsPath, fileName);
             await File.WriteAllTextAsync(filePath, "Manual content");
 
-            asset.ManualPath = Path.Combine("AssetsStorage", fileName);
+            asset.ManualPath = Path.Combine("DocumentsStorage", fileName);
             await DbContext.SaveChangesAsync();
 
             // Act
@@ -593,7 +593,7 @@ namespace Orbit.Tests.Services.Assets
         {
             // Arrange
             var asset = DbContext.Assets.First();
-            asset.ReceiptPath = Path.Combine("AssetsStorage", "NonExistent.pdf");
+            asset.ReceiptPath = Path.Combine("DocumentsStorage", "NonExistent.pdf");
             await DbContext.SaveChangesAsync();
 
             // Act & Assert

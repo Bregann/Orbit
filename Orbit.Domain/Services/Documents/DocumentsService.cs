@@ -53,7 +53,7 @@ namespace Orbit.Domain.Services.Documents
             Log.Information($"Document {request.DocumentName} uploaded successfully to {documentPath}");
         }
 
-        public async Task<byte[]> DownloadDocument(int documentId)
+        public async Task<(byte[] fileBytes, string fileName)> DownloadDocument(int documentId)
         {
             var document = await context.Documents.FindAsync(documentId) ?? throw new NotFoundException("Document not found");
 
@@ -65,7 +65,10 @@ namespace Orbit.Domain.Services.Documents
                 throw new NotFoundException("Document file not found in storage");
             }
 
-            return await File.ReadAllBytesAsync(documentPath);
+            var fileBytes = await File.ReadAllBytesAsync(documentPath);
+            var fileName = Path.GetFileName(document.DocumentPath);
+
+            return (fileBytes, fileName);
         }
 
         public async Task DeleteDocument(int documentId)
