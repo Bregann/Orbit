@@ -29,7 +29,9 @@ export default function NoteEditor({ content, isEditing, onContentChange, onRead
   }, [onReady]);
 
   const handleChange = (html: string) => {
-    onContentChange(html);
+    if (isEditing) {
+      onContentChange(html);
+    }
   };
 
   const insertBlockquote = () => {
@@ -93,7 +95,6 @@ export default function NoteEditor({ content, isEditing, onContentChange, onRead
         style={notesStyles.editorWebview}
         scrollEnabled={true}
         showsVerticalScrollIndicator={false}
-        disabled={!isEditing}
       />
     </View>
   );

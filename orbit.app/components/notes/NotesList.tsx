@@ -15,7 +15,6 @@ import { useState, useMemo } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  ScrollView,
   TextInput,
   TouchableOpacity,
   useColorScheme,
@@ -220,11 +219,7 @@ export function NotesList({ onAddPage, onAddFolder }: NotesListProps) {
         />
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
-        style={notesStyles.listScroll}
-      >
+      <View style={notesStyles.listScroll}>
         {/* Favourites */}
         {favouritePages.length > 0 && (
           <View style={commonStyles.sectionContainer}>
@@ -264,7 +259,7 @@ export function NotesList({ onAddPage, onAddFolder }: NotesListProps) {
             </ThemedText>
           </ThemedView>
         )}
-      </ScrollView>
+      </View>
     </ThemedView>
   );
 }
