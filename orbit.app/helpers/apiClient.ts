@@ -91,15 +91,23 @@ authApiClient.interceptors.response.use(
       try {
         console.log('🔑 Refreshing token...')
         const request: RefreshTokenRequest = { refreshToken }
-        const { data } = await noAuthApiClient.post<RefreshTokenResponse>('/api/Auth/RefreshAppToken', request)
+        const response = await noAuthApiClient.post<RefreshTokenResponse>('/api/Auth/RefreshAppToken', request)
+
+        // noAuthApiClient treats 4xx as success (validateStatus: status < 500),
+        // so we must manually check for a non-2xx response to avoid using
+        // undefined tokens and entering an infinite refresh loop.
+        if (response.status !== 200 || !response.data?.accessToken || !response.data?.refreshToken) {
+          console.error('❌ Token refresh returned non-OK or missing tokens:', response.status)
+          throw new Error('Refresh endpoint returned invalid response')
+        }
 
         console.log('✅ Token refreshed successfully')
-        await keychainHelper.setAccessToken(data.accessToken)
-        await keychainHelper.setRefreshToken(data.refreshToken)
+        await keychainHelper.setAccessToken(response.data.accessToken)
+        await keychainHelper.setRefreshToken(response.data.refreshToken)
 
         isRefreshing = false
         hasLoggedOut = false
-        error.config.headers['Authorization'] = `Bearer ${data.accessToken}`
+        error.config.headers['Authorization'] = `Bearer ${response.data.accessToken}`
 
         return authApiClient.request(error.config)
       } catch {

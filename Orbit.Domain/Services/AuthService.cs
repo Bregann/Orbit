@@ -113,10 +113,12 @@ namespace Orbit.Domain.Services
             var token = GenerateJwtToken(user);
             var newRefreshToken = GenerateRefreshToken();
 
-            await SaveRefreshToken(newRefreshToken, user.Id);
-
+            // Revoke the old token BEFORE saving the new one to prevent
+            // any race condition where the old token could be reused.
             refreshToken.IsRevoked = true;
             await context.SaveChangesAsync();
+
+            await SaveRefreshToken(newRefreshToken, user.Id);
 
             Log.Information($"Token refreshed for user {refreshToken.UserId}");
 

@@ -171,7 +171,7 @@ export default function NotesEditorScreen() {
             {!isEditing ? (
               <TouchableOpacity
                 onPress={handleEdit}
-                style={[notesStyles.editorScreenSaveButton, { backgroundColor: colors.tint }]}
+                style={[notesStyles.editorScreenSaveButton, { backgroundColor: '#0a7ea4' }]}
               >
                 <ThemedText style={notesStyles.editorScreenSaveButtonText}>Edit</ThemedText>
               </TouchableOpacity>
@@ -180,7 +180,7 @@ export default function NotesEditorScreen() {
                 onPress={handleSave}
                 style={[
                   notesStyles.editorScreenSaveButton,
-                  { backgroundColor: colors.tint },
+                  { backgroundColor: '#0a7ea4' },
                   (!hasUnsavedChanges || isSaving) && { opacity: 0.4 },
                 ]}
                 disabled={!hasUnsavedChanges || isSaving}
@@ -214,12 +214,14 @@ export default function NotesEditorScreen() {
       </View>
 
       {/* Editor */}
-      <NoteEditor
-        content={page.content}
-        isEditing={isEditing}
-        onContentChange={handleContentChange}
-        onReady={() => {}}
-      />
+      <View style={{ flex: 1 }}>
+        <NoteEditor
+          content={page.content}
+          isEditing={isEditing}
+          onContentChange={handleContentChange}
+          onReady={() => {}}
+        />
+      </View>
     </SafeAreaView>
   );
 }
