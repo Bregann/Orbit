@@ -63,6 +63,9 @@ export default function LoginScreen() {
             editable={!loading}
             keyboardType="email-address"
             autoCapitalize="none"
+            textContentType="emailAddress"
+            autoComplete="email"
+            importantForAutofill="yes"
           />
 
           <View style={styles.passwordContainer}>
@@ -83,6 +86,9 @@ export default function LoginScreen() {
               secureTextEntry={!showPassword}
               editable={!loading}
               autoCapitalize="none"
+              textContentType="password"
+              autoComplete="current-password"
+              importantForAutofill="yes"
               onSubmitEditing={handleLogin}
             />
             <TouchableOpacity

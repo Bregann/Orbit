@@ -1,4 +1,4 @@
-import { noAuthApiClient } from '@/helpers/apiClient'
+import { noAuthApiClient, resetAuthState } from '@/helpers/apiClient'
 import { keychainHelper } from '@/helpers/keychainHelper'
 import { LoginUserRequest } from '@/interfaces/api/login/LoginUserRequest'
 import { LoginUserResponse } from '@/interfaces/api/login/LoginUserResponse'
@@ -56,6 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (response.status === 200 && response.data) {
+        resetAuthState()
         await keychainHelper.setAccessToken(response.data.accessToken)
         await keychainHelper.setRefreshToken(response.data.refreshToken)
         setIsAuthenticated(true)
