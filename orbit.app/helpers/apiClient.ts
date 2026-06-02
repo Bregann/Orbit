@@ -133,3 +133,8 @@ authApiClient.interceptors.response.use(
 
 export { authApiClient, noAuthApiClient }
 
+export const resetAuthState = (): void => {
+  hasLoggedOut = false
+  isRefreshing = false
+}
+

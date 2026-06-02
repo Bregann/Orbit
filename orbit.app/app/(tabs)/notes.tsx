@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { authApiClient } from '@/helpers/apiClient';
 import { notesStyles } from '@/styles/notesStyles';
 import { useState } from 'react';
-import { TouchableOpacity, useColorScheme, View, Alert } from 'react-native';
+import { TouchableOpacity, useColorScheme, View, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NotesScreen() {
@@ -83,7 +83,7 @@ export default function NotesScreen() {
             <IconSymbol name="folder.plus" size={20} color={colors.text} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={[notesStyles.screenHeaderButton, { backgroundColor: colors.tint }]}
+            style={[notesStyles.screenHeaderButton, { backgroundColor: '#0a7ea4' }]}
             onPress={() => setShowAddPage(true)}
           >
             <IconSymbol name="doc.plus" size={20} color="#ffffff" />
@@ -92,12 +92,16 @@ export default function NotesScreen() {
       </View>
 
       {/* Notes List */}
-      <View style={notesStyles.screenContent}>
+      <ScrollView
+        style={notesStyles.screenContent}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
         <NotesList
           onAddPage={() => setShowAddPage(true)}
           onAddFolder={() => setShowAddFolder(true)}
         />
-      </View>
+      </ScrollView>
 
       {/* Modals */}
       <AddNotePageModal

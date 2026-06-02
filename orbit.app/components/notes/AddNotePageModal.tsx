@@ -132,7 +132,7 @@ export function AddNotePageModal({ visible, folders, onClose, onSubmit }: AddNot
               style={[
                 notesStyles.modalButton,
                 notesStyles.modalSubmitButton,
-                { backgroundColor: colors.tint },
+                { backgroundColor: '#0a7ea4' },
                 !title.trim() && { opacity: 0.5 },
               ]}
               onPress={handleSubmit}

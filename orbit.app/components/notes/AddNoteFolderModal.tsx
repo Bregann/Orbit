@@ -96,7 +96,7 @@ export function AddNoteFolderModal({ visible, onClose, onSubmit }: AddNoteFolder
               style={[
                 notesStyles.modalButton,
                 notesStyles.modalSubmitButton,
-                { backgroundColor: colors.tint },
+                { backgroundColor: '#0a7ea4' },
                 !folderName.trim() && { opacity: 0.5 },
               ]}
               onPress={handleSubmit}
