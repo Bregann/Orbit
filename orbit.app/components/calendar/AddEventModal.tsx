@@ -114,11 +114,13 @@ export default function AddEventModal({ visible, onClose, initialDate }: AddEven
 
   // Set initial date and default event type when modal opens
   useEffect(() => {
-    if (visible) {
+    if (!visible) return;
+    // Defer state updates so they don't run synchronously within the effect body.
+    const id = setTimeout(() => {
       if (initialDate) {
         setEventDate(moment(initialDate).toDate());
       }
-      // Default start time to current hour
+      // Default start time to the next full hour
       const now = new Date();
       now.setMinutes(0, 0, 0);
       now.setHours(now.getHours() + 1);
@@ -126,14 +128,17 @@ export default function AddEventModal({ visible, onClose, initialDate }: AddEven
       const endDefault = new Date(now);
       endDefault.setHours(endDefault.getHours() + 1);
       setEndTime(endDefault);
-    }
+    }, 0);
+    return () => clearTimeout(id);
   }, [visible, initialDate]);
 
   // Set event type when data loads
   useEffect(() => {
-    if (eventTypes.length > 0 && eventTypeId === null) {
-      setEventTypeId(eventTypes[0].id);
-    }
+    if (eventTypes.length === 0 || eventTypeId !== null) return;
+    const firstType = eventTypes[0];
+    // Defer state update so it doesn't run synchronously within the effect body.
+    const id = setTimeout(() => setEventTypeId(firstType.id), 0);
+    return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventTypes]);
 
