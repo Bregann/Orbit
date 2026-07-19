@@ -6,7 +6,7 @@ import { router } from 'expo-router'
 import { keychainHelper } from './keychainHelper'
 
 const authApiClient = axios.create({
-  baseURL: __DEV__ ? 'http://192.168.1.248:5053' : Constants.expoConfig?.extra?.ApiUrl || '',
+  baseURL: __DEV__ ? 'http://192.168.1.208:5053' : Constants.expoConfig?.extra?.ApiUrl || '',
   validateStatus: (status) => status < 500 && status !== 401,
 })
 
@@ -14,7 +14,7 @@ let isRefreshing = false
 let hasLoggedOut = false
 
 const noAuthApiClient = axios.create({
-  baseURL: __DEV__ ? 'http://192.168.1.248:5053' : Constants.expoConfig?.extra?.ApiUrl || '',
+  baseURL: __DEV__ ? 'http://192.168.1.208:5053' : Constants.expoConfig?.extra?.ApiUrl || '',
   validateStatus (status) {
     return status < 500
   },

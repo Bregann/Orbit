@@ -93,6 +93,7 @@ export default function NoteEditor({ content, isEditing, onContentChange, onRead
         editorStyle={darkTheme}
         placeholder="Start writing..."
         style={notesStyles.editorWebview}
+        useContainer={false}
         scrollEnabled={true}
         showsVerticalScrollIndicator={false}
       />
