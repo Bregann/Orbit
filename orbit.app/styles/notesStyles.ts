@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 export const notesStyles = StyleSheet.create({
   // ── Notes List ──
   listContainer: {
-    flex: 1,
+    flexGrow: 1,
   },
   listCentered: {
     alignItems: 'center',
@@ -24,7 +24,7 @@ export const notesStyles = StyleSheet.create({
     fontSize: 15,
   },
   listScroll: {
-    flex: 1,
+    flexGrow: 1,
   },
   listPageItem: {
     flexDirection: 'row',
