@@ -89,15 +89,27 @@ export default function NotesEditor({ selectedPageId, folders, onCreatePage }: N
     onUpdate: () => {
       setHasUnsavedChanges(true)
     },
-  }, [page?.content, isEditing])
+  })
 
   useEffect(() => {
-    if (editor && page) {
-      editor.commands.setContent(page.content)
-      editor.setEditable(isEditing)
-      setHasUnsavedChanges(false)
+    if (editor === null || editor === undefined || editor.isDestroyed) {
+      return
     }
-  }, [page, editor, isEditing])
+    if (page === null || page === undefined) {
+      return
+    }
+
+    editor.commands.setContent(page.content)
+    setHasUnsavedChanges(false)
+  }, [page?.content, editor])
+
+  useEffect(() => {
+    if (editor === null || editor === undefined || editor.isDestroyed) {
+      return
+    }
+
+    editor.setEditable(isEditing)
+  }, [isEditing, editor])
 
   const { mutateAsync: updateContent, isPending } = useMutationPut<UpdateNotePageContentRequest, void>({
     url: '/api/notes/UpdateNotePageContent',

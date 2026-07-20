@@ -666,6 +666,41 @@ namespace Orbit.Tests.Infrastructure
             await context.SaveChangesAsync();
         }
 
+        public static async Task SeedTestChores(AppDbContext context)
+        {
+            await context.Chores.AddRangeAsync(new List<Chore>
+            {
+                new Chore
+                {
+                    Name = "Hoover Living Room",
+                    Description = "Vacuum the living room carpet and under furniture",
+                    Frequency = Orbit.Domain.Enums.ChoreFrequencyType.Weekly,
+                    NextDueDate = DateTime.UtcNow.AddDays(3),
+                    CreatedAt = DateTime.UtcNow.AddDays(-10)
+                },
+                new Chore
+                {
+                    Name = "Clean Bathroom",
+                    Description = "Deep clean the bathroom including shower, toilet, and sink",
+                    Frequency = Orbit.Domain.Enums.ChoreFrequencyType.Weekly,
+                    NextDueDate = DateTime.UtcNow.AddDays(1),
+                    LastCompletedAt = DateTime.UtcNow.AddDays(-6),
+                    CreatedAt = DateTime.UtcNow.AddDays(-30)
+                },
+                new Chore
+                {
+                    Name = "Deep Clean Kitchen",
+                    Description = "Clean oven, degrease surfaces, mop floor, clean fridge",
+                    Frequency = Orbit.Domain.Enums.ChoreFrequencyType.Monthly,
+                    NextDueDate = DateTime.UtcNow.AddDays(5),
+                    LastCompletedAt = DateTime.UtcNow.AddDays(-25),
+                    CreatedAt = DateTime.UtcNow.AddDays(-60)
+                }
+            });
+
+            await context.SaveChangesAsync();
+        }
+
         public static async Task SeedMinimalData(AppDbContext context)
         {
             await SeedTestUser(context);

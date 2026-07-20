@@ -44,4 +44,7 @@ export enum QueryKeys {
   NotePages = 'notePages',
   NotePageDetails = 'notePageDetails',
   GetNotePagesAndFolders = 'getNotePagesAndFolders',
+
+  // ── Chores ──
+  Chores = 'chores',
 }

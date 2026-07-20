@@ -50,5 +50,7 @@ namespace Orbit.Domain.Database.Context
         public DbSet<RecipeStep> RecipeSteps { get; set; } = null!;
         public DbSet<MealPlanEntry> MealPlanEntries { get; set; } = null!;
         public DbSet<RecipeCookHistory> RecipeCookHistory { get; set; } = null!;
+
+        public DbSet<Chore> Chores { get; set; } = null!;
     }
 }

@@ -18,6 +18,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, ScrollView, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { formatWeekdayDate } from '@/helpers/dateHelper';
 import { useRouter } from 'expo-router';
 
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner'];
@@ -30,7 +31,7 @@ function getWeekDates(): { date: Date; label: string; dateStr: string }[] {
     d.setDate(today.getDate() + i);
     days.push({
       date: d,
-      label: d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }),
+      label: formatWeekdayDate(d.toISOString()),
       dateStr: d.toISOString().split('T')[0],
     });
   }

@@ -6,6 +6,7 @@ import { Colors } from '@/constants/theme';
 import { authApiClient } from '@/helpers/apiClient';
 import { useMutationPost } from '@/helpers/mutations/useMutationPost';
 import { QueryKeys } from '@/helpers/QueryKeys';
+import { formatLongDate } from '@/helpers/dateHelper';
 import { RecipeItem } from '@/interfaces/api/meal-planner/GetRecipesResponse';
 import { createCommonStyles } from '@/styles/commonStyles';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -220,11 +221,11 @@ export default function RecipeDetailScreen() {
           {/* Meta */}
           <View style={{ marginTop: 20, marginBottom: 30, opacity: 0.5 }}>
             <ThemedText style={{ fontSize: 12 }}>
-              Added: {new Date(recipe.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+              Added: {formatLongDate(recipe.createdAt)}
             </ThemedText>
             {recipe.lastCooked && (
               <ThemedText style={{ fontSize: 12 }}>
-                Last cooked: {new Date(recipe.lastCooked).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                Last cooked: {formatLongDate(recipe.lastCooked)}
               </ThemedText>
             )}
           </View>

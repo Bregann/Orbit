@@ -2,6 +2,7 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { QueryKeys } from '@/helpers/QueryKeys';
+import { formatShortDate } from '@/helpers/dateHelper';
 import { authApiClient } from '@/helpers/apiClient';
 import { useMutationPut } from '@/helpers/mutations/useMutationPut';
 import NoteEditor from '@/components/notes/NoteEditor';
@@ -198,12 +199,7 @@ export default function NotesEditorScreen() {
         {/* Meta row */}
         <View style={notesStyles.editorScreenMetaRow}>
           <ThemedText style={notesStyles.editorScreenMetaText}>
-            Last edited{' '}
-            {new Date(page.createdAt).toLocaleDateString('en-GB', {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-            })}
+            Last edited {formatShortDate(page.createdAt)}
           </ThemedText>
           {hasUnsavedChanges && (
             <ThemedText style={[notesStyles.editorScreenMetaText, { color: '#f59f0b' }]}>

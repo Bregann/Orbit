@@ -32,6 +32,28 @@ namespace Orbit.Domain.Services.Calendar
 
             }).ToArrayAsync();
 
+            var choreEvents = await context.Chores
+                .Select(c => new EventEntry
+                {
+                    Id = c.Id + 1000000,
+                    StartTime = c.NextDueDate,
+                    EndTime = c.NextDueDate,
+                    EventName = $"🧹 {c.Name}",
+                    EventLocation = string.Empty,
+                    Description = c.Description,
+                    IsAllDay = true,
+                    CalendarEventTypeId = 0,
+                    CalendarEventTypeName = "Chore",
+                    CalendarEventTypeColour = "#10b981",
+                    RecurrenceRule = null,
+                    DocumentId = null,
+                    DocumentFileName = null,
+                    DocumentFileType = null
+                })
+                .ToArrayAsync();
+
+            var allEvents = events.Concat(choreEvents).ToArray();
+
             var eventExceptions = await context.CalendarEventExceptions.Select(x => new EventExceptionEntry
             {
                 Id = x.Id,
@@ -41,7 +63,7 @@ namespace Orbit.Domain.Services.Calendar
 
             return new GetCalendarEventsDto
             {
-                Events = events,
+                Events = allEvents,
                 EventExceptions = eventExceptions
             };
         }
