@@ -32,6 +32,7 @@ import {
   IconNotebook,
   IconDeviceLaptop,
   IconToolsKitchen2,
+  IconSpray
 } from '@tabler/icons-react'
 import { useRouter, usePathname } from 'next/navigation'
 import classes from '@/css/navigation.module.css'
@@ -63,6 +64,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
   // App items (shown in dropdown on desktop to save space)
   const appItems = [
     { label: 'Tasks', icon: IconCheckbox, href: '/tasks' },
+    { label: 'Chores', icon: IconSpray, href: '/chores' },
     { label: 'Documents', icon: IconFiles, href: '/documents' },
     { label: 'Assets', icon: IconDeviceLaptop, href: '/assets' },
     { label: 'Shopping', icon: IconShoppingCart, href: '/shopping' },

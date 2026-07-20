@@ -78,13 +78,18 @@ export const toDateString = (date: Date): string => {
 }
 
 /**
- * Checks if a date is today
- * @param date - Date object
- * @returns True if the date is today
+ * Returns `true` when `dateStr` falls on today.  Accepts an ISO date
+ * string or a Date object.
  */
-export const isToday = (date: Date): boolean => {
+export const isToday = (dateInput: string | Date): boolean => {
+  if (!dateInput) {
+    return false
+  }
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput
+  date.setUTCHours(0, 0, 0, 0)
   const today = new Date()
-  return date.toDateString() === today.toDateString()
+  today.setUTCHours(0, 0, 0, 0)
+  return date.getTime() === today.getTime()
 }
 
 /**
@@ -112,5 +117,33 @@ export const formatLongDate = (dateString: string): string => {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
+  })
+}
+
+/**
+ * Returns `true` when the given ISO date string is before today.
+ */
+export const isOverdue = (dateStr: string): boolean => {
+  if (!dateStr) {
+    return false
+  }
+  const due = new Date(dateStr)
+  due.setUTCHours(0, 0, 0, 0)
+  const today = new Date()
+  today.setUTCHours(0, 0, 0, 0)
+  return due < today
+}
+
+/**
+ * Short date with year — e.g. `"20 Jul 2026"`.
+ */
+export const formatShortDate = (dateStr: string): string => {
+  if (!dateStr) {
+    return ''
+  }
+  return new Date(dateStr).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
   })
 }

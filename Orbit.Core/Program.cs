@@ -35,6 +35,8 @@ using Orbit.Domain.Interfaces.Api.Assets;
 using Orbit.Domain.Services.Assets;
 using Orbit.Domain.Interfaces.Api.MealPlanner;
 using Orbit.Domain.Services.MealPlanner;
+using Orbit.Domain.Interfaces.Api.Chores;
+using Orbit.Domain.Services.Chores;
 using Orbit.Core;
 
 #if DEBUG
@@ -97,6 +99,7 @@ builder.Services.AddScoped<IFitbitService, FitbitService>();
 builder.Services.AddScoped<IGoCardlessService, GoCardlessService>();
 builder.Services.AddScoped<IAssetsService, AssetsService>();
 builder.Services.AddScoped<IMealPlannerService, MealPlannerService>();
+builder.Services.AddScoped<IChoresService, ChoresService>();
 builder.Services.AddHttpClient<ICommsSenderClient, CommsSenderClient>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

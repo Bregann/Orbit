@@ -39,5 +39,8 @@ export enum QueryKeys {
   GoCardlessInstitutions = 'goCardlessInstitutions',
   Recipes = 'recipes',
   MealPlan = 'mealPlan',
-  CookHistory = 'cookHistory'
+  CookHistory = 'cookHistory',
+
+  // ── Chores ──
+  Chores = 'chores'
 }
