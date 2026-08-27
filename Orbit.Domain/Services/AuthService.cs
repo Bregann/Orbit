@@ -81,24 +81,45 @@ namespace Orbit.Domain.Services
 
         public async Task<LoginUserResponse> RefreshToken(string userRefreshToken)
         {
-            Log.Information($"Refreshing token {userRefreshToken}");
+            // Never log the raw token - it is a credential. A short fingerprint
+            // is enough to correlate against the app-side auth debug log.
+            var tokenFingerprint = Fingerprint(userRefreshToken);
+
+            Log.Information("[Refresh] Attempting refresh for token {Fingerprint}", tokenFingerprint);
             var refreshToken = await context.UserRefreshTokens.FirstOrDefaultAsync(t => t.Token == userRefreshToken);
 
             if (refreshToken == null)
             {
-                Log.Information($"Token not found for refresh token {userRefreshToken}");
+                Log.Warning("[Refresh] REJECTED - token {Fingerprint} not found in database", tokenFingerprint);
                 throw new UnauthorizedException("Token not found");
             }
 
             if (refreshToken.IsRevoked)
             {
-                Log.Information($"Token has been revoked for user {refreshToken.UserId}");
+                // This is the diagnostic that matters most: a revoked token means
+                // it was already used by an earlier refresh. Log how many valid
+                // tokens the user still has, which distinguishes a benign replay
+                // (user has a working newer token) from a genuine lockout
+                // (rotation left them with none).
+                var validTokenCount = await context.UserRefreshTokens
+                    .CountAsync(t => t.UserId == refreshToken.UserId
+                                     && !t.IsRevoked
+                                     && t.ExpiresAt > DateTime.UtcNow);
+
+                Log.Warning(
+                    "[Refresh] REJECTED - token {Fingerprint} already revoked for user {UserId}. " +
+                    "User currently has {ValidTokenCount} valid token(s). " +
+                    "If this is 0 the user is locked out and rotation lost their token.",
+                    tokenFingerprint, refreshToken.UserId, validTokenCount);
+
                 throw new UnauthorizedException("Refresh token has been revoked");
             }
 
             if (refreshToken.ExpiresAt < DateTime.UtcNow)
             {
-                Log.Information($"Token expired for user {refreshToken.UserId}");
+                Log.Warning(
+                    "[Refresh] REJECTED - token {Fingerprint} expired at {ExpiresAt} for user {UserId}",
+                    tokenFingerprint, refreshToken.ExpiresAt, refreshToken.UserId);
                 throw new UnauthorizedException("Refresh token expired");
             }
 
@@ -113,14 +134,29 @@ namespace Orbit.Domain.Services
             var token = GenerateJwtToken(user);
             var newRefreshToken = GenerateRefreshToken();
 
-            // Revoke the old token BEFORE saving the new one to prevent
-            // any race condition where the old token could be reused.
+            // Revoking the old token and issuing the new one MUST be atomic.
+            // Previously these were two separate SaveChangesAsync calls: if the
+            // second failed (connection drop, restart mid-deploy), the old token
+            // was left permanently revoked with no replacement ever persisted,
+            // and the client - which never received a response - was locked out
+            // holding a dead token until it logged in again.
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
             refreshToken.IsRevoked = true;
+
+            context.UserRefreshTokens.Add(new UserRefreshToken
+            {
+                Token = newRefreshToken,
+                UserId = user.Id,
+                ExpiresAt = DateTime.UtcNow.AddDays(30)
+            });
+
             await context.SaveChangesAsync();
+            await transaction.CommitAsync();
 
-            await SaveRefreshToken(newRefreshToken, user.Id);
-
-            Log.Information($"Token refreshed for user {refreshToken.UserId}");
+            Log.Information(
+                "[Refresh] SUCCESS - user {UserId} rotated {OldFingerprint} -> {NewFingerprint}",
+                refreshToken.UserId, tokenFingerprint, Fingerprint(newRefreshToken));
 
             return new LoginUserResponse
             {
@@ -153,6 +189,23 @@ namespace Orbit.Domain.Services
         private static string GenerateRefreshToken()
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(128));
+        }
+
+        /// <summary>
+        /// Short, non-reversible-enough identifier for correlating a token across
+        /// the API log and the app's auth debug log, without ever writing the
+        /// credential itself to disk. Matches the app-side `fingerprint` format.
+        /// </summary>
+        private static string Fingerprint(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                return "none";
+            }
+
+            return token.Length <= 10
+                ? $"(len {token.Length})"
+                : $"{token[..6]}…{token[^4..]} (len {token.Length})";
         }
 
         private async Task SaveRefreshToken(string token, string userId)

@@ -2,6 +2,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/context/authContext';
 import { createCommonStyles } from '@/styles/commonStyles';
+import { router } from 'expo-router';
 import { ScrollView, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -40,6 +41,18 @@ export default function SettingsScreen() {
               <ThemedText style={{ fontSize: 14, fontWeight: '500' }}>About</ThemedText>
               <ThemedText style={{ fontSize: 12, opacity: 0.6, marginTop: 2 }}>
                 Learn more about Orbit
+              </ThemedText>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.listItem, { marginTop: 8 }]}
+            onPress={() => router.push('/(stack)/auth-debug')}
+          >
+            <View style={{ flex: 1 }}>
+              <ThemedText style={{ fontSize: 14, fontWeight: '500' }}>Auth Debug</ThemedText>
+              <ThemedText style={{ fontSize: 12, opacity: 0.6, marginTop: 2 }}>
+                Token state and session event log
               </ThemedText>
             </View>
           </TouchableOpacity>
