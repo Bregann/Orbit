@@ -69,12 +69,88 @@ export const formatDateWithTime = (dateString: string, time?: string, isAllDay?:
 }
 
 /**
- * Converts a date to YYYY-MM-DD format
+ * Converts a date to YYYY-MM-DD format using the date's *local* calendar
+ * fields.
+ *
+ * Deliberately avoids `toISOString()`, which converts to UTC first: for any
+ * timezone ahead of UTC a local-midnight Date (as produced by the calendar
+ * grid) rolls back to the previous day. e.g. in BST, 19 Sep 00:00 local is
+ * 18 Sep 23:00 UTC, so `toISOString()` yields "2026-09-18".
+ *
  * @param date - Date object
  * @returns Date string in YYYY-MM-DD format
  */
 export const toDateString = (date: Date): string => {
-  return date.toISOString().split('T')[0]
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+/**
+ * Extracts the calendar date (YYYY-MM-DD) from an API date string without any
+ * timezone conversion.
+ *
+ * Calendar events are wall-clock dates: an all-day event on the 19th is the
+ * 19th regardless of the viewer's timezone. The API serialises these with a
+ * `Z` suffix, so parsing via `new Date(...)` would shift them. Taking the date
+ * portion verbatim preserves the intended day.
+ *
+ * @param dateString - ISO date string from the API
+ * @returns Date string in YYYY-MM-DD format
+ */
+export const toApiDateString = (dateString: string): string => {
+  if (!dateString) {
+    return ''
+  }
+  return dateString.split('T')[0]
+}
+
+/**
+ * Today's date as YYYY-MM-DD in the viewer's local timezone.
+ */
+export const todayDateString = (): string => toDateString(new Date())
+
+/**
+ * Converts a local calendar date into a UTC-midnight ISO string for the API.
+ *
+ * Builds the instant from the date's local calendar fields so the day is
+ * preserved. `new Date('2026-09-19').toISOString()` would instead re-interpret
+ * the value and can shift it.
+ *
+ * @param date - Date object, or a YYYY-MM-DD string
+ * @returns ISO-8601 string at UTC midnight, e.g. "2026-09-19T00:00:00.000Z"
+ */
+export const toUtcDateString = (date: Date | string): string => {
+  const dateStr = typeof date === 'string' ? toApiDateString(date) : toDateString(date)
+  return new Date(`${dateStr}T00:00:00Z`).toISOString()
+}
+
+/**
+ * The Monday-start week containing today, as local YYYY-MM-DD strings.
+ *
+ * Shared between the meal planner page (server-side prefetch) and its
+ * component so both request exactly the same range — otherwise the prefetched
+ * cache entry never matches the one the client asks for.
+ */
+export const getCurrentWeekRange = (): { startDate: string, endDate: string } => {
+  const days = getCurrentWeekDates()
+  return { startDate: days[0], endDate: days[6] }
+}
+
+/**
+ * The seven local dates of the Monday-start week containing today.
+ */
+export const getCurrentWeekDates = (): string[] => {
+  const today = new Date()
+  const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  monday.setDate(monday.getDate() - ((today.getDay() + 6) % 7))
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday)
+    d.setDate(monday.getDate() + i)
+    return toDateString(d)
+  })
 }
 
 /**
@@ -85,11 +161,14 @@ export const isToday = (dateInput: string | Date): boolean => {
   if (!dateInput) {
     return false
   }
-  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput
-  date.setUTCHours(0, 0, 0, 0)
-  const today = new Date()
-  today.setUTCHours(0, 0, 0, 0)
-  return date.getTime() === today.getTime()
+
+  // Compare calendar dates, not instants. Note this must not mutate the
+  // caller's Date — the calendar grid passes the same objects it renders.
+  const dateStr = typeof dateInput === 'string'
+    ? toApiDateString(dateInput)
+    : toDateString(dateInput)
+
+  return dateStr === toDateString(new Date())
 }
 
 /**
@@ -127,11 +206,8 @@ export const isOverdue = (dateStr: string): boolean => {
   if (!dateStr) {
     return false
   }
-  const due = new Date(dateStr)
-  due.setUTCHours(0, 0, 0, 0)
-  const today = new Date()
-  today.setUTCHours(0, 0, 0, 0)
-  return due < today
+  // String comparison is safe and timezone-free for YYYY-MM-DD.
+  return toApiDateString(dateStr) < toDateString(new Date())
 }
 
 /**

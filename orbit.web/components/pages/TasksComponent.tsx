@@ -40,11 +40,13 @@ import { useMutationPatch } from '@/helpers/mutations/useMutationPatch'
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import notificationHelper from '@/helpers/notificationHelper'
 import type { GetTasksResponse } from '@/interfaces/api/tasks/GetTasksResponse'
+import type { TaskItem } from '@/interfaces/api/tasks/TaskItem'
 import type { GetTaskCategoriesResponse } from '@/interfaces/api/tasks/GetTaskCategoriesResponse'
 import AddTaskModal from '@/components/tasks/AddTaskModal'
 import ManageCategoriesModal from '@/components/tasks/ManageCategoriesModal'
 import { getPriorityColour, getPriorityLabel } from '@/helpers/dataHelper'
 import { QueryKeys } from '@/helpers/QueryKeys'
+import { toApiDateString, toDateString, todayDateString } from '@/helpers/dateHelper'
 
 export default function TasksComponent() {
   const [selectedCategory, setSelectedCategory] = useState<number | 'All'>('All')
@@ -114,25 +116,21 @@ export default function TasksComponent() {
   const totalCount = tasks.length
   const completionPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0
 
-  const todaysTasks = tasks.filter(t => {
-    if (!t.dueDate || t.dateCompleted !== null) return false
-    const today = new Date().toISOString().split('T')[0]
-    const taskDate = new Date(t.dueDate).toISOString().split('T')[0]
-    return taskDate === today
-  })
+  // Due dates are calendar dates, so compare them as YYYY-MM-DD strings rather
+  // than as instants — parsing them would shift the day for viewers ahead of
+  // UTC, and an instant comparison drops tasks due today.
+  const today = todayDateString()
+  const nextWeek = toDateString(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
 
-  const overdueTasks = tasks.filter(t => {
-    if (!t.dueDate || t.dateCompleted !== null) return false
-    const today = new Date().toISOString().split('T')[0]
-    const taskDate = new Date(t.dueDate).toISOString().split('T')[0]
-    return taskDate < today
-  })
+  const isPending = (t: TaskItem) => Boolean(t.dueDate) && t.dateCompleted === null
+
+  const todaysTasks = tasks.filter(t => isPending(t) && toApiDateString(t.dueDate!) === today)
+
+  const overdueTasks = tasks.filter(t => isPending(t) && toApiDateString(t.dueDate!) < today)
 
   const upcomingTasks = tasks.filter(t => {
-    if (!t.dueDate || t.dateCompleted !== null) return false
-    const today = new Date()
-    const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    const taskDate = new Date(t.dueDate)
+    if (!isPending(t)) return false
+    const taskDate = toApiDateString(t.dueDate!)
     return taskDate > today && taskDate <= nextWeek
   })
 

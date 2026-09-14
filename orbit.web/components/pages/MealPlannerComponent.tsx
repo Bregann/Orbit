@@ -47,25 +47,22 @@ import EditRecipeModal from '@/components/meal-planner/EditRecipeModal'
 import AddMealPlanModal from '@/components/meal-planner/AddMealPlanModal'
 import CookHistoryModal from '@/components/meal-planner/CookHistoryModal'
 import { useRouter } from 'next/navigation'
+import { getCurrentWeekDates } from '@/helpers/dateHelper'
 
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner']
 
 function getWeekDates(): { date: Date; label: string; dateStr: string }[] {
-  const today = new Date()
-  const dayOfWeek = today.getDay() // 0 = Sunday
-  const monday = new Date(today)
-  monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7))
-  const days = []
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday)
-    d.setDate(monday.getDate() + i)
-    days.push({
-      date: d,
-      label: d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }),
-      dateStr: d.toISOString().split('T')[0]
-    })
-  }
-  return days
+  // Shares getCurrentWeekDates() with the page-level prefetch so both agree on
+  // the week, and formats local dates (toISOString() would shift the day for
+  // viewers ahead of UTC).
+  return getCurrentWeekDates().map(dateStr => {
+    const date = new Date(`${dateStr}T00:00:00`)
+    return {
+      date,
+      label: date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }),
+      dateStr
+    }
+  })
 }
 
 export default function MealPlannerComponent() {

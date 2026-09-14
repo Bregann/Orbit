@@ -9,6 +9,7 @@ import { QueryKeys } from '@/helpers/QueryKeys'
 import { useMutationPost } from '@/helpers/mutations/useMutationPost'
 import { IconCheck, IconAlertCircle } from '@tabler/icons-react'
 import { moodOptions } from '@/helpers/moodOptions'
+import { todayDateString } from '@/helpers/dateHelper'
 
 interface MoodSelectorProps {
   currentMood?: MoodType | null
@@ -49,8 +50,7 @@ export default function MoodSelector({ currentMood, hasMoodToday }: MoodSelector
   const handleConfirm = () => {
     if (selectedMood !== null) {
       // Send the user's local today date as YYYY-MM-DD
-      const todayStr = new Date().toISOString().split('T')[0]
-      recordMood({ mood: selectedMood, date: todayStr })
+      recordMood({ mood: selectedMood, date: todayDateString() })
     }
   }
 

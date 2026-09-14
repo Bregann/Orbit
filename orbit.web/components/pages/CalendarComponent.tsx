@@ -37,6 +37,7 @@ import { doQueryGet } from '@/helpers/apiClient'
 import { GetCalendarEventsDto } from '@/interfaces/api/calendar/GetCalendarEventsDto'
 import { GetCalendarEventTypesDto } from '@/interfaces/api/calendar/GetCalendarEventTypesDto'
 import { getEventTypeColour } from '@/helpers/dataHelper'
+import { toDateString, toApiDateString } from '@/helpers/dateHelper'
 import { QueryKeys } from '@/helpers/QueryKeys'
 
 export default function CalendarComponent() {
@@ -59,7 +60,9 @@ export default function CalendarComponent() {
   const eventExceptions = useMemo(() => {
     const exceptionsSet = new Set<string>()
     calendarData?.eventExceptions?.forEach(exception => {
-      const exceptionDate = new Date(exception.exceptionDate).toISOString().split('T')[0]
+      // Take the date portion verbatim; parsing would shift it by a day for
+      // viewers ahead of UTC and the exception would stop matching.
+      const exceptionDate = toApiDateString(exception.exceptionDate)
       const key = `${exception.calendarEventId}_${exceptionDate}`
       exceptionsSet.add(key)
     })
@@ -97,10 +100,7 @@ export default function CalendarComponent() {
 
   const getEventsForDate = (date: Date) => {
     // Format date as YYYY-MM-DD without timezone conversion
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    const dateStr = `${year}-${month}-${day}`
+    const dateStr = toDateString(date)
     const matchingEvents: EventEntry[] = []
 
     events.forEach(event => {
@@ -112,7 +112,7 @@ export default function CalendarComponent() {
       }
 
       // Get event start date from API format
-      const eventStartDate = event.startTime.split('T')[0]
+      const eventStartDate = toApiDateString(event.startTime)
 
       // Check if this is the event's base date
       if (eventStartDate === dateStr) {
@@ -121,18 +121,15 @@ export default function CalendarComponent() {
       // Check if this event has a recurrence rule and if this date matches
       else if (event.recurrenceRule) {
         try {
-          // Parse the event's start date and create proper DTSTART
-          const rruleStartDate = new Date(eventStartDate + 'T00:00:00')
-
-          // Create RRule with proper DTSTART formatting
-          const rruleString = `DTSTART:${rruleStartDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\nRRULE:${event.recurrenceRule}`
+          // Treat recurrences as wall-clock dates: anchor DTSTART at UTC
+          // midnight and query with UTC bounds. Mixing a UTC DTSTART with
+          // local-midnight bounds (as before) shifts occurrences by a day.
+          const rruleString = `DTSTART:${eventStartDate.replace(/-/g, '')}T000000Z\nRRULE:${event.recurrenceRule}`
           const rule = RRule.fromString(rruleString)
 
-          // Check if this date is in the recurrence set
-          const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
           const occurrences = rule.between(
-            new Date(checkDate.getFullYear(), checkDate.getMonth(), checkDate.getDate(), 0, 0, 0),
-            new Date(checkDate.getFullYear(), checkDate.getMonth(), checkDate.getDate(), 23, 59, 59),
+            new Date(`${dateStr}T00:00:00Z`),
+            new Date(`${dateStr}T23:59:59Z`),
             true
           )
 
@@ -148,36 +145,31 @@ export default function CalendarComponent() {
     return matchingEvents
   }
 
+  // An all-day event is "upcoming" for the whole of its final day, so compare
+  // on the calendar date rather than an instant.
+  const hasPassed = (event: EventEntry) => {
+    if (event.isAllDay) {
+      return toApiDateString(event.endTime) < toDateString(new Date())
+    }
+    return new Date(event.endTime) < new Date()
+  }
+
   const getUpcomingEvents = () => {
-    const now = new Date()
     return events
-      .filter(e => {
-        const eventDateTime = e.isAllDay
-          ? new Date(e.endTime.split('T')[0] + 'T23:59:59')
-          : new Date(e.endTime)
-        return eventDateTime >= now
-      })
+      .filter(e => !hasPassed(e))
       .sort((a, b) => a.startTime.localeCompare(b.startTime))
   }
 
   const getPastEvents = () => {
-    const now = new Date()
     return events
-      .filter(e => {
-        const eventDateTime = e.isAllDay
-          ? new Date(e.endTime.split('T')[0] + 'T23:59:59')
-          : new Date(e.endTime)
-        return eventDateTime < now
-      })
+      .filter(e => hasPassed(e))
       .sort((a, b) => b.startTime.localeCompare(a.startTime))
   }
 
   const getEventsThisMonth = () => {
     const now = new Date()
-    return events.filter(e => {
-      const eventDate = new Date(e.startTime)
-      return eventDate.getMonth() === now.getMonth() && eventDate.getFullYear() === now.getFullYear()
-    }).length
+    const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    return events.filter(e => toApiDateString(e.startTime).startsWith(prefix)).length
   }
 
   const navigateMonth = (direction: 'prev' | 'next') => {

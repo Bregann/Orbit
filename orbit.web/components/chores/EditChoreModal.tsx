@@ -16,6 +16,7 @@ import { IconCheck, IconX } from '@tabler/icons-react'
 import type { ChoreItem } from '@/interfaces/api/chores/ChoreItem'
 import { ChoreFrequencyType } from '@/interfaces/api/chores/ChoreFrequencyType'
 import { QueryKeys } from '@/helpers/QueryKeys'
+import { todayDateString, toApiDateString } from '@/helpers/dateHelper'
 
 interface EditChoreModalProps {
   opened: boolean
@@ -24,7 +25,7 @@ interface EditChoreModalProps {
 }
 
 export default function EditChoreModal({ opened, chore, onClose }: EditChoreModalProps) {
-  const todayStr = new Date().toISOString().split('T')[0]
+  const todayStr = todayDateString()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [frequency, setFrequency] = useState<string>('2')
@@ -37,7 +38,9 @@ export default function EditChoreModal({ opened, chore, onClose }: EditChoreModa
       setDescription(chore.description)
       setFrequency(chore.frequency.toString())
       setCustomDays(chore.customFrequencyDays?.toString() ?? '')
-      setDueDate(new Date(chore.nextDueDate).toISOString().split('T')[0])
+      // Take the stored date verbatim; parsing it would shift the day and the
+      // chore's due date would move every time it is edited.
+      setDueDate(toApiDateString(chore.nextDueDate))
     }
   }, [chore])
 

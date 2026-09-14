@@ -4,6 +4,7 @@ import { Card, Stack, Text, SimpleGrid, Tooltip, Box } from '@mantine/core'
 import { MoodType } from '@/interfaces/api/mood/MoodType'
 import { MoodEntry } from '@/interfaces/api/mood/GetYearlyMoodResponse'
 import { getMoodOption } from '@/helpers/moodOptions'
+import { todayDateString } from '@/helpers/dateHelper'
 
 const monthNames = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -40,7 +41,7 @@ export default function MoodCalendarMonth({ monthIndex, year, moodMap, onDayClic
     // Build date string manually to avoid timezone issues with toISOString()
     const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     const moodEntry = moodMap.get(dateStr)
-    const todayStr = new Date().toISOString().split('T')[0]
+    const todayStr = todayDateString()
     const isToday = dateStr === todayStr
     const isFuture = new Date(year, monthIndex, day) > new Date()
 

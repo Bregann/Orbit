@@ -18,7 +18,7 @@ import {
   IconClock
 } from '@tabler/icons-react'
 import type { EventEntry } from '@/interfaces/api/calendar/GetCalendarEventsDto'
-import { isToday } from '@/helpers/dateHelper'
+import { isToday, toDateString } from '@/helpers/dateHelper'
 
 interface DayEventsModalProps {
   opened: boolean
@@ -94,7 +94,7 @@ export default function DayEventsModal({
                   // Set instanceDate to the selected date for recurring events
                   const eventWithInstance = {
                     ...event,
-                    instanceDate: selectedDate.toISOString().split('T')[0]
+                    instanceDate: toDateString(selectedDate)
                   }
                   onViewEvent(eventWithInstance)
                   onClose()

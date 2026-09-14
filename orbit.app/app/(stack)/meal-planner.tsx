@@ -18,7 +18,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, ScrollView, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { formatWeekdayDate } from '@/helpers/dateHelper';
+import { formatWeekdayDate, toDateString } from '@/helpers/dateHelper';
 import { useRouter } from 'expo-router';
 
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner'];
@@ -29,10 +29,13 @@ function getWeekDates(): { date: Date; label: string; dateStr: string }[] {
   for (let i = 0; i < 7; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
+    // Use the local calendar date: toISOString() converts to UTC first and so
+    // shifts the day back for anyone at or ahead of UTC.
+    const dateStr = toDateString(d);
     days.push({
       date: d,
-      label: formatWeekdayDate(d.toISOString()),
-      dateStr: d.toISOString().split('T')[0],
+      label: formatWeekdayDate(`${dateStr}T00:00:00Z`),
+      dateStr,
     });
   }
   return days;

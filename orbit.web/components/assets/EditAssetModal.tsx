@@ -4,6 +4,7 @@ import { Modal, Stack, Group, TextInput, Button, Select, NumberInput, Textarea }
 import { useState, useEffect } from 'react'
 import { IconDeviceFloppy, IconX } from '@tabler/icons-react'
 import notificationHelper from '@/helpers/notificationHelper'
+import { toApiDateString, toUtcDateString } from '@/helpers/dateHelper'
 import type { AssetCategoryItem } from '@/interfaces/api/assets/GetAllAssetCategoriesDto'
 import type { AssetItem } from '@/interfaces/api/assets/GetAllAssetsDto'
 import type { UpdateAssetRequest } from '@/interfaces/api/assets/UpdateAssetRequest'
@@ -30,10 +31,12 @@ export default function EditAssetModal({
   const [brand, setBrand] = useState(asset.brand || '')
   const [model, setModel] = useState(asset.model || '')
   const [serialNumber, setSerialNumber] = useState(asset.serialNumber || '')
-  const [purchaseDate, setPurchaseDate] = useState<string>(asset.purchaseDate)
+  // A type="date" input only renders a bare YYYY-MM-DD value, so strip the
+  // time portion the API sends or the field shows up blank.
+  const [purchaseDate, setPurchaseDate] = useState<string>(toApiDateString(asset.purchaseDate))
   const [purchasePrice, setPurchasePrice] = useState<number | string>(asset.purchasePrice || '')
   const [location, setLocation] = useState(asset.location || '')
-  const [warrantyExpirationDate, setWarrantyExpirationDate] = useState<string>(asset.warrantyExpirationDate || '')
+  const [warrantyExpirationDate, setWarrantyExpirationDate] = useState<string>(toApiDateString(asset.warrantyExpirationDate || ''))
   const [notes, setNotes] = useState(asset.notes || '')
   const [status, setStatus] = useState<string | null>(asset.status)
   const [categoryId, setCategoryId] = useState<string | null>(asset.categoryId.toString())
@@ -47,10 +50,10 @@ export default function EditAssetModal({
     setBrand(asset.brand || '')
     setModel(asset.model || '')
     setSerialNumber(asset.serialNumber || '')
-    setPurchaseDate(asset.purchaseDate)
+    setPurchaseDate(toApiDateString(asset.purchaseDate))
     setPurchasePrice(asset.purchasePrice || '')
     setLocation(asset.location || '')
-    setWarrantyExpirationDate(asset.warrantyExpirationDate || '')
+    setWarrantyExpirationDate(toApiDateString(asset.warrantyExpirationDate || ''))
     setNotes(asset.notes || '')
     setStatus(asset.status)
     setCategoryId(asset.categoryId.toString())
@@ -83,10 +86,10 @@ export default function EditAssetModal({
       brand: brand.trim() || null,
       model: model.trim() || null,
       serialNumber: serialNumber.trim() || null,
-      purchaseDate: new Date(purchaseDate).toISOString(),
+      purchaseDate: toUtcDateString(purchaseDate),
       purchasePrice: typeof purchasePrice === 'number' ? purchasePrice : null,
       location: location.trim() || null,
-      warrantyExpirationDate: warrantyExpirationDate ? new Date(warrantyExpirationDate).toISOString() : null,
+      warrantyExpirationDate: warrantyExpirationDate ? toUtcDateString(warrantyExpirationDate) : null,
       notes: notes.trim() || null,
       status,
       categoryId: parseInt(categoryId, 10)
