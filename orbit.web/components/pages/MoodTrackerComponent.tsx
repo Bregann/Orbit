@@ -28,6 +28,7 @@ import { GetTodaysMoodResponse } from '@/interfaces/api/mood/GetTodaysMoodRespon
 import { GetAvailableYearsResponse } from '@/interfaces/api/mood/GetAvailableYearsResponse'
 import MoodCalendarMonth from '@/components/mood/MoodCalendarMonth'
 import { moodOptions, getMoodOption } from '@/helpers/moodOptions'
+import { toDateString } from '@/helpers/dateHelper'
 
 export default function MoodTrackerComponent() {
   const currentYear = new Date().getFullYear()
@@ -61,7 +62,7 @@ export default function MoodTrackerComponent() {
       // Take just the YYYY-MM-DD portion to avoid any timezone conversion
       const dateKey = typeof entry.date === 'string'
         ? (entry.date as string).substring(0, 10)
-        : new Date(entry.date).toISOString().substring(0, 10)
+        : toDateString(new Date(entry.date))
       map.set(dateKey, entry)
     })
     return map

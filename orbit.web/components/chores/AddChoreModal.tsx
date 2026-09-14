@@ -16,6 +16,7 @@ import { IconCheck, IconX } from '@tabler/icons-react'
 import type { AddChoreRequest } from '@/interfaces/api/chores/AddChoreRequest'
 import { ChoreFrequencyType } from '@/interfaces/api/chores/ChoreFrequencyType'
 import { QueryKeys } from '@/helpers/QueryKeys'
+import { todayDateString } from '@/helpers/dateHelper'
 
 interface AddChoreModalProps {
   opened: boolean
@@ -23,7 +24,7 @@ interface AddChoreModalProps {
 }
 
 export default function AddChoreModal({ opened, onClose }: AddChoreModalProps) {
-  const todayStr = new Date().toISOString().split('T')[0]
+  const todayStr = todayDateString()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [frequency, setFrequency] = useState<string>('2')
@@ -49,7 +50,7 @@ export default function AddChoreModal({ opened, onClose }: AddChoreModalProps) {
     setDescription('')
     setFrequency('2')
     setCustomDays('')
-    setDueDate(new Date().toISOString().split('T')[0])
+    setDueDate(todayDateString())
   }
 
   const handleSubmit = () => {

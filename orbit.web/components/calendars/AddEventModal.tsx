@@ -211,7 +211,8 @@ export default function AddEventModal({ opened, onClose, initialDate }: AddEvent
       const ruleOptions: RuleOptionsType = {
         freq: recurrenceFrequency,
         interval: recurrenceInterval,
-        dtstart: new Date(newEventDate)
+        // Anchor at UTC midnight so occurrences expand on the intended dates.
+        dtstart: new Date(newEventDate + 'T00:00:00Z')
       }
 
       if (recurrenceFrequency === Frequency.WEEKLY && recurrenceDaysOfWeek.length > 0) {
@@ -223,7 +224,7 @@ export default function AddEventModal({ opened, onClose, initialDate }: AddEvent
       }
 
       if (useEndDate && recurrenceEndDate) {
-        ruleOptions.until = new Date(recurrenceEndDate + 'T23:59:59')
+        ruleOptions.until = new Date(recurrenceEndDate + 'T23:59:59Z')
       } else if (!useEndDate && recurrenceOccurrences) {
         ruleOptions.count = recurrenceOccurrences
       }

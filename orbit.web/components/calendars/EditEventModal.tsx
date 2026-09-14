@@ -113,8 +113,7 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
       if (event.recurrenceRule) {
         setShowRecurrence(true)
         try {
-          const eventStartDate = new Date(event.startTime.split('T')[0] + 'T00:00:00')
-          const rruleString = `DTSTART:${eventStartDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\nRRULE:${event.recurrenceRule}`
+          const rruleString = `DTSTART:${event.startTime.split('T')[0].replace(/-/g, '')}T000000Z\nRRULE:${event.recurrenceRule}`
           const rule = RRule.fromString(rruleString)
 
           setRecurrenceFrequency(rule.options.freq)
@@ -136,6 +135,8 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
 
           if (rule.options.until) {
             setUseEndDate(true)
+            // until is a UTC instant (DTSTART is anchored at UTC midnight), so
+            // read the UTC date back rather than the local one.
             setRecurrenceEndDate(rule.options.until.toISOString().split('T')[0])
           } else if (rule.options.count) {
             setRecurrenceOccurrences(rule.options.count)
@@ -155,11 +156,12 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
     let rruleString: string | null = null
 
     if (showRecurrence && recurrenceFrequency !== null) {
-      const eventStartDate = new Date(eventDate + 'T00:00:00')
+      // Anchor at UTC midnight so the generated rule matches how occurrences
+      // are expanded when rendering the grid.
       const ruleOptions: any = {
         freq: recurrenceFrequency,
         interval: recurrenceInterval,
-        dtstart: eventStartDate
+        dtstart: new Date(eventDate + 'T00:00:00Z')
       }
 
       if (recurrenceFrequency === Frequency.WEEKLY && recurrenceDaysOfWeek.length > 0) {
@@ -171,7 +173,7 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
       }
 
       if (useEndDate && recurrenceEndDate) {
-        ruleOptions.until = new Date(recurrenceEndDate + 'T23:59:59')
+        ruleOptions.until = new Date(recurrenceEndDate + 'T23:59:59Z')
       } else if (recurrenceOccurrences) {
         ruleOptions.count = recurrenceOccurrences
       }
@@ -188,8 +190,14 @@ export default function EditEventModal({ opened, onClose, event }: EditEventModa
       eventName: eventTitle,
       eventLocation: eventLocation,
       description: eventDescription || null,
-      startTime: new Date(eventDate + 'T' + (eventStartTime || '00:00') + ':00').toISOString(),
-      endTime: new Date(eventDate + 'T' + (eventEndTime || '23:59') + ':00').toISOString(),
+      // Send wall-clock strings (matching AddEventModal). Converting via
+      // toISOString() would shift the date for viewers ahead of UTC.
+      startTime: eventIsAllDay
+        ? `${eventDate}T00:00:00`
+        : `${eventDate}T${eventStartTime || '00:00'}:00`,
+      endTime: eventIsAllDay
+        ? `${eventDate}T23:59:59`
+        : `${eventDate}T${eventEndTime || '23:59'}:00`,
       isAllDay: eventIsAllDay,
       calendarEventTypeId: parseInt(eventTypeId || '1'),
       recurrenceRule: rruleString

@@ -23,11 +23,13 @@ export function EventListItem({
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
+  // Event dates/times are wall-clock values stored at UTC, so format them in
+  // UTC — local formatting shifts them by the viewer's offset.
   const formatEventTime = () => {
     if (isAllDay) {
-      return moment(startTime).format('DD MMM');
+      return moment.utc(startTime).format('DD MMM');
     }
-    const start = moment(startTime);
+    const start = moment.utc(startTime);
     const formattedDate = start.format('DD MMM');
     const formattedTime = start.format('HH:mm');
     return `${formattedDate} · ${formattedTime}`;

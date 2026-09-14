@@ -7,6 +7,7 @@ import notificationHelper from '@/helpers/notificationHelper'
 import type { AssetCategoryItem } from '@/interfaces/api/assets/GetAllAssetCategoriesDto'
 import type { CreateAssetRequest } from '@/interfaces/api/assets/CreateAssetRequest'
 import { assetStatuses } from '@/helpers/assetOptions'
+import { todayDateString, toUtcDateString } from '@/helpers/dateHelper'
 
 interface CreateAssetModalProps {
   opened: boolean
@@ -27,7 +28,7 @@ export default function CreateAssetModal({
   const [brand, setBrand] = useState('')
   const [model, setModel] = useState('')
   const [serialNumber, setSerialNumber] = useState('')
-  const [purchaseDate, setPurchaseDate] = useState<string>(new Date().toISOString().split('T')[0])
+  const [purchaseDate, setPurchaseDate] = useState<string>(todayDateString())
   const [purchasePrice, setPurchasePrice] = useState<number | string>('')
   const [location, setLocation] = useState('')
   const [warrantyExpirationDate, setWarrantyExpirationDate] = useState<string>('')
@@ -61,10 +62,10 @@ export default function CreateAssetModal({
       brand: brand.trim() || null,
       model: model.trim() || null,
       serialNumber: serialNumber.trim() || null,
-      purchaseDate: new Date(purchaseDate).toISOString(),
+      purchaseDate: toUtcDateString(purchaseDate),
       purchasePrice: typeof purchasePrice === 'number' ? purchasePrice : null,
       location: location.trim() || null,
-      warrantyExpirationDate: warrantyExpirationDate ? new Date(warrantyExpirationDate).toISOString() : null,
+      warrantyExpirationDate: warrantyExpirationDate ? toUtcDateString(warrantyExpirationDate) : null,
       notes: notes.trim() || null,
       status,
       categoryId: parseInt(categoryId, 10)
@@ -79,7 +80,7 @@ export default function CreateAssetModal({
     setBrand('')
     setModel('')
     setSerialNumber('')
-    setPurchaseDate(new Date().toISOString().split('T')[0])
+    setPurchaseDate(todayDateString())
     setPurchasePrice('')
     setLocation('')
     setWarrantyExpirationDate('')

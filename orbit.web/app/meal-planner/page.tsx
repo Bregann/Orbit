@@ -6,6 +6,7 @@ import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query
 import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
 import { QueryKeys } from '@/helpers/QueryKeys'
+import { getCurrentWeekRange } from '@/helpers/dateHelper'
 
 export const metadata: Metadata = {
   title: 'Meal Planner'
@@ -15,9 +16,10 @@ export default async function MealPlannerPage() {
   const queryClient = new QueryClient()
   const cookieStore = await cookies()
 
-  const today = new Date()
-  const startDate = today.toISOString().split('T')[0]
-  const endDate = new Date(today.getTime() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  // Must match the week MealPlannerComponent renders (Monday-start, local
+  // dates). Using toISOString() here would prefetch a different range to the
+  // one the client asks for, so the cache would always miss.
+  const { startDate, endDate } = getCurrentWeekRange()
 
   if (cookieStore.has('accessToken')) {
     const cookieHeader = cookieStore

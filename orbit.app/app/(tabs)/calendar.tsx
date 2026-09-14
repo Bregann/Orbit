@@ -46,27 +46,35 @@ export default function CalendarScreen() {
     const endDate = moment().add(2, 'years');
 
     calendarData.events.forEach((event) => {
+      // Calendar dates are wall-clock values stored at UTC midnight, so format
+      // them in UTC. moment()'s default local formatting shifts them back a day
+      // for anyone at or ahead of UTC.
       const eventExceptions = calendarData.eventExceptions
         .filter((ex) => ex.calendarEventId === event.id)
-        .map((ex) => moment(ex.exceptionDate).format('YYYY-MM-DD'));
+        .map((ex) => moment.utc(ex.exceptionDate).format('YYYY-MM-DD'));
 
       if (event.recurrenceRule) {
         try {
-          // Parse RRule and generate occurrences
-          const rule = RRule.fromString(event.recurrenceRule);
+          // Anchor the rule at the event's own start date, at UTC midnight.
+          // Without an explicit DTSTART the rule starts from "now" and the
+          // occurrences land on the wrong dates entirely.
+          const dtstart = moment.utc(event.startTime).format('YYYYMMDD');
+          const rule = RRule.fromString(
+            `DTSTART:${dtstart}T000000Z\nRRULE:${event.recurrenceRule.replace(/^RRULE:/, '')}`
+          );
           const occurrences = rule.between(startDate.toDate(), endDate.toDate(), true);
 
           occurrences.forEach((occurrence) => {
-            const occurrenceDate = moment(occurrence).format('YYYY-MM-DD');
-            
+            const occurrenceDate = moment.utc(occurrence).format('YYYY-MM-DD');
+
             // Skip if this occurrence is in the exceptions list
             if (!eventExceptions.includes(occurrenceDate)) {
-              const startTime = moment(occurrence)
-                .hour(moment(event.startTime).hour())
-                .minute(moment(event.startTime).minute());
-              const endTime = moment(occurrence)
-                .hour(moment(event.endTime).hour())
-                .minute(moment(event.endTime).minute());
+              const startTime = moment.utc(occurrence)
+                .hour(moment.utc(event.startTime).hour())
+                .minute(moment.utc(event.startTime).minute());
+              const endTime = moment.utc(occurrence)
+                .hour(moment.utc(event.endTime).hour())
+                .minute(moment.utc(event.endTime).minute());
 
               processed.push({
                 ...event,
@@ -81,12 +89,12 @@ export default function CalendarScreen() {
           // Fall back to single event if RRule parsing fails
           processed.push({
             ...event,
-            displayDate: moment(event.startTime).format('YYYY-MM-DD'),
+            displayDate: moment.utc(event.startTime).format('YYYY-MM-DD'),
           });
         }
       } else {
         // Non-recurring event
-        const eventDate = moment(event.startTime).format('YYYY-MM-DD');
+        const eventDate = moment.utc(event.startTime).format('YYYY-MM-DD');
         if (!eventExceptions.includes(eventDate)) {
           processed.push({
             ...event,
@@ -162,7 +170,7 @@ export default function CalendarScreen() {
   const selectedDateEvents = useMemo(() => {
     return processedEvents
       .filter((e) => e.displayDate === selectedDate)
-      .sort((a, b) => moment(a.startTime).diff(moment(b.startTime)));
+      .sort((a, b) => moment.utc(a.startTime).diff(moment.utc(b.startTime)));
   }, [processedEvents, selectedDate]);
 
   const handleDayPress = (day: DateData) => {
@@ -194,7 +202,7 @@ export default function CalendarScreen() {
             <ThemedText style={styles.eventItemTime}>
               {event.isAllDay
                 ? 'All Day'
-                : `${moment(event.startTime).format('HH:mm')} - ${moment(event.endTime).format('HH:mm')}`}
+                : `${moment.utc(event.startTime).format('HH:mm')} - ${moment.utc(event.endTime).format('HH:mm')}`}
             </ThemedText>
             {event.eventLocation && (
               <ThemedText style={styles.eventItemLocation} numberOfLines={1}>

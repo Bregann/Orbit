@@ -17,6 +17,7 @@ import notificationHelper from '@/helpers/notificationHelper'
 import type { AddTaskRequest } from '@/interfaces/api/tasks/AddTaskRequest'
 import { TaskPriorityType } from '@/interfaces/api/tasks/TaskPriorityType'
 import { QueryKeys } from '@/helpers/QueryKeys'
+import { todayDateString } from '@/helpers/dateHelper'
 
 const priorities = [
   { value: TaskPriorityType.Low.toString(), label: 'Low' },
@@ -31,10 +32,7 @@ interface AddTaskModalProps {
   categories: { id: number; name: string }[]
 }
 
-const getTodayDate = () => {
-  const today = new Date()
-  return today.toISOString().split('T')[0]
-}
+const getTodayDate = () => todayDateString()
 
 const dateOptions = [
   { value: 'today', label: 'Today' },

@@ -163,3 +163,35 @@ export function toUtcDateString(date: Date): string {
     date.getDate(),
   )).toISOString()
 }
+
+/**
+ * Converts a `Date` to `YYYY-MM-DD` using its **local** calendar fields.
+ *
+ * Deliberately avoids `toISOString()`, which converts to UTC first and so
+ * rolls back a day for anyone at or ahead of UTC (in BST, local midnight on
+ * the 19th is 18 Sep 23:00 UTC).
+ */
+export function toDateString(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+/**
+ * Today's date as `YYYY-MM-DD` in the device's local timezone.
+ */
+export function todayDateString(): string {
+  return toDateString(new Date())
+}
+
+/**
+ * Extracts the calendar date (`YYYY-MM-DD`) from an API date string with no
+ * timezone conversion — the API sends wall-clock dates tagged as UTC.
+ */
+export function toApiDateString(dateStr: string): string {
+  if (!dateStr) {
+    return ''
+  }
+  return dateStr.split('T')[0]
+}

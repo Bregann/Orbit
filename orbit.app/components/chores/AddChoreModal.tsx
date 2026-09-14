@@ -1,7 +1,7 @@
 import { ThemedText } from '@/components/themed-text'
 import { choresStyles } from '@/styles/choresStyles'
 import { ChoreFrequencyType } from '@/interfaces/api/chores/ChoreFrequencyType'
-import { toUtcDateString } from '@/helpers/dateHelper'
+import { todayDateString } from '@/helpers/dateHelper'
 import { FREQUENCIES } from '@/helpers/choreHelper'
 import { useState } from 'react'
 import {
@@ -22,7 +22,7 @@ interface AddChoreModalProps {
 }
 
 export function AddChoreModal({ visible, onClose, onSubmit, isDark }: AddChoreModalProps) {
-  const todayStr = new Date().toISOString().split('T')[0]
+  const todayStr = todayDateString()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [frequency, setFrequency] = useState(ChoreFrequencyType.Weekly)
@@ -34,7 +34,9 @@ export function AddChoreModal({ visible, onClose, onSubmit, isDark }: AddChoreMo
       return
     }
     const days = frequency === ChoreFrequencyType.Custom ? (parseInt(customDays) || null) : null
-    onSubmit(name.trim(), description.trim(), frequency, toUtcDateString(new Date(dueDate + 'T00:00:00Z')), days)
+    // dueDate is already YYYY-MM-DD; send it as UTC midnight directly. Round
+    // tripping it through a Date would re-read local fields and shift the day.
+    onSubmit(name.trim(), description.trim(), frequency, `${dueDate}T00:00:00.000Z`, days)
     resetForm()
   }
 
@@ -48,7 +50,7 @@ export function AddChoreModal({ visible, onClose, onSubmit, isDark }: AddChoreMo
     setDescription('')
     setFrequency(ChoreFrequencyType.Weekly)
     setCustomDays('')
-    setDueDate(new Date().toISOString().split('T')[0])
+    setDueDate(todayDateString())
   }
 
   return (

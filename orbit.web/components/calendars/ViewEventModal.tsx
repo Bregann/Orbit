@@ -38,6 +38,7 @@ import { RRule } from 'rrule'
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import type { DeleteCalendarEventRequest } from '@/interfaces/api/calendar/DeleteCalendarEventRequest'
 import { QueryKeys } from '@/helpers/QueryKeys'
+import { toApiDateString } from '@/helpers/dateHelper'
 
 interface ViewEventModalProps {
   opened: boolean
@@ -60,7 +61,7 @@ export default function ViewEventModal({ opened, onClose, event, onDelete, onEdi
 
   const formatDate = (isoDateTime: string) => {
     // Extract date part from ISO datetime and add time component to prevent timezone shift
-    const dateString = isoDateTime.split('T')[0]
+    const dateString = toApiDateString(isoDateTime)
     return new Date(dateString + 'T00:00:00').toLocaleDateString('en-GB', {
       weekday: 'long',
       year: 'numeric',
@@ -72,8 +73,7 @@ export default function ViewEventModal({ opened, onClose, event, onDelete, onEdi
   const formatRecurrence = (event: EventEntry) => {
     if (!event.recurrenceRule) return null
     try {
-      const eventStartDate = new Date(event.startTime.split('T')[0] + 'T00:00:00')
-      const rruleString = `DTSTART:${eventStartDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z\nRRULE:${event.recurrenceRule}`
+      const rruleString = `DTSTART:${toApiDateString(event.startTime).replace(/-/g, '')}T000000Z\nRRULE:${event.recurrenceRule}`
       const rule = RRule.fromString(rruleString)
       return rule.toText()
     } catch {
@@ -114,9 +114,12 @@ export default function ViewEventModal({ opened, onClose, event, onDelete, onEdi
     if (!viewingEvent) return
     if (viewingEvent.recurrenceRule) {
       openRecurringModal()
-    } else {
-      onDelete(viewingEvent.id)
+      return
     }
+    // Non-recurring events delete the whole record. This has to call the API —
+    // onDelete alone only updates local UI state and the event would reappear
+    // on the next refetch.
+    handleDeleteSeries()
   }
 
   const handleEditClick = () => {
@@ -135,9 +138,11 @@ export default function ViewEventModal({ opened, onClose, event, onDelete, onEdi
     if (!viewingEvent) return
 
     // For single occurrence, use instanceDate (clicked date) or fall back to event start date
-    const instanceDateValue = viewingEvent.instanceDate || viewingEvent.startTime.split('T')[0]
-    // Convert to full ISO 8601 datetime format for C# DateTime deserialization
-    const isoDateTime = new Date(instanceDateValue + 'T00:00:00').toISOString()
+    const instanceDateValue = viewingEvent.instanceDate || toApiDateString(viewingEvent.startTime)
+    // Send midnight UTC so the stored exception date matches the calendar date
+    // exactly. Parsing as local time would shift it a day for viewers ahead of
+    // UTC and the exception would never match the occurrence.
+    const isoDateTime = `${instanceDateValue}T00:00:00Z`
 
     const requestBody: DeleteCalendarEventRequest = {
       eventId: viewingEvent.id,

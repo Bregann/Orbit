@@ -2,7 +2,7 @@ import { ThemedText } from '@/components/themed-text'
 import { choresStyles } from '@/styles/choresStyles'
 import { ChoreFrequencyType } from '@/interfaces/api/chores/ChoreFrequencyType'
 import type { ChoreItem } from '@/interfaces/api/chores/ChoreItem'
-import { toUtcDateString } from '@/helpers/dateHelper'
+import { toApiDateString } from '@/helpers/dateHelper'
 import { FREQUENCIES } from '@/helpers/choreHelper'
 import { useEffect, useState } from 'react'
 import {
@@ -36,7 +36,9 @@ export function EditChoreModal({ visible, chore, onClose, onSubmit, isDark }: Ed
       setDescription(chore.description)
       setFrequency(chore.frequency)
       setCustomDays(chore.customFrequencyDays?.toString() ?? '')
-      setDueDate(new Date(chore.nextDueDate).toISOString().split('T')[0])
+      // Take the stored date verbatim; parsing it would shift the day and the
+      // due date would move every time the chore is edited.
+      setDueDate(toApiDateString(chore.nextDueDate))
     }
   }, [chore])
 
@@ -45,7 +47,8 @@ export function EditChoreModal({ visible, chore, onClose, onSubmit, isDark }: Ed
       return
     }
     const days = frequency === ChoreFrequencyType.Custom ? (parseInt(customDays) || null) : null
-    onSubmit(chore.id, name.trim(), description.trim(), frequency, toUtcDateString(new Date(dueDate + 'T00:00:00Z')), days)
+    // dueDate is already YYYY-MM-DD; send it as UTC midnight directly.
+    onSubmit(chore.id, name.trim(), description.trim(), frequency, `${dueDate}T00:00:00.000Z`, days)
   }
 
   const handleClose = () => {
