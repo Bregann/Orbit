@@ -94,7 +94,7 @@ namespace Orbit.Tests.Services.Auth
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<DuplicateNameException>(async () =>
+            var exception = await Assert.ThrowsAsync<DuplicateNameException>(async () =>
                 await _authService.RegisterUser(request));
 
             Assert.That(exception.Message, Does.Contain("User already exists"));
@@ -115,7 +115,7 @@ namespace Orbit.Tests.Services.Auth
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<DuplicateNameException>(async () =>
+            var exception = await Assert.ThrowsAsync<DuplicateNameException>(async () =>
                 await _authService.RegisterUser(request));
 
             Assert.That(exception.Message, Does.Contain("User already exists"));
@@ -199,7 +199,7 @@ namespace Orbit.Tests.Services.Auth
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<UnauthorizedException>(async () =>
+            var exception = await Assert.ThrowsAsync<UnauthorizedException>(async () =>
                 await _authService.LoginUser(request));
 
             Assert.That(exception.Message, Does.Contain("User not found"));
@@ -218,7 +218,7 @@ namespace Orbit.Tests.Services.Auth
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<UnauthorizedException>(async () =>
+            var exception = await Assert.ThrowsAsync<UnauthorizedException>(async () =>
                 await _authService.LoginUser(request));
 
             Assert.That(exception.Message, Does.Contain("Invalid password"));
@@ -312,7 +312,7 @@ namespace Orbit.Tests.Services.Auth
             var invalidToken = "InvalidTokenThatDoesNotExist";
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<UnauthorizedException>(async () =>
+            var exception = await Assert.ThrowsAsync<UnauthorizedException>(async () =>
                 await _authService.RefreshToken(invalidToken));
 
             Assert.That(exception.Message, Does.Contain("Token not found"));
@@ -336,7 +336,7 @@ namespace Orbit.Tests.Services.Auth
             await DbContext.SaveChangesAsync();
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<UnauthorizedException>(async () =>
+            var exception = await Assert.ThrowsAsync<UnauthorizedException>(async () =>
                 await _authService.RefreshToken(expiredToken.Token));
 
             Assert.That(exception.Message, Does.Contain("Refresh token expired"));
@@ -360,7 +360,7 @@ namespace Orbit.Tests.Services.Auth
             await _authService.RefreshToken(loginResult.RefreshToken);
 
             // Act & Assert - Try to use the same (now revoked) token again
-            var exception = Assert.ThrowsAsync<UnauthorizedException>(async () =>
+            var exception = await Assert.ThrowsAsync<UnauthorizedException>(async () =>
                 await _authService.RefreshToken(loginResult.RefreshToken));
 
             Assert.That(exception.Message, Does.Contain("revoked"));

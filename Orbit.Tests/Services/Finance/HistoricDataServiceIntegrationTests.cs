@@ -108,7 +108,7 @@ namespace Orbit.Tests.Services.Finance
         public async Task GetHistoricMonthData_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _historicDataService.GetHistoricMonthData(99999));
 
             Assert.That(exception.Message, Does.Contain("Historic month data not found"));

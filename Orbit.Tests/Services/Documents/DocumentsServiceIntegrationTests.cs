@@ -168,7 +168,7 @@ namespace Orbit.Tests.Services.Documents
         public async Task DownloadDocument_ShouldThrowNotFoundException_WhenDocumentNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _documentsService.DownloadDocument(99999));
 
             Assert.That(exception.Message, Does.Contain("Document not found"));
@@ -190,7 +190,7 @@ namespace Orbit.Tests.Services.Documents
             await DbContext.SaveChangesAsync();
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _documentsService.DownloadDocument(document.Id));
 
             Assert.That(exception.Message, Does.Contain("Document file not found in storage"));
@@ -257,7 +257,7 @@ namespace Orbit.Tests.Services.Documents
             await DbContext.SaveChangesAsync();
 
             // Act & Assert
-            Assert.DoesNotThrowAsync(async () =>
+            await Assert.DoesNotThrowAsync(async () =>
                 await _documentsService.DeleteDocument(document.Id));
         }
 
@@ -265,7 +265,7 @@ namespace Orbit.Tests.Services.Documents
         public async Task DeleteDocument_ShouldThrowNotFoundException_WhenDocumentNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _documentsService.DeleteDocument(99999));
 
             Assert.That(exception.Message, Does.Contain("Document not found"));
@@ -345,7 +345,7 @@ namespace Orbit.Tests.Services.Documents
         public async Task DeleteCategory_ShouldThrowNotFoundException_WhenCategoryNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _documentsService.DeleteCategory(99999));
 
             Assert.That(exception.Message, Does.Contain("Document category not found"));
@@ -375,7 +375,7 @@ namespace Orbit.Tests.Services.Documents
             }
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<ConflictException>(async () =>
+            var exception = await Assert.ThrowsAsync<ConflictException>(async () =>
                 await _documentsService.DeleteCategory(categoryId));
 
             Assert.That(exception.Message, Does.Contain("Cannot delete category with associated documents"));

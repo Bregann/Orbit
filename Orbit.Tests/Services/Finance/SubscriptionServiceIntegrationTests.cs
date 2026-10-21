@@ -125,7 +125,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
+            var exception = await Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _subscriptionService.AddSubscription(request));
 
             Assert.That(exception.Message, Does.Contain("Subscription with the same name already exists"));
@@ -170,7 +170,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _subscriptionService.UpdateSubscription(request));
 
             Assert.That(exception.Message, Does.Contain("Subscription not found"));
@@ -204,7 +204,7 @@ namespace Orbit.Tests.Services.Finance
         public async Task DeleteSubscription_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _subscriptionService.DeleteSubscription(99999));
 
             Assert.That(exception.Message, Does.Contain("Subscription not found"));

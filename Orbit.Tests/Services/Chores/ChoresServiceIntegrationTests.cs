@@ -110,7 +110,7 @@ namespace Orbit.Tests.Services.Chores
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _choresService.UpdateChore(request));
 
             Assert.That(exception.Message, Does.Contain("Chore with ID 99999 not found"));
@@ -173,7 +173,7 @@ namespace Orbit.Tests.Services.Chores
         public async Task CompleteChore_ShouldThrowNotFoundException_WhenChoreNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _choresService.CompleteChore(99999));
 
             Assert.That(exception.Message, Does.Contain("Chore with ID 99999 not found"));
@@ -203,7 +203,7 @@ namespace Orbit.Tests.Services.Chores
         public async Task DeleteChore_ShouldThrowNotFoundException_WhenChoreNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _choresService.DeleteChore(99999));
 
             Assert.That(exception.Message, Does.Contain("Chore with ID 99999 not found"));

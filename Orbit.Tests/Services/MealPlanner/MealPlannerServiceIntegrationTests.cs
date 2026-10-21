@@ -244,7 +244,7 @@ namespace Orbit.Tests.Services.MealPlanner
         [Test]
         public async Task UpdateRecipe_ShouldThrowNotFoundException_WhenNotFound()
         {
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _mealPlannerService.UpdateRecipe(new UpdateRecipeRequest
                 {
                     Id = 99999,
@@ -278,7 +278,7 @@ namespace Orbit.Tests.Services.MealPlanner
         [Test]
         public async Task DeleteRecipe_ShouldThrowNotFoundException_WhenNotFound()
         {
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _mealPlannerService.DeleteRecipe(99999));
 
             Assert.That(exception!.Message, Does.Contain("Recipe with ID 99999 not found"));
@@ -365,7 +365,7 @@ namespace Orbit.Tests.Services.MealPlanner
         [Test]
         public async Task AddMealPlanEntry_ShouldThrowNotFoundException_WhenRecipeNotFound()
         {
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _mealPlannerService.AddMealPlanEntry(new AddMealPlanEntryRequest
                 {
                     Date = DateTime.UtcNow.Date,
@@ -395,7 +395,7 @@ namespace Orbit.Tests.Services.MealPlanner
         [Test]
         public async Task DeleteMealPlanEntry_ShouldThrowNotFoundException_WhenNotFound()
         {
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _mealPlannerService.DeleteMealPlanEntry(99999));
 
             Assert.That(exception!.Message, Does.Contain("Meal plan entry with ID 99999 not found"));
@@ -441,7 +441,7 @@ namespace Orbit.Tests.Services.MealPlanner
         [Test]
         public async Task LogCook_ShouldThrowNotFoundException_WhenRecipeNotFound()
         {
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _mealPlannerService.LogCook(99999));
 
             Assert.That(exception!.Message, Does.Contain("Recipe with ID 99999 not found"));

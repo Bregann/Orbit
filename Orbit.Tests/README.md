@@ -185,7 +185,7 @@ public void DeletePot_WhenPotNotFound_ShouldThrowKeyNotFoundException()
     int nonExistentId = 999;
     
     // Act & Assert
-    var exception = Assert.ThrowsAsync<KeyNotFoundException>(
+    var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
         async () => await _sut.DeletePot(nonExistentId)
     );
     Assert.That(exception.Message, Does.Contain("not found"));

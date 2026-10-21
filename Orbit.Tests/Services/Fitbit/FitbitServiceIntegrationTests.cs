@@ -92,7 +92,7 @@ namespace Orbit.Tests.Services.Fitbit
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _fitbitService.SaveFitbitTokens("non_existent_user", tokens));
 
             Assert.That(exception.Message, Does.Contain("User not found"));
@@ -129,7 +129,7 @@ namespace Orbit.Tests.Services.Fitbit
         public async Task GetConnectionStatus_ShouldThrowNotFoundException_WhenUserNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _fitbitService.GetConnectionStatus("non_existent_user"));
 
             Assert.That(exception.Message, Does.Contain("User not found"));
@@ -176,7 +176,7 @@ namespace Orbit.Tests.Services.Fitbit
         public async Task DisconnectFitbit_ShouldThrowNotFoundException_WhenUserNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _fitbitService.DisconnectFitbit("non_existent_user"));
 
             Assert.That(exception.Message, Does.Contain("User not found"));
@@ -207,7 +207,7 @@ namespace Orbit.Tests.Services.Fitbit
         public async Task RefreshAccessToken_ShouldThrowNotFoundException_WhenUserNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _fitbitService.RefreshAccessToken("non_existent_user"));
 
             Assert.That(exception.Message, Does.Contain("User not found"));
@@ -217,7 +217,7 @@ namespace Orbit.Tests.Services.Fitbit
         public async Task RefreshAccessToken_ShouldThrowBadRequestException_WhenNoRefreshToken()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
+            var exception = await Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _fitbitService.RefreshAccessToken(_testUserId));
 
             Assert.That(exception.Message, Does.Contain("No Fitbit refresh token available"));
@@ -245,7 +245,7 @@ namespace Orbit.Tests.Services.Fitbit
         public async Task GetProfile_ShouldThrowNotFoundException_WhenUserNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _fitbitService.GetProfile("non_existent_user"));
 
             Assert.That(exception.Message, Does.Contain("User not found"));
@@ -255,7 +255,7 @@ namespace Orbit.Tests.Services.Fitbit
         public async Task GetProfile_ShouldThrowBadRequestException_WhenNotConnected()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
+            var exception = await Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _fitbitService.GetProfile(_testUserId));
 
             Assert.That(exception.Message, Does.Contain("Fitbit is not connected"));
@@ -299,7 +299,7 @@ namespace Orbit.Tests.Services.Fitbit
         public async Task GetDailyActivity_ShouldThrowNotFoundException_WhenUserNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _fitbitService.GetDailyActivity("non_existent_user", DateTime.UtcNow));
 
             Assert.That(exception.Message, Does.Contain("User not found"));
@@ -309,7 +309,7 @@ namespace Orbit.Tests.Services.Fitbit
         public async Task GetDailyActivity_ShouldThrowBadRequestException_WhenNotConnected()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
+            var exception = await Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _fitbitService.GetDailyActivity(_testUserId, DateTime.UtcNow));
 
             Assert.That(exception.Message, Does.Contain("Fitbit is not connected"));

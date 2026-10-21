@@ -360,7 +360,7 @@ namespace Orbit.Tests.Services.MoodTracker
             var futureDate = DateTime.UtcNow.AddDays(1);
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
+            var exception = await Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _moodTrackerService.RecordMoodForDate(MoodTrackerEnum.Good, futureDate));
 
             Assert.That(exception.Message, Does.Contain("Cannot record mood for future dates"));

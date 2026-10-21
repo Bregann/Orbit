@@ -160,7 +160,7 @@ export default function AddRecipeModal({ opened, onClose, allRecipes }: AddRecip
           </Button>
         </Group>
 
-        <Collapse in={showImport}>
+        <Collapse expanded={showImport}>
           <Paper withBorder p="sm">
             <Stack gap="xs">
               <Text size="xs" c="dimmed">
