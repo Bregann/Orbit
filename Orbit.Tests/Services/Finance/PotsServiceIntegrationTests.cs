@@ -152,7 +152,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
+            var exception = await Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _potsService.AddNewPot(request));
 
             Assert.That(exception.Message, Does.Contain("Invalid pot name or amount"));
@@ -171,7 +171,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
+            var exception = await Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _potsService.AddNewPot(request));
 
             Assert.That(exception.Message, Does.Contain("Invalid pot name or amount"));
@@ -190,7 +190,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<ConflictException>(async () =>
+            var exception = await Assert.ThrowsAsync<ConflictException>(async () =>
                 await _potsService.AddNewPot(request));
 
             Assert.That(exception.Message, Does.Contain("A spending pot with this name already exists"));
@@ -209,7 +209,7 @@ namespace Orbit.Tests.Services.Finance
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<ConflictException>(async () =>
+            var exception = await Assert.ThrowsAsync<ConflictException>(async () =>
                 await _potsService.AddNewPot(request));
 
             Assert.That(exception.Message, Does.Contain("A savings pot with this name already exists"));

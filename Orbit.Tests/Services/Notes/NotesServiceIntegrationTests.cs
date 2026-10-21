@@ -95,7 +95,7 @@ namespace Orbit.Tests.Services.Notes
         public async Task GetNotePageDetails_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _notesService.GetNotePageDetails(99999));
 
             Assert.That(exception!.Message, Does.Contain("Note page with ID 99999 not found"));
@@ -241,7 +241,7 @@ namespace Orbit.Tests.Services.Notes
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _notesService.UpdateNotePageContent(request));
 
             Assert.That(exception!.Message, Does.Contain("Note page with ID 99999 not found"));
@@ -325,7 +325,7 @@ namespace Orbit.Tests.Services.Notes
         public async Task ToggleNotePageFavouriteStatus_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _notesService.ToggleNotePageFavouriteStatus(99999));
 
             Assert.That(exception!.Message, Does.Contain("Note page with ID 99999 not found"));
@@ -358,7 +358,7 @@ namespace Orbit.Tests.Services.Notes
         public async Task DeleteNotePage_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _notesService.DeleteNotePage(99999));
 
             Assert.That(exception!.Message, Does.Contain("Note page with ID 99999 not found"));
@@ -462,7 +462,7 @@ namespace Orbit.Tests.Services.Notes
         public async Task DeleteNoteFolder_ShouldThrowNotFoundException_WhenNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _notesService.DeleteNoteFolder(99999));
 
             Assert.That(exception!.Message, Does.Contain("Note folder with ID 99999 not found"));

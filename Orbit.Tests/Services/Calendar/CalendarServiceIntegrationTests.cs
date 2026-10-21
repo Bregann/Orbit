@@ -141,7 +141,7 @@ namespace Orbit.Tests.Services.Calendar
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _calendarService.AddCalendarEvent(request));
 
             Assert.That(exception.Message, Does.Contain("Document with ID 99999 not found"));
@@ -251,7 +251,7 @@ namespace Orbit.Tests.Services.Calendar
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _calendarService.EditCalendarEvent(request));
 
             Assert.That(exception.Message, Does.Contain("Calendar event with ID 99999 not found"));
@@ -322,7 +322,7 @@ namespace Orbit.Tests.Services.Calendar
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _calendarService.DeleteCalendarEvent(request));
 
             Assert.That(exception.Message, Does.Contain("Calendar event with ID 99999 not found"));

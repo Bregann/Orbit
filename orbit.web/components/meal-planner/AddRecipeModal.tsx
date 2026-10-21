@@ -12,15 +12,19 @@ import {
   ActionIcon,
   Text,
   Autocomplete,
-  Divider
+  Divider,
+  Collapse,
+  CopyButton,
+  Paper
 } from '@mantine/core'
 import { useState } from 'react'
-import { IconCheck, IconX, IconPlus, IconTrash } from '@tabler/icons-react'
+import { IconCheck, IconX, IconPlus, IconTrash, IconCode, IconCopy, IconFileImport } from '@tabler/icons-react'
 import { useMutationPost } from '@/helpers/mutations/useMutationPost'
 import notificationHelper from '@/helpers/notificationHelper'
 import type { AddRecipeRequest, RecipeIngredient, RecipeStep } from '@/interfaces/api/meal-planner/AddRecipeRequest'
 import { QueryKeys } from '@/helpers/QueryKeys'
 import type { RecipeItem } from '@/interfaces/api/meal-planner/GetRecipesResponse'
+import { parseRecipeJson, recipeAiPrompt } from '@/helpers/recipeImportHelper'
 
 interface AddRecipeModalProps {
   opened: boolean
@@ -36,6 +40,9 @@ export default function AddRecipeModal({ opened, onClose, allRecipes }: AddRecip
   const [prepTime, setPrepTime] = useState<number | string>('')
   const [cookTime, setCookTime] = useState<number | string>('')
   const [servings, setServings] = useState<number | string>('')
+  const [showImport, setShowImport] = useState(false)
+  const [importJson, setImportJson] = useState('')
+  const [importError, setImportError] = useState<string | null>(null)
 
   const isFormValid = name.trim() !== '' && description.trim() !== ''
 
@@ -56,6 +63,28 @@ export default function AddRecipeModal({ opened, onClose, allRecipes }: AddRecip
     setPrepTime('')
     setCookTime('')
     setServings('')
+    setShowImport(false)
+    setImportJson('')
+    setImportError(null)
+  }
+
+  const handleImport = () => {
+    try {
+      const recipe = parseRecipeJson(importJson)
+      setName(recipe.name)
+      setDescription(recipe.description)
+      setIngredients(recipe.ingredients.length > 0 ? recipe.ingredients : [{ name: '', quantity: null }])
+      setSteps(recipe.steps.length > 0 ? recipe.steps : [{ stepNumber: 1, instruction: '' }])
+      setPrepTime(recipe.prepTimeMinutes ?? '')
+      setCookTime(recipe.cookTimeMinutes ?? '')
+      setServings(recipe.servings ?? '')
+      setImportError(null)
+      setImportJson('')
+      setShowImport(false)
+      notificationHelper.showSuccessNotification('Imported', 'Recipe loaded - review it and click Add Recipe', 3000, <IconCheck />)
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : 'Failed to import recipe')
+    }
   }
 
   const addIngredient = () => setIngredients([...ingredients, { name: '', quantity: null }])
@@ -116,6 +145,40 @@ export default function AddRecipeModal({ opened, onClose, allRecipes }: AddRecip
   return (
     <Modal opened={opened} onClose={onClose} title="Add New Recipe" size="lg" closeOnClickOutside={false}>
       <Stack gap="md">
+        <Group justify="flex-end" gap="xs">
+          <CopyButton value={recipeAiPrompt}>
+            {({ copied, copy }) => (
+              <Button size="xs" variant="light" color={copied ? 'teal' : 'gray'} onClick={copy}
+                leftSection={copied ? <IconCheck size="0.9rem" /> : <IconCopy size="0.9rem" />}>
+                {copied ? 'Prompt copied' : 'Copy AI prompt'}
+              </Button>
+            )}
+          </CopyButton>
+          <Button size="xs" variant={showImport ? 'filled' : 'light'} leftSection={<IconCode size="0.9rem" />}
+            onClick={() => setShowImport(!showImport)}>
+            Import from JSON
+          </Button>
+        </Group>
+
+        <Collapse expanded={showImport}>
+          <Paper withBorder p="sm">
+            <Stack gap="xs">
+              <Text size="xs" c="dimmed">
+                Copy the AI prompt, paste it into your AI of choice followed by the recipe (text or link), then paste the JSON it returns here.
+              </Text>
+              <Textarea placeholder='{ "name": "...", "ingredients": [...], "steps": [...] }' value={importJson}
+                onChange={(e) => { setImportJson(e.currentTarget.value); setImportError(null) }}
+                autosize minRows={4} maxRows={12} error={importError} styles={{ input: { fontFamily: 'monospace', fontSize: 12 } }} />
+              <Group justify="flex-end">
+                <Button size="xs" leftSection={<IconFileImport size="0.9rem" />} onClick={handleImport}
+                  disabled={importJson.trim() === ''}>
+                  Import
+                </Button>
+              </Group>
+            </Stack>
+          </Paper>
+        </Collapse>
+
         <TextInput label="Recipe Name" placeholder="Enter recipe name" value={name}
           onChange={(e) => setName(e.currentTarget.value)} required />
         <Textarea label="Description" placeholder="Brief description of the recipe" value={description}

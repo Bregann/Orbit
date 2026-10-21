@@ -250,7 +250,7 @@ namespace Orbit.Tests.Services.Assets
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _assetsService.UpdateAsset(request));
 
             Assert.That(exception.Message, Does.Contain("Asset with ID 99999 not found"));
@@ -328,7 +328,7 @@ namespace Orbit.Tests.Services.Assets
             await DbContext.SaveChangesAsync();
 
             // Act & Assert
-            Assert.DoesNotThrowAsync(async () =>
+            await Assert.DoesNotThrowAsync(async () =>
                 await _assetsService.DeleteAsset(asset.Id));
         }
 
@@ -336,7 +336,7 @@ namespace Orbit.Tests.Services.Assets
         public async Task DeleteAsset_ShouldThrowNotFoundException_WhenAssetNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _assetsService.DeleteAsset(99999));
 
             Assert.That(exception.Message, Does.Contain("Asset with ID 99999 not found"));
@@ -446,7 +446,7 @@ namespace Orbit.Tests.Services.Assets
             using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("content"));
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _assetsService.UploadAssetDocument(request, stream, ".pdf"));
 
             Assert.That(exception.Message, Does.Contain("Asset with ID 99999 not found"));
@@ -504,7 +504,7 @@ namespace Orbit.Tests.Services.Assets
         public async Task DownloadAssetDocument_ShouldThrowNotFoundException_WhenAssetNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _assetsService.DownloadAssetDocument(99999, "Receipt"));
 
             Assert.That(exception.Message, Does.Contain("Asset with ID 99999 not found"));
@@ -519,7 +519,7 @@ namespace Orbit.Tests.Services.Assets
             await DbContext.SaveChangesAsync();
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _assetsService.DownloadAssetDocument(asset.Id, "Receipt"));
 
             Assert.That(exception.Message, Does.Contain("Receipt not found for this asset"));
@@ -534,7 +534,7 @@ namespace Orbit.Tests.Services.Assets
             await DbContext.SaveChangesAsync();
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _assetsService.DownloadAssetDocument(asset.Id, "Receipt"));
 
             Assert.That(exception.Message, Does.Contain("Receipt file not found at "));
@@ -597,7 +597,7 @@ namespace Orbit.Tests.Services.Assets
             await DbContext.SaveChangesAsync();
 
             // Act & Assert
-            Assert.DoesNotThrowAsync(async () =>
+            await Assert.DoesNotThrowAsync(async () =>
                 await _assetsService.DeleteAssetDocument(asset.Id, "Receipt"));
 
             // Verify path was still cleared
@@ -611,7 +611,7 @@ namespace Orbit.Tests.Services.Assets
         public async Task DeleteAssetDocument_ShouldThrowNotFoundException_WhenAssetNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _assetsService.DeleteAssetDocument(99999, "Receipt"));
 
             Assert.That(exception.Message, Does.Contain("Asset with ID 99999 not found"));
@@ -705,7 +705,7 @@ namespace Orbit.Tests.Services.Assets
         public async Task DeleteCategory_ShouldThrowNotFoundException_WhenCategoryNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _assetsService.DeleteAssetCategory(99999));
 
             Assert.That(exception.Message, Does.Contain("Category with ID 99999 not found"));
@@ -736,7 +736,7 @@ namespace Orbit.Tests.Services.Assets
             }
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<BadRequestException>(async () =>
+            var exception = await Assert.ThrowsAsync<BadRequestException>(async () =>
                 await _assetsService.DeleteAssetCategory(categoryId));
 
             Assert.That(exception.Message, Does.Contain("Cannot delete category that has assets. Please reassign or delete the assets first."));

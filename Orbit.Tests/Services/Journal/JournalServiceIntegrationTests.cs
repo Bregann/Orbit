@@ -197,7 +197,7 @@ namespace Orbit.Tests.Services.Journal
         public async Task DeleteJournalEntry_ShouldThrowNotFoundException_WhenEntryNotFound()
         {
             // Act & Assert
-            var exception = Assert.ThrowsAsync<NotFoundException>(async () =>
+            var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _journalService.DeleteJournalEntry(99999));
 
             Assert.That(exception!.Message, Does.Contain("Journal entry with ID 99999 not found"));
