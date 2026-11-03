@@ -70,4 +70,7 @@ jobs:
         continue-on-error: true
         run: npx tsc --noEmit
       - name: Check packages match the Expo SDK
+        # Advisory only: flags when the app is behind its Expo SDK's expected versions.
+        # Renovate leaves Expo packages alone, so fix with `npx expo install --fix` and test on a device.
+        continue-on-error: true
         run: npx expo install --check
