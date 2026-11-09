@@ -101,6 +101,7 @@ builder.Services.AddScoped<IAssetsService, AssetsService>();
 builder.Services.AddScoped<IMealPlannerService, MealPlannerService>();
 builder.Services.AddScoped<IChoresService, ChoresService>();
 builder.Services.AddHttpClient<ICommsSenderClient, CommsSenderClient>();
+builder.Services.AddHttpClient<IProjectMonitorClient, ProjectMonitorClient>(c => c.Timeout = TimeSpan.FromSeconds(10));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

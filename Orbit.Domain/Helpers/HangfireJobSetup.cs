@@ -16,6 +16,7 @@ namespace Orbit.Domain.Helpers
             RecurringJob.AddOrUpdate<IBankApiHelper>("RefreshMonzoToken", service => service.RefreshMonzoToken(), Cron.Hourly(45));
             RecurringJob.AddOrUpdate<IFitbitService>("RefreshFitbitTokens", service => service.RefreshFitbitTokens(), Cron.Hourly(50));
             RecurringJob.AddOrUpdate<IFitbitService>("RecordDailyFitbitData", service => service.RecordDailyFitbitData(), Cron.Daily(2));
+            RecurringJob.AddOrUpdate<IProjectMonitorClient>("ProjectMonitorHeartbeat", client => client.SendHeartbeat(), Cron.Minutely);
             RecurringJob.AddOrUpdate<IGoCardlessService>("CheckGoCardlessConnectionExpiry", service => service.CheckAndNotifyExpiringConnections(), Cron.Daily(8));
         }
     }
