@@ -17,6 +17,9 @@
         FitbitClientId,
         FitbitClientSecret,
         FitbitRedirectUri,
-        GoCardlessRedirectUri
+        GoCardlessRedirectUri,
+
+        // Key for reporting to Project Monitor (copy it from its Manage projects page)
+        ProjectMonitorApiKey
     }
 }
