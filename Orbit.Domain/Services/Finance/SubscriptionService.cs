@@ -105,7 +105,7 @@ namespace Orbit.Domain.Services.Finance
             };
         }
 
-                private static DateTime CalculateNextBillingDate(int billingDay, int? billingMonth, SubscriptionBillingFrequencyType billingFrequency)
+        private static DateTime CalculateNextBillingDate(int billingDay, int? billingMonth, SubscriptionBillingFrequencyType billingFrequency)
         {
             var today = DateTime.UtcNow;
 
