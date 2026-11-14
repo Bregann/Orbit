@@ -2,7 +2,7 @@
 
 import { doQueryGet } from '@/helpers/apiClient'
 import { useMutationPost } from '@/helpers/mutations/useMutationPost'
-import { useMutationPatch } from '@/helpers/mutations/useMutationPatch'
+import { useMutationPut } from '@/helpers/mutations/useMutationPut'
 import notificationHelper from '@/helpers/notificationHelper'
 import { GetSubscriptionsDto } from '@/interfaces/api/subscriptions/GetSubscriptionsDto'
 import { SubscriptionItem, BillingFrequency, BillingFrequencyOptions } from '@/interfaces/api/subscriptions/MonthlyPayment'
@@ -72,7 +72,7 @@ export default function SubscriptionsManagement({ onDeleteSubscription }: Subscr
     }
   })
 
-  const { mutateAsync: updateSubscriptionMutation } = useMutationPatch<UpdateSubscriptionRequest, void>({
+  const { mutateAsync: updateSubscriptionMutation } = useMutationPut<UpdateSubscriptionRequest, void>({
     url: '/api/subscriptions/UpdateSubscription',
     queryKey: [QueryKeys.GetSubscriptions],
     invalidateQuery: true,

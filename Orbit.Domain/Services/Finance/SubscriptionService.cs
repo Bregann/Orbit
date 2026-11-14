@@ -50,12 +50,7 @@ namespace Orbit.Domain.Services.Finance
                 BillingDay = request.BillingDay,
                 BillingMonth = request.BillingMonth,
                 BillingFrequency = request.BillingFrequency,
-                SubscriptionMonthlyAmount = request.BillingFrequency switch
-                {
-                    SubscriptionBillingFrequencyType.Monthly => request.SubscriptionAmount,
-                    SubscriptionBillingFrequencyType.Yearly => (long)Math.Ceiling(request.SubscriptionAmount / 12.0m),
-                    _ => throw new ArgumentOutOfRangeException()
-                }
+                SubscriptionMonthlyAmount = CalculateMonthlyAmount(request.SubscriptionAmount, request.BillingFrequency)
             };
 
             context.Subscriptions.Add(subscription);
@@ -77,6 +72,10 @@ namespace Orbit.Domain.Services.Finance
             subscription.SubscriptionAmount = request.SubscriptionAmount;
             subscription.BillingDay = request.BillingDay;
             subscription.BillingFrequency = request.BillingFrequency;
+            subscription.BillingMonth = request.BillingFrequency == SubscriptionBillingFrequencyType.Yearly
+                ? request.BillingMonth ?? subscription.BillingMonth ?? 1
+                : null;
+            subscription.SubscriptionMonthlyAmount = CalculateMonthlyAmount(request.SubscriptionAmount, request.BillingFrequency);
 
             await context.SaveChangesAsync();
 
@@ -96,7 +95,17 @@ namespace Orbit.Domain.Services.Finance
             Log.Information($"Deleted subscription with ID: {id}");
         }
 
-        private static DateTime CalculateNextBillingDate(int billingDay, int? billingMonth, SubscriptionBillingFrequencyType billingFrequency)
+        private static long CalculateMonthlyAmount(long amount, SubscriptionBillingFrequencyType billingFrequency)
+        {
+            return billingFrequency switch
+            {
+                SubscriptionBillingFrequencyType.Monthly => amount,
+                SubscriptionBillingFrequencyType.Yearly => (long)Math.Ceiling(amount / 12.0m),
+                _ => throw new ArgumentOutOfRangeException(nameof(billingFrequency))
+            };
+        }
+
+                private static DateTime CalculateNextBillingDate(int billingDay, int? billingMonth, SubscriptionBillingFrequencyType billingFrequency)
         {
             var today = DateTime.UtcNow;
 
