@@ -32,26 +32,26 @@ export default function CommonItemsCard({ onEditClick, currentItems }: CommonIte
 
   const commonItems = quickAddData?.items ?? []
 
-  const handleAddCommonItem = async (itemName: string) => {
-    const existing = currentItems.find(i => i.name.toLowerCase() === itemName.toLowerCase() && !i.isPurchased)
+  const { mutate: addItem } = useMutationPost<string, void>({
+    url: (name: string) => `/api/shopping/AddShoppingListItem?name=${encodeURIComponent(name)}`,
+    queryKey: [QueryKeys.ShoppingListItems],
+    invalidateQuery: true,
+    onSuccess: () => {
+      notificationHelper.showSuccessNotification('Success', 'Item added to shopping list', 3000, <IconCheck />)
+    },
+    onError: (error) => {
+      notificationHelper.showErrorNotification('Error', error.message || 'Failed to add item', 3000, <IconX />)
+    }
+  })
+
+  const handleAddCommonItem = (itemName: string) => {
+    const existing = currentItems.find(i => i.name.toLowerCase() === itemName.toLowerCase())
     if (existing) {
       notificationHelper.showErrorNotification('Duplicate', 'Item already in your list', 3000, <IconX />)
       return
     }
 
-    const { mutateAsync } = useMutationPost<void, void>({
-      url: `/api/shopping/AddShoppingListItem?name=${encodeURIComponent(itemName)}`,
-      queryKey: [QueryKeys.ShoppingListItems],
-      invalidateQuery: true,
-      onSuccess: () => {
-        notificationHelper.showSuccessNotification('Success', 'Item added to shopping list', 3000, <IconCheck />)
-      },
-      onError: (error) => {
-        notificationHelper.showErrorNotification('Error', error.message || 'Failed to add item', 3000, <IconX />)
-      }
-    })
-
-    await mutateAsync()
+    addItem(itemName)
   }
 
   return (

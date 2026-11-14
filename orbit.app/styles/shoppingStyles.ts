@@ -78,16 +78,6 @@ export const shoppingStyles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  listControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  showCheckedToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
   checkbox: {
     width: 20,
     height: 20,
@@ -95,9 +85,6 @@ export const shoppingStyles = StyleSheet.create({
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  showCheckedText: {
-    fontSize: 13,
   },
   itemCount: {
     fontSize: 11,
@@ -123,10 +110,6 @@ export const shoppingStyles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
   },
-  itemNameChecked: {
-    textDecorationLine: 'line-through',
-    opacity: 0.5,
-  },
   deleteButton: {
     padding: 4,
   },
@@ -138,5 +121,45 @@ export const shoppingStyles = StyleSheet.create({
     fontSize: 14,
     opacity: 0.6,
     textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalSheet: {
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 24,
+    paddingBottom: 40,
+    gap: 12,
+    maxHeight: '85%',
+  },
+  modalTitle: {
+    fontSize: 24,
+    marginBottom: 8,
+  },
+  modalAddRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: 8,
+  },
+  modalInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 16,
+  },
+  modalList: {
+    maxHeight: 360,
+  },
+  modalCloseButton: {
+    paddingVertical: 14,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+    marginTop: 8,
   },
 });

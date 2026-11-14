@@ -1,11 +1,11 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ManageQuickAddItemsModal } from '@/components/shopping/ManageQuickAddItemsModal';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { authApiClient } from '@/helpers/apiClient';
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete';
 import { useMutationPost } from '@/helpers/mutations/useMutationPost';
-import { useMutationPut } from '@/helpers/mutations/useMutationPut';
 import { QueryKeys } from '@/helpers/QueryKeys';
 import { GetShoppingListItemsResponse } from '@/interfaces/api/shopping/GetShoppingListItemsResponse';
 import { GetShoppingListQuickAddItemsResponse } from '@/interfaces/api/shopping/GetShoppingListQuickAddItemsResponse';
@@ -23,7 +23,7 @@ export default function ShoppingScreen() {
   const isDark = colorScheme === 'dark';
 
   const [quickAddText, setQuickAddText] = useState('');
-  const [showChecked, setShowChecked] = useState(true);
+  const [manageQuickAddVisible, setManageQuickAddVisible] = useState(false);
 
   // Fetch shopping list items
   const { data: shoppingData, isLoading: isLoadingItems } = useQuery({
@@ -56,16 +56,6 @@ export default function ShoppingScreen() {
     },
   });
 
-  // Mark as purchased mutation
-  const markAsPurchasedMutation = useMutationPut<number, void>({
-    url: (itemId: number) => `/api/Shopping/MarkShoppingListItemAsPurchased?itemId=${itemId}`,
-    queryKey: [QueryKeys.ShoppingListItems],
-    invalidateQuery: true,
-    onError: () => {
-      Alert.alert('Error', 'Failed to update item');
-    },
-  });
-
   // Remove item mutation
   const removeItemMutation = useMutationDelete<number, void>({
     url: (itemId: number) => `/api/Shopping/RemoveShoppingListItem?itemId=${itemId}`,
@@ -87,24 +77,11 @@ export default function ShoppingScreen() {
     addItemMutation.mutate(name);
   };
 
-  const toggleItemChecked = (itemId: number) => {
-    markAsPurchasedMutation.mutate(itemId);
-  };
-
-  const deleteItem = (itemId: number) => {
-    Alert.alert(
-      'Remove Item',
-      'Are you sure you want to remove this item?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Remove', style: 'destructive', onPress: () => removeItemMutation.mutate(itemId) },
-      ]
-    );
+  const tickItem = (itemId: number) => {
+    removeItemMutation.mutate(itemId);
   };
 
   const items = shoppingData?.items || [];
-  const visibleItems = showChecked ? items : items.filter(item => !item.isPurchased);
-  const uncheckedCount = items.filter(item => !item.isPurchased).length;
 
   if (isLoadingItems || isLoadingQuickAdd) {
     return (
@@ -147,7 +124,7 @@ export default function ShoppingScreen() {
                 onChangeText={setQuickAddText}
               />
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.addButton, { backgroundColor: colors.tint }]}
               onPress={handleAddItem}
               disabled={addItemMutation.isPending || !quickAddText.trim()}
@@ -171,12 +148,17 @@ export default function ShoppingScreen() {
                 <IconSymbol name="basket" size={20} color={colors.tint} />
                 <ThemedText style={styles.sectionTitle}>Quick Add Common Items</ThemedText>
               </View>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => setManageQuickAddVisible(true)}>
                 <IconSymbol name="pencil" size={18} color={colors.icon} />
               </TouchableOpacity>
             </View>
             <View style={styles.divider} />
             <View style={styles.quickAddItems}>
+              {quickAddData?.items.length === 0 && (
+                <ThemedText style={styles.emptyStateText}>
+                  No common items yet. Tap the pencil to add some.
+                </ThemedText>
+              )}
               {quickAddData?.items.map((item) => (
                 <TouchableOpacity
                   key={item.id}
@@ -212,37 +194,22 @@ export default function ShoppingScreen() {
                 <IconSymbol name="cart" size={20} color={colors.tint} />
                 <ThemedText style={styles.sectionTitle}>Shopping List</ThemedText>
               </View>
-              <View style={styles.listControls}>
-                <TouchableOpacity 
-                  style={styles.showCheckedToggle}
-                  onPress={() => setShowChecked(!showChecked)}
-                >
-                  <View style={[
-                    styles.checkbox,
-                    showChecked && { backgroundColor: colors.tint },
-                    { borderColor: colors.tint }
-                  ]}>
-                    {showChecked && <IconSymbol name="checkmark" size={14} color="#FFFFFF" />}
-                  </View>
-                  <ThemedText style={styles.showCheckedText}>Show checked</ThemedText>
-                </TouchableOpacity>
-                <ThemedText style={[styles.itemCount, { color: colors.tint }]}>
-                  {uncheckedCount} ITEMS
-                </ThemedText>
-              </View>
+              <ThemedText style={[styles.itemCount, { color: colors.tint }]}>
+                {items.length} ITEMS
+              </ThemedText>
             </View>
             <View style={styles.divider} />
-            
-            {visibleItems.length === 0 ? (
+
+            {items.length === 0 ? (
               <View style={styles.emptyState}>
                 <ThemedText style={styles.emptyStateText}>
-                  {showChecked ? 'No items in your shopping list' : 'No unchecked items'}
+                  No items in your shopping list
                 </ThemedText>
               </View>
             ) : (
               <View style={styles.itemsList}>
-                {visibleItems.map((item) => (
-                  <View
+                {items.map((item) => (
+                  <TouchableOpacity
                     key={item.id}
                     style={[
                       styles.listItem,
@@ -251,36 +218,19 @@ export default function ShoppingScreen() {
                         borderColor: isDark ? '#334155' : '#E2E8F0',
                       }
                     ]}
+                    onPress={() => tickItem(item.id)}
+                    disabled={removeItemMutation.isPending}
                   >
-                    <TouchableOpacity 
-                      style={styles.itemCheckbox}
-                      onPress={() => toggleItemChecked(item.id)}
-                      disabled={markAsPurchasedMutation.isPending}
-                    >
+                    <View style={styles.itemCheckbox}>
                       <View style={[
                         styles.checkbox,
-                        item.isPurchased && { backgroundColor: colors.tint },
-                        { borderColor: item.isPurchased ? colors.tint : (isDark ? '#475569' : '#CBD5E1') }
-                      ]}>
-                        {item.isPurchased && <IconSymbol name="checkmark" size={14} color="#FFFFFF" />}
-                      </View>
-                    </TouchableOpacity>
-                    <ThemedText 
-                      style={[
-                        styles.itemName,
-                        item.isPurchased && styles.itemNameChecked
-                      ]}
-                    >
+                        { borderColor: isDark ? '#475569' : '#CBD5E1' }
+                      ]} />
+                    </View>
+                    <ThemedText style={styles.itemName}>
                       {item.name}
                     </ThemedText>
-                    <TouchableOpacity 
-                      style={styles.deleteButton}
-                      onPress={() => deleteItem(item.id)}
-                      disabled={removeItemMutation.isPending}
-                    >
-                      <IconSymbol name="trash" size={18} color={isDark ? '#EF4444' : '#DC2626'} />
-                    </TouchableOpacity>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </View>
             )}
@@ -289,6 +239,12 @@ export default function ShoppingScreen() {
           {/* Spacing */}
           <View style={{ height: 20 }} />
         </ScrollView>
+
+        <ManageQuickAddItemsModal
+          visible={manageQuickAddVisible}
+          onClose={() => setManageQuickAddVisible(false)}
+          items={quickAddData?.items ?? []}
+        />
       </ThemedView>
     </SafeAreaView>
   );

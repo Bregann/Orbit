@@ -10,10 +10,7 @@ import {
   Modal
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import {
-  IconRefresh,
-  IconTrash
-} from '@tabler/icons-react'
+import { IconRefresh } from '@tabler/icons-react'
 import { useMutationDelete } from '@/helpers/mutations/useMutationDelete'
 import notificationHelper from '@/helpers/notificationHelper'
 import { IconCheck, IconX } from '@tabler/icons-react'
@@ -28,7 +25,6 @@ export default function ShoppingComponent() {
   const [commonItemsModalOpened, { open: openCommonItemsModal, close: closeCommonItemsModal }] = useDisclosure(false)
 
   const items = useShoppingListItems()
-  const checkedCount = items.filter(i => i.isPurchased).length
 
   const { mutate: clearAllItems, isPending: isClearingAll } = useMutationDelete<void, void>({
     url: '/api/shopping/ClearAllShoppingListItems',
@@ -40,18 +36,6 @@ export default function ShoppingComponent() {
     },
     onError: (error) => {
       notificationHelper.showErrorNotification('Error', error.message || 'Failed to clear list', 3000, <IconX />)
-    }
-  })
-
-  const { mutate: clearPurchasedItems, isPending: isClearingPurchased } = useMutationDelete<void, void>({
-    url: '/api/shopping/ClearPurchasedShoppingListItems',
-    queryKey: [QueryKeys.ShoppingListItems],
-    invalidateQuery: true,
-    onSuccess: () => {
-      notificationHelper.showSuccessNotification('Success', 'Purchased items cleared', 3000, <IconCheck />)
-    },
-    onError: (error) => {
-      notificationHelper.showErrorNotification('Error', error.message || 'Failed to clear items', 3000, <IconX />)
     }
   })
 
@@ -77,17 +61,6 @@ export default function ShoppingComponent() {
             >
               New List
             </Button>
-            {checkedCount > 0 && (
-              <Button
-                variant="light"
-                color="red"
-                leftSection={<IconTrash size="1rem" />}
-                onClick={() => clearPurchasedItems()}
-                loading={isClearingPurchased}
-              >
-                Clear Checked ({checkedCount})
-              </Button>
-            )}
           </Group>
         </Group>
 
@@ -110,18 +83,8 @@ export default function ShoppingComponent() {
       >
         <Stack gap="md">
           <Text size="sm">
-            Choose how you want to reset your shopping list:
+            This will remove every item from your shopping list.
           </Text>
-          <Button
-            variant="light"
-            color="orange"
-            onClick={() => clearPurchasedItems()}
-            leftSection={<IconTrash size="1rem" />}
-            loading={isClearingPurchased}
-            fullWidth
-          >
-            Clear Purchased Items Only
-          </Button>
           <Button
             color="red"
             onClick={() => clearAllItems()}
