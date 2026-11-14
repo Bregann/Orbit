@@ -162,6 +162,16 @@
         "major"
       ],
       "enabled": false
+    },
+    {
+      "description": "Hold the web app on TypeScript 6: typescript-eslint (our ESLint parser) refuses to load on TS 7 (peer range <6.1.0 as of 8.72.x). Remove once typescript-eslint supports TS 7.",
+      "matchFileNames": [
+        "orbit.web/**"
+      ],
+      "matchPackageNames": [
+        "typescript"
+      ],
+      "allowedVersions": "<7"
     }
   ],
   "lockFileMaintenance": {
