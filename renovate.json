@@ -174,6 +174,16 @@
       "allowedVersions": "<7"
     },
     {
+      "description": "Hold the Expo app on ESLint 9: eslint-config-expo bundles eslint-plugin-react 7.x, which crashes on ESLint 10 (context.getFilename was removed). Remove once eslint-config-expo supports ESLint 10.",
+      "matchFileNames": [
+        "orbit.app/**"
+      ],
+      "matchPackageNames": [
+        "eslint"
+      ],
+      "allowedVersions": "<10"
+    },
+    {
       "description": "Hold EF Core on 10.x until Npgsql's EF Core provider has a stable 11.x (it only has release candidates). When the Npgsql 11 PR appears, delete this rule in that PR so EF Core moves with it",
       "matchPackageNames": [
         "Microsoft.EntityFrameworkCore*",

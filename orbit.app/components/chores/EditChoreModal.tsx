@@ -4,7 +4,7 @@ import { ChoreFrequencyType } from '@/interfaces/api/chores/ChoreFrequencyType'
 import type { ChoreItem } from '@/interfaces/api/chores/ChoreItem'
 import { toApiDateString } from '@/helpers/dateHelper'
 import { FREQUENCIES } from '@/helpers/choreHelper'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   View,
   TextInput,
@@ -29,8 +29,12 @@ export function EditChoreModal({ visible, chore, onClose, onSubmit, isDark }: Ed
   const [frequency, setFrequency] = useState(ChoreFrequencyType.Weekly)
   const [customDays, setCustomDays] = useState('')
   const [dueDate, setDueDate] = useState('')
+  const [loadedChore, setLoadedChore] = useState<ChoreItem | null>(null)
 
-  useEffect(() => {
+  // Load the form when a different chore is passed in. Done during render
+  // (not in an effect) so the form never shows stale values for a frame.
+  if (chore !== loadedChore) {
+    setLoadedChore(chore)
     if (chore !== null) {
       setName(chore.name)
       setDescription(chore.description)
@@ -40,7 +44,7 @@ export function EditChoreModal({ visible, chore, onClose, onSubmit, isDark }: Ed
       // due date would move every time the chore is edited.
       setDueDate(toApiDateString(chore.nextDueDate))
     }
-  }, [chore])
+  }
 
   const handleSubmit = () => {
     if (!chore || !name.trim()) {

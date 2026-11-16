@@ -51,7 +51,7 @@ jobs:
           NEXT_TELEMETRY_DISABLED: 1
 
   app:
-    name: Expo app (type-check, SDK versions)
+    name: Expo app (lint, type-check, SDK versions)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -64,6 +64,9 @@ jobs:
           cache: npm
           cache-dependency-path: orbit.app/package-lock.json
       - run: npm ci
+      - name: Lint
+        # --max-warnings 0 so warnings fail the PR too, not just errors.
+        run: npm run lint -- --max-warnings 0
       - name: Type-check
         # TODO: orbit.app has existing type errors (tab bar colours, authContext, IngredientPickerModal).
         # Fix them, then delete continue-on-error so this step blocks merges.
