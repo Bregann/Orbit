@@ -541,5 +541,109 @@ namespace Orbit.Tests.Services.MealPlanner
             Assert.That(recipe, Is.Not.Null);
             Assert.That(recipe.Name, Does.Contain("🍮"));
         }
+
+        // ===== Auto Log Cook Tests =====
+
+        private async Task ClearCookHistoryAndMealPlan()
+        {
+            DbContext.RecipeCookHistory.RemoveRange(DbContext.RecipeCookHistory);
+            DbContext.MealPlanEntries.RemoveRange(DbContext.MealPlanEntries);
+            await DbContext.SaveChangesAsync();
+        }
+
+        private async Task<int> AddPlannedMeal(DateTime date, string mealType, int? recipeId = null)
+        {
+            var id = recipeId ?? (await DbContext.Recipes.FirstAsync()).Id;
+            DbContext.MealPlanEntries.Add(new Orbit.Domain.Database.Models.MealPlanEntry
+            {
+                Date = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc),
+                MealType = mealType,
+                RecipeId = id
+            });
+            await DbContext.SaveChangesAsync();
+            return id;
+        }
+
+        [Test]
+        public async Task AutoLogCookedMeals_ShouldLogPastPlannedMeals()
+        {
+            await ClearCookHistoryAndMealPlan();
+            var recipeId = await AddPlannedMeal(DateTime.UtcNow.Date.AddDays(-1), "Dinner");
+
+            var logged = await _mealPlannerService.AutoLogCookedMeals();
+
+            Assert.That(logged, Is.EqualTo(1));
+            var history = await DbContext.RecipeCookHistory.ToListAsync();
+            Assert.That(history.Count, Is.EqualTo(1));
+            Assert.That(history[0].RecipeId, Is.EqualTo(recipeId));
+            Assert.That(history[0].CookedAt, Is.EqualTo(DateTime.UtcNow.Date.AddDays(-1).AddHours(18)));
+        }
+
+        [Test]
+        public async Task AutoLogCookedMeals_ShouldIgnoreTodayAndFutureMeals()
+        {
+            await ClearCookHistoryAndMealPlan();
+            await AddPlannedMeal(DateTime.UtcNow.Date, "Dinner");
+            await AddPlannedMeal(DateTime.UtcNow.Date.AddDays(1), "Dinner");
+
+            var logged = await _mealPlannerService.AutoLogCookedMeals();
+
+            Assert.That(logged, Is.EqualTo(0));
+            Assert.That(await DbContext.RecipeCookHistory.CountAsync(), Is.EqualTo(0));
+        }
+
+        [Test]
+        public async Task AutoLogCookedMeals_ShouldIgnoreMealsOutsideLookback()
+        {
+            await ClearCookHistoryAndMealPlan();
+            await AddPlannedMeal(DateTime.UtcNow.Date.AddDays(-30), "Dinner");
+
+            var logged = await _mealPlannerService.AutoLogCookedMeals();
+
+            Assert.That(logged, Is.EqualTo(0));
+        }
+
+        [Test]
+        public async Task AutoLogCookedMeals_ShouldBeIdempotent()
+        {
+            await ClearCookHistoryAndMealPlan();
+            await AddPlannedMeal(DateTime.UtcNow.Date.AddDays(-2), "Lunch");
+
+            await _mealPlannerService.AutoLogCookedMeals();
+            var secondRun = await _mealPlannerService.AutoLogCookedMeals();
+
+            Assert.That(secondRun, Is.EqualTo(0));
+            Assert.That(await DbContext.RecipeCookHistory.CountAsync(), Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task AutoLogCookedMeals_ShouldNotDuplicateManuallyLoggedCook()
+        {
+            await ClearCookHistoryAndMealPlan();
+            var recipeId = await AddPlannedMeal(DateTime.UtcNow.Date.AddDays(-1), "Dinner");
+            DbContext.RecipeCookHistory.Add(new Orbit.Domain.Database.Models.RecipeCookHistory
+            {
+                RecipeId = recipeId,
+                CookedAt = DateTime.UtcNow.Date.AddDays(-1).AddHours(19)
+            });
+            await DbContext.SaveChangesAsync();
+
+            var logged = await _mealPlannerService.AutoLogCookedMeals();
+
+            Assert.That(logged, Is.EqualTo(0));
+            Assert.That(await DbContext.RecipeCookHistory.CountAsync(), Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task AutoLogCookedMeals_ShouldLogSameRecipeTwiceOnSameDay()
+        {
+            await ClearCookHistoryAndMealPlan();
+            var recipeId = await AddPlannedMeal(DateTime.UtcNow.Date.AddDays(-1), "Lunch");
+            await AddPlannedMeal(DateTime.UtcNow.Date.AddDays(-1), "Dinner", recipeId);
+
+            var logged = await _mealPlannerService.AutoLogCookedMeals();
+
+            Assert.That(logged, Is.EqualTo(2));
+        }
     }
 }

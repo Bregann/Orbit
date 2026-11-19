@@ -2,6 +2,7 @@
 using Orbit.Domain.Interfaces;
 using Orbit.Domain.Interfaces.Api.Finance;
 using Orbit.Domain.Interfaces.Api.Fitbit;
+using Orbit.Domain.Interfaces.Api.MealPlanner;
 using Orbit.Domain.Interfaces.Helpers;
 
 namespace Orbit.Domain.Helpers
@@ -18,6 +19,7 @@ namespace Orbit.Domain.Helpers
             RecurringJob.AddOrUpdate<IFitbitService>("RecordDailyFitbitData", service => service.RecordDailyFitbitData(), Cron.Daily(2));
             RecurringJob.AddOrUpdate<IProjectMonitorClient>("ProjectMonitorHeartbeat", client => client.SendHeartbeat(), Cron.Minutely);
             RecurringJob.AddOrUpdate<IGoCardlessService>("CheckGoCardlessConnectionExpiry", service => service.CheckAndNotifyExpiringConnections(), Cron.Daily(8));
+            RecurringJob.AddOrUpdate<IMealPlannerService>("AutoLogCookedMeals", service => service.AutoLogCookedMeals(), Cron.Daily(3));
         }
     }
 }
