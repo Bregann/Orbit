@@ -13,6 +13,7 @@ namespace Orbit.Domain.Interfaces.Api.MealPlanner
         Task<int> AddMealPlanEntry(AddMealPlanEntryRequest request);
         Task DeleteMealPlanEntry(int entryId);
         Task<int> LogCook(int recipeId);
+        Task<int> AutoLogCookedMeals();
         Task<GetCookHistoryResponse> GetCookHistory(int recipeId);
         Task AddRecipeIngredientsToShoppingList(int recipeId);
     }

@@ -258,6 +258,71 @@ namespace Orbit.Domain.Services.MealPlanner
             return entry.Id;
         }
 
+        private const int AutoLogCookLookbackDays = 7;
+
+        public async Task<int> AutoLogCookedMeals()
+        {
+            var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
+            var lookbackStart = today.AddDays(-AutoLogCookLookbackDays);
+
+            var pastEntries = await context.MealPlanEntries
+                .Where(e => e.Date >= lookbackStart && e.Date < today)
+                .Select(e => new { e.RecipeId, e.Date, e.MealType })
+                .ToListAsync();
+
+            if (pastEntries.Count == 0)
+            {
+                return 0;
+            }
+
+            var existingCooks = await context.RecipeCookHistory
+                .Where(h => h.CookedAt >= lookbackStart && h.CookedAt < today)
+                .Select(h => new { h.RecipeId, h.CookedAt })
+                .ToListAsync();
+
+            // How many times each recipe has already been logged on each day
+            var loggedCounts = existingCooks
+                .GroupBy(h => (h.RecipeId, h.CookedAt.Date))
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            var newEntries = new List<Database.Models.RecipeCookHistory>();
+
+            foreach (var group in pastEntries.GroupBy(e => (e.RecipeId, e.Date.Date)))
+            {
+                loggedCounts.TryGetValue(group.Key, out var alreadyLogged);
+
+                // Skip as many planned entries as have already been logged (manually or by a previous run)
+                foreach (var entry in group.OrderBy(e => MealTypeHour(e.MealType)).Skip(alreadyLogged))
+                {
+                    newEntries.Add(new Database.Models.RecipeCookHistory
+                    {
+                        RecipeId = entry.RecipeId,
+                        CookedAt = DateTime.SpecifyKind(entry.Date.Date.AddHours(MealTypeHour(entry.MealType)), DateTimeKind.Utc)
+                    });
+                }
+            }
+
+            if (newEntries.Count == 0)
+            {
+                return 0;
+            }
+
+            context.RecipeCookHistory.AddRange(newEntries);
+            await context.SaveChangesAsync();
+
+            Log.Information($"Auto-logged {newEntries.Count} cooks from past meal plan entries.");
+
+            return newEntries.Count;
+        }
+
+        private static int MealTypeHour(string mealType) => mealType switch
+        {
+            "Breakfast" => 8,
+            "Lunch" => 12,
+            "Dinner" => 18,
+            _ => 12
+        };
+
         public async Task<GetCookHistoryResponse> GetCookHistory(int recipeId)
         {
             var history = await context.RecipeCookHistory
